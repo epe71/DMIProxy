@@ -1,0 +1,62 @@
+﻿using DMIProxy.BusinessEntity;
+using System.Net;
+using System.Text.Json;
+
+namespace DMIProxy.DomainService
+{
+    public class MetObsService : IMetObsService
+    {
+        private string baseUrl = "https://dmigw.govcloud.dk/v2/metObs/collections/observation/items";
+
+        private readonly JsonSerializerOptions _serializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+        };
+
+        private readonly HttpClient _httpClient;
+
+        public MetObsService(IHttpClientFactory httpClientFactory)
+        {
+            _httpClient = httpClientFactory.CreateClient();
+        }
+
+        public async Task<DmiResult> GetRain(string stationId)
+        {
+            var parameters = new Dictionary<string, string> { 
+                { "stationId", stationId }, 
+                { "period", "latest-month" }, 
+                { "parameterId", "precip_past1h" } 
+            };
+            var encodedContent = new FormUrlEncodedContent(parameters);
+            string query = await ParamsToStringAsync(parameters);
+
+            var httpRequestMessage = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(baseUrl + "?" + query),
+                Headers = {
+                    { HttpRequestHeader.Accept.ToString(), "application/json" },
+                    { "X-Gravitee-Api-Key", "" }
+                },
+                Content = encodedContent
+            };
+
+            await using var contentStream = await(
+                await _httpClient.SendAsync(httpRequestMessage))
+            .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
+
+            DmiResult? dmiResult = await JsonSerializer.DeserializeAsync<DmiResult>(contentStream, _serializerOptions);
+            if (dmiResult == null)
+            {
+                throw new SystemException("No response from DMI");
+            }
+            return dmiResult;
+        }
+
+        private static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
+        {
+            using (HttpContent content = new FormUrlEncodedContent(urlParams))
+                return await content.ReadAsStringAsync();
+        }
+    }
+}

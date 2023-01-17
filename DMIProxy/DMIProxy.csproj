@@ -6,6 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>0d0870f3-1337-4592-970c-94722de10288</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1591;8618</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;1591;8618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
