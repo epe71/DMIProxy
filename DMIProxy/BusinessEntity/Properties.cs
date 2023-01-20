@@ -10,7 +10,7 @@
 
         public bool ThisHour()
         {
-            var span = DateTime.Now - observed;
+            var span = DateTime.UtcNow - observed;
             if (span.TotalMinutes < 60)
             {
                 return true;

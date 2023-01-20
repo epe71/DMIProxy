@@ -22,6 +22,12 @@ namespace DMIProxy.DomainService
 
         public async Task<DmiResult> GetRain(string stationId)
         {
+            var apiKey = Environment.GetEnvironmentVariable("DMI_API_KEY");
+            if (apiKey == null)
+            {
+                throw new ArgumentNullException(nameof(apiKey));
+            }
+
             var parameters = new Dictionary<string, string> { 
                 { "stationId", stationId }, 
                 { "period", "latest-month" }, 
@@ -36,7 +42,7 @@ namespace DMIProxy.DomainService
                 RequestUri = new Uri(baseUrl + "?" + query),
                 Headers = {
                     { HttpRequestHeader.Accept.ToString(), "application/json" },
-                    { "X-Gravitee-Api-Key", "" }
+                    { "X-Gravitee-Api-Key", apiKey }
                 },
                 Content = encodedContent
             };

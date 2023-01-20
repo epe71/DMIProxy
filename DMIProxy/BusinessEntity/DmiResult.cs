@@ -10,7 +10,11 @@
 
         public double Rain1h()
         {
-            var thisHour = features.First(f => f.ThisHour());
+            var thisHour = features.FirstOrDefault(f => f.ThisHour());
+            if (thisHour == null)
+            {
+                return 0.0;
+            }
             return thisHour.Rain1h();
         }
 

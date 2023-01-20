@@ -2,6 +2,7 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
+ENV TZ="Europe/Copenhagen"
 EXPOSE 80
 EXPOSE 443
 
