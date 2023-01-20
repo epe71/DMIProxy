@@ -19,6 +19,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>();
 builder.Services.AddScoped<IMetObsService, MetObsService>();
+builder.Services.AddScoped<IRequestCache, RequestCache>();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();

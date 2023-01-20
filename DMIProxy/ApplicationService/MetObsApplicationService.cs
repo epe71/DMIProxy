@@ -7,19 +7,25 @@ namespace DMIProxy.ApplicationService
     public class MetObsApplicationService : IMetObsApplicationService
     {
         private IMetObsService _service;
+        private IRequestCache _requestCache;
 
-        public MetObsApplicationService(IMetObsService metObsService) 
+        public MetObsApplicationService(IMetObsService metObsService, IRequestCache requestCache) 
         {
             _service = metObsService;
+            _requestCache = requestCache;
         }
 
         public async Task<RainDTO> GetRain(string stationId)
         {
-            DmiResult result = await _service.GetRain(stationId);
-            var rainDto = new RainDTO();
-            rainDto.Rain1h = result.Rain1h();
-            rainDto.RainToday = result.RainToday();
-            rainDto.RainThisMonth = result.RainThisMonth();
+            if (!_requestCache.GetRainDTO(stationId, out var rainDto))
+            {
+                DmiResult result = await _service.GetRain(stationId);
+                rainDto = new RainDTO();
+                rainDto.Rain1h = result.Rain1h();
+                rainDto.RainToday = result.RainToday();
+                rainDto.RainThisMonth = result.RainThisMonth();
+                _requestCache.SaveRainDTO(stationId, rainDto);
+            }
             return rainDto;
         }
     }
