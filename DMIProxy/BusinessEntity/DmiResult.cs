@@ -27,7 +27,7 @@
         public double RainThisMonth()
         {
             var rainThisMonth = features.Where(f => f.ThisMonth()).Select(f => f.Rain1h()).Sum();
-            return rainThisMonth;
+            return Math.Round(rainThisMonth, 2);
         }
 
     }

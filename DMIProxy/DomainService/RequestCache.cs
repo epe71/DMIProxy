@@ -9,8 +9,7 @@ namespace DMIProxy.DomainService
 
         private const string rainCacheKey = "Rain";
 
-        private const int slidingCacheExpirationMinutes = 5;
-        private const int absoluteCacheExpirationHours = 6;
+        private const int slidingCacheExpirationMinutes = 15;
 
         public RequestCache(IMemoryCache memoryCache)
         {
@@ -29,12 +28,22 @@ namespace DMIProxy.DomainService
 
         public void SaveRainDTO(string stationId, RainDTO rainDTO)
         {
+            var nextUpdate = 4;
+            if (rainDTO.RainToday > 0) { nextUpdate = 2; }
+            if (rainDTO.Rain1h > 0) { nextUpdate = 1; }
+
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                        .SetSlidingExpiration(TimeSpan.FromMinutes(slidingCacheExpirationMinutes))
-                       .SetAbsoluteExpiration(TimeSpan.FromHours(absoluteCacheExpirationHours))
+                       .SetAbsoluteExpiration(AbsoluteCacheExpirationTime(nextUpdate))
                        .SetPriority(CacheItemPriority.Normal);
             _cache.Set(rainCacheKey + stationId, rainDTO, cacheEntryOptions);
         }
 
+        private TimeSpan AbsoluteCacheExpirationTime(int hours)
+        {
+            var minutesToTopOfTheHour = 5 + 60 - DateTime.Now.Minute;
+            int absoluteCacheExpirationMinutes = (hours-1) * 60 + minutesToTopOfTheHour;
+            return TimeSpan.FromMinutes(absoluteCacheExpirationMinutes);
+        }
     }
 }
