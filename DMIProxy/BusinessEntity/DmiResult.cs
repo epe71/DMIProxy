@@ -30,5 +30,13 @@
             return Math.Round(rainThisMonth, 2);
         }
 
+        public bool AllRecived()
+        {
+            if (features.Count() == numberReturned)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

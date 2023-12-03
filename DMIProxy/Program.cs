@@ -1,5 +1,6 @@
 using DMIProxy.ApplicationService;
 using DMIProxy.DomainService;
+using Serilog;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,10 @@ builder.Services.AddScoped<IRequestCache, RequestCache>();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
+
+builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+                .ReadFrom.Configuration(hostingContext.Configuration));
+
 
 var app = builder.Build();
 

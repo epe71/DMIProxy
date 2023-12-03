@@ -7,6 +7,7 @@ namespace DMIProxy.DomainService
     public class MetObsService : IMetObsService
     {
         private string baseUrl = "https://dmigw.govcloud.dk/v2/metObs/collections/observation/items";
+        private readonly ILogger<MetObsService> _logger;
 
         private readonly JsonSerializerOptions _serializerOptions = new()
         {
@@ -15,9 +16,12 @@ namespace DMIProxy.DomainService
 
         private readonly HttpClient _httpClient;
 
-        public MetObsService(IHttpClientFactory httpClientFactory)
+        public MetObsService(
+            IHttpClientFactory httpClientFactory, 
+            ILogger<MetObsService> logger)
         {
             _httpClient = httpClientFactory.CreateClient();
+            _logger = logger;
         }
 
         public async Task<DmiResult> GetRain(string stationId)
@@ -25,6 +29,7 @@ namespace DMIProxy.DomainService
             var apiKey = Environment.GetEnvironmentVariable("DMI_API_KEY");
             if (apiKey == null)
             {
+                _logger.LogError("No DMI_API_KEY set");
                 throw new ArgumentNullException(nameof(apiKey));
             }
 
@@ -54,6 +59,7 @@ namespace DMIProxy.DomainService
             DmiResult? dmiResult = await JsonSerializer.DeserializeAsync<DmiResult>(contentStream, _serializerOptions);
             if (dmiResult == null)
             {
+                _logger.LogError("No response from DMI");
                 throw new SystemException("No response from DMI");
             }
             return dmiResult;
