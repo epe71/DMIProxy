@@ -1,4 +1,4 @@
-﻿using DMIProxy.BusinessEntity;
+﻿using DMIProxy.BusinessEntity.MetObs;
 using System.Net;
 using System.Text.Json;
 
@@ -24,7 +24,7 @@ namespace DMIProxy.DomainService
             _logger = logger;
         }
 
-        public async Task<DmiResult> GetRain(string stationId)
+        public async Task<DmiMetObsData> GetRain(string stationId)
         {
             var apiKey = Environment.GetEnvironmentVariable("DMI_API_KEY");
             if (apiKey == null)
@@ -56,7 +56,7 @@ namespace DMIProxy.DomainService
                 await _httpClient.SendAsync(httpRequestMessage))
             .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
 
-            DmiResult? dmiResult = await JsonSerializer.DeserializeAsync<DmiResult>(contentStream, _serializerOptions);
+            DmiMetObsData? dmiResult = await JsonSerializer.DeserializeAsync<DmiMetObsData>(contentStream, _serializerOptions);
             if (dmiResult == null)
             {
                 _logger.LogError("No response from DMI");

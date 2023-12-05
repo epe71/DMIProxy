@@ -1,4 +1,4 @@
-﻿using DMIProxy.BusinessEntity;
+﻿using DMIProxy.BusinessEntity.MetObs;
 using DMIProxy.Contract;
 using DMIProxy.DomainService;
 
@@ -19,7 +19,7 @@ namespace DMIProxy.ApplicationService
         {
             if (!_requestCache.GetRainDTO(stationId, out var rainDto))
             {
-                DmiResult result = await _service.GetRain(stationId);
+                DmiMetObsData result = await _service.GetRain(stationId);
                 rainDto = new RainDTO();
                 rainDto.Rain1h = result.Rain1h();
                 rainDto.RainToday = result.RainToday();

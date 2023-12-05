@@ -1,9 +1,9 @@
-﻿using DMIProxy.BusinessEntity;
+﻿using DMIProxy.BusinessEntity.MetObs;
 
 namespace DMIProxy.DomainService
 {
     public interface IMetObsService
     {
-        Task<DmiResult> GetRain(string stationId);
+        Task<DmiMetObsData> GetRain(string stationId);
     }
 }

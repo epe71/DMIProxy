@@ -1,4 +1,4 @@
-﻿namespace DMIProxy.BusinessEntity
+﻿namespace DMIProxy.BusinessEntity.MetObs
 {
     public class Feature
     {
@@ -8,8 +8,8 @@
         public Properties properties { get; set; }
 
         public bool ThisHour()
-        { 
-            return properties.ThisHour(); 
+        {
+            return properties.ThisHour();
         }
 
         public bool ThisDay()

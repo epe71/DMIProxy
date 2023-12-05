@@ -1,4 +1,4 @@
-﻿namespace DMIProxy.BusinessEntity
+﻿namespace DMIProxy.BusinessEntity.MetObs
 {
     public class Geometry
     {

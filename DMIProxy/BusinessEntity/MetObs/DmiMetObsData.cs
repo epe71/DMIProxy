@@ -1,6 +1,6 @@
-﻿namespace DMIProxy.BusinessEntity
+﻿namespace DMIProxy.BusinessEntity.MetObs
 {
-    public class DmiResult
+    public class DmiMetObsData
     {
         public string type { get; set; }
         public List<Feature> features { get; set; }
