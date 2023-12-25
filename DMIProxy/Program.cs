@@ -20,6 +20,8 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>();
 builder.Services.AddScoped<IMetObsService, MetObsService>();
+builder.Services.AddScoped<IEdrApplicationService, EdrApplicationService>();
+builder.Services.AddScoped<IEdrService, EdrService>();
 builder.Services.AddScoped<IRequestCache, RequestCache>();
 
 builder.Services.AddMemoryCache();

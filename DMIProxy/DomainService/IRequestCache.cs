@@ -7,5 +7,8 @@ namespace DMIProxy.DomainService
         void ClearCache();
         bool GetRainDTO(string stationId, out RainDTO? rainDto);
         void SaveRainDTO(string stationId, RainDTO rainDTO);
+
+        bool GetForcastDTO(out ForcastDTO? forcastDto);
+        void SaveForcastDTO(ForcastDTO forcastDTO);
     }
 }

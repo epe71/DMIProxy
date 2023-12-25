@@ -26,10 +26,10 @@ namespace DMIProxy.DomainService
 
         public async Task<DmiMetObsData> GetRain(string stationId)
         {
-            var apiKey = Environment.GetEnvironmentVariable("DMI_API_KEY");
+            var apiKey = Environment.GetEnvironmentVariable("DMI_METOBS_API_KEY");
             if (apiKey == null)
             {
-                _logger.LogError("No DMI_API_KEY set");
+                _logger.LogError("No DMI_METOBS_API_KEY set");
                 throw new ArgumentNullException(nameof(apiKey));
             }
 
@@ -59,8 +59,8 @@ namespace DMIProxy.DomainService
             DmiMetObsData? dmiResult = await JsonSerializer.DeserializeAsync<DmiMetObsData>(contentStream, _serializerOptions);
             if (dmiResult == null)
             {
-                _logger.LogError("No response from DMI");
-                throw new SystemException("No response from DMI");
+                _logger.LogError("No response from DMI-MetObs");
+                throw new SystemException("No response from DMI-MetObs");
             }
             return dmiResult;
         }

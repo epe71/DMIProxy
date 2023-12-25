@@ -8,6 +8,7 @@ namespace DMIProxy.DomainService
         private IMemoryCache _cache;
 
         private const string rainCacheKey = "Rain";
+        private const string forcastCacheKey = "Forcast";
 
         private const int slidingCacheExpirationMinutes = 15;
 
@@ -19,6 +20,7 @@ namespace DMIProxy.DomainService
         public void ClearCache()
         {
             _cache.Remove(rainCacheKey);
+            _cache.Remove(forcastCacheKey);
         }
 
         public bool GetRainDTO(string stationId, out RainDTO? rainDto)
@@ -34,12 +36,27 @@ namespace DMIProxy.DomainService
 
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                        .SetSlidingExpiration(TimeSpan.FromMinutes(slidingCacheExpirationMinutes))
-                       .SetAbsoluteExpiration(AbsoluteCacheExpirationTime(nextUpdate))
+                       .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(nextUpdate))
                        .SetPriority(CacheItemPriority.Normal);
             _cache.Set(rainCacheKey + stationId, rainDTO, cacheEntryOptions);
         }
 
-        private TimeSpan AbsoluteCacheExpirationTime(int hours)
+        public bool GetForcastDTO(out ForcastDTO? forcastDto)
+        {
+            return _cache.TryGetValue(forcastCacheKey, out forcastDto);
+        }
+
+        public void SaveForcastDTO(ForcastDTO forcastDTO)
+        {
+            var timeOut = forcastDTO.StartTime.AddHours(6).AddMinutes(1) - DateTime.UtcNow;
+
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                       .SetAbsoluteExpiration(timeOut)
+                       .SetPriority(CacheItemPriority.Normal);
+            _cache.Set(forcastCacheKey, forcastDTO, cacheEntryOptions);
+        }
+
+        private TimeSpan AbsoluteCacheExpirationTimeInHour(int hours)
         {
             var minutesToTopOfTheHour = 5 + 60 - DateTime.Now.Minute;
             int absoluteCacheExpirationMinutes = (hours-1) * 60 + minutesToTopOfTheHour;

@@ -9,14 +9,17 @@ namespace DMIProxy.Controllers
     public class MetObsController : ControllerBase
     {
         private readonly ILogger<MetObsController> _logger;
-        private readonly IMetObsApplicationService _applicationService;
+        private readonly IMetObsApplicationService _metObsApplicationService;
+        private readonly IEdrApplicationService _edrApplicationService;
 
         public MetObsController(
             ILogger<MetObsController> logger,
-            IMetObsApplicationService nordPoolApplicationService)
+            IMetObsApplicationService nordPoolApplicationService,
+            IEdrApplicationService edrApplicationService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _applicationService = nordPoolApplicationService;
+            _metObsApplicationService = nordPoolApplicationService;
+            _edrApplicationService = edrApplicationService;
         }
 
 
@@ -25,11 +28,22 @@ namespace DMIProxy.Controllers
         /// </summary>
         /// <param name="stationId" example="06072">id of the station to get information for</param>
         /// <returns></returns>
-        [HttpGet(Name = "Rain/{stationId}")]
-        public async Task<IActionResult> GetAsync(string stationId)
+        [HttpGet("Rain/{stationId}/")]
+        public async Task<IActionResult> GetRain(string stationId)
         {
-            var statisticsDTO = await _applicationService.GetRain(stationId);
+            var statisticsDTO = await _metObsApplicationService.GetRain(stationId);
             return new JsonResult(statisticsDTO);
+        }
+
+        /// <summary>
+        /// Get 2 day forcast
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("Forcast/")]
+        public async Task<IActionResult> GetForcast()
+        {
+            var forcastDTO = await _edrApplicationService.GetForcast();
+            return new JsonResult(forcastDTO);
         }
     }
 }
