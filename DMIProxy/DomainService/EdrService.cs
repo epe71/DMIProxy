@@ -71,23 +71,33 @@ namespace DMIProxy.DomainService
 
         private ForcastDTO ExtractData(EdrData data)
         {
-            var forcastDto = new ForcastDTO();
-
-            forcastDto.StartTime = data.domain.axes.t.values.First();
-            forcastDto.WindSpeed = ArrayRound(data.ranges.windspeed.values, 1);
-            forcastDto.WindDir = ArrayRound(data.ranges.winddir.values, 0);
+            var startTime = data.domain.axes.t.values.First();
+            var windspeed = ArrayRound(data.ranges.windspeed.values, 1);
+            var windDir = ArrayRound(data.ranges.winddir.values, 0);
 
             var cloudCoverPct = ArrayMultiply(data.ranges.cloudcover.values, 100);
-            forcastDto.CloudCover = ArrayRound(cloudCoverPct, 2);
+            cloudCoverPct = ArrayRound(cloudCoverPct, 2);
 
             var humidityPct = ArrayMultiply(data.ranges.relativehumidity.values, 100);
-            forcastDto.RelativeHumidity = ArrayRound(humidityPct, 2);
+            humidityPct = ArrayRound(humidityPct, 2);
 
             var presurehPa = ArrayDivide(data.ranges.pressuresealevel.values, 100);
-            forcastDto.PressureSeaLevel = ArrayRound(presurehPa, 1);
+            presurehPa = ArrayRound(presurehPa, 1);
 
             var temperaturCelsius = ArraySubtract(data.ranges.temperature2m.values, 273.15f);
-            forcastDto.Temperatur2m = ArrayRound(temperaturCelsius, 1);
+            temperaturCelsius = ArrayRound(temperaturCelsius, 1);
+
+            var forcastDto = new ForcastDTO()
+            { 
+                StartTime = startTime,
+                WindSpeed = windspeed,
+                WindDir = windDir,
+                CloudCover = cloudCoverPct,
+                RelativeHumidity = humidityPct,
+                PressureSeaLevel = presurehPa,
+                Temperatur2m = temperaturCelsius
+            };
+
 
             return forcastDto;
         }

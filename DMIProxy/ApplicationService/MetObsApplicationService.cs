@@ -20,10 +20,12 @@ namespace DMIProxy.ApplicationService
             if (!_requestCache.GetRainDTO(stationId, out var rainDto))
             {
                 DmiMetObsData result = await _service.GetRain(stationId);
-                rainDto = new RainDTO();
-                rainDto.Rain1h = result.Rain1h();
-                rainDto.RainToday = result.RainToday();
-                rainDto.RainThisMonth = result.RainThisMonth();
+                rainDto = new RainDTO()
+                {
+                    Rain1h = result.Rain1h(),
+                    RainToday = result.RainToday(),
+                    RainThisMonth = result.RainThisMonth()
+                };
                 _requestCache.SaveRainDTO(stationId, rainDto);
             }
             return rainDto;

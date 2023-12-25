@@ -2,8 +2,8 @@
 {
     public class RainDTO
     {
-        public double Rain1h { get; set; }
-        public double RainToday { get; set; }
-        public double RainThisMonth { get; set; }
+        public double Rain1h { get; init; }
+        public double RainToday { get; init; }
+        public double RainThisMonth { get; init; }
     }
 }
