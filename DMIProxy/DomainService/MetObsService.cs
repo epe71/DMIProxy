@@ -55,6 +55,7 @@ namespace DMIProxy.DomainService
             await using var contentStream = await(
                 await _httpClient.SendAsync(httpRequestMessage))
             .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
+            _logger.LogDebug($"DMI MetObs data recived for {stationId}");
 
             DmiMetObsData? dmiResult = await JsonSerializer.DeserializeAsync<DmiMetObsData>(contentStream, _serializerOptions);
             if (dmiResult == null)

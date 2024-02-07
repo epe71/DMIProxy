@@ -32,6 +32,7 @@ namespace DMIProxy.Controllers
         public async Task<IActionResult> GetRain(string stationId)
         {
             var statisticsDTO = await _metObsApplicationService.GetRain(stationId);
+            _logger.LogDebug($"Rain this month {statisticsDTO.RainThisMonth} at {stationId}");
             return new JsonResult(statisticsDTO);
         }
 
