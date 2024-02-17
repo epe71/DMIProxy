@@ -5,5 +5,7 @@
         public double Rain1h { get; init; }
         public double RainToday { get; init; }
         public double RainThisMonth { get; init; }
+        public DateTime TimeStamp { get; init; }
+        public int NumberReturned { get; init; }
     }
 }

@@ -1,5 +1,8 @@
 using DMIProxy.ApplicationService;
 using DMIProxy.DomainService;
+using DMIProxy.HealthCheck;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using System.Reflection;
 
@@ -18,13 +21,19 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
+builder.Services.AddHealthChecks()
+    .AddCheck<RequestCacheHealthCheck>("request_cache_check")
+    .AddCheck<MetObsHealthCheck>("MetObs_data_check")
+    .AddProcessAllocatedMemoryHealthCheck(30)
+    .AddPrivateMemoryHealthCheck(300000000);
+
 builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>();
 builder.Services.AddScoped<IMetObsService, MetObsService>();
 builder.Services.AddScoped<IEdrApplicationService, EdrApplicationService>();
 builder.Services.AddScoped<IEdrService, EdrService>();
 builder.Services.AddScoped<IRequestCache, RequestCache>();
 
-builder.Services.AddMemoryCache();
+builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
 builder.Services.AddHttpClient();
 
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
@@ -39,6 +48,12 @@ var app = builder.Build();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapHealthChecks("/healthcheck", new HealthCheckOptions
+{
+    Predicate = _ => true,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 app.UseHttpsRedirection();
 

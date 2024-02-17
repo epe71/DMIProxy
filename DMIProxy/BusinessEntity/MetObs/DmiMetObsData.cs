@@ -2,11 +2,11 @@
 {
     public class DmiMetObsData
     {
-        public string type { get; set; }
-        public List<Feature> features { get; set; }
-        public DateTime timeStamp { get; set; }
-        public int numberReturned { get; set; }
-        public List<Link> links { get; set; }
+        public string type { get; init; }
+        public List<Feature> features { get; init; }
+        public DateTime timeStamp { get; init; }
+        public int numberReturned { get; init; }
+        public List<Link> links { get; init; }
 
         public double Rain1h()
         {

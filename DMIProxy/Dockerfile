@@ -2,6 +2,8 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+RUN apt-get update
+RUN apt-get --yes install curl
 ENV TZ="Europe/Copenhagen"
 EXPOSE 80
 EXPOSE 443
@@ -20,4 +22,6 @@ RUN dotnet publish "DMIProxy.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+HEALTHCHECK --interval=60s --timeout=5s --retries=3 CMD curl --fail http://localhost:80/healthcheck || exit 1
+
 ENTRYPOINT ["dotnet", "DMIProxy.dll"]

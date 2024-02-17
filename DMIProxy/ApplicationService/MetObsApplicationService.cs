@@ -24,7 +24,9 @@ namespace DMIProxy.ApplicationService
                 {
                     Rain1h = result.Rain1h(),
                     RainToday = result.RainToday(),
-                    RainThisMonth = result.RainThisMonth()
+                    RainThisMonth = result.RainThisMonth(),
+                    TimeStamp = result.timeStamp,
+                    NumberReturned = result.numberReturned
                 };
                 _requestCache.SaveRainDTO(stationId, rainDto);
             }
