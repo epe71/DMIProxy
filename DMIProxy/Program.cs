@@ -24,8 +24,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHealthChecks()
     .AddCheck<RequestCacheHealthCheck>("request_cache_check")
     .AddCheck<MetObsHealthCheck>("MetObs_data_check")
-    .AddProcessAllocatedMemoryHealthCheck(30)
-    .AddPrivateMemoryHealthCheck(300000000);
+    .AddProcessAllocatedMemoryHealthCheck(60)
+    .AddPrivateMemoryHealthCheck(350000000);
 
 builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>();
 builder.Services.AddScoped<IMetObsService, MetObsService>();

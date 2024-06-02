@@ -10,7 +10,7 @@ namespace DMIProxy.DomainService
     {
         // parameter list: https://confluence.govcloud.dk/pages/viewpage.action?pageId=110690581
 
-        private string baseUrl = "https://dmigw.govcloud.dk/v1/forecastedr/collections/harmonie_nea_sf/position";
+        private string baseUrl = "https://dmigw.govcloud.dk/v1/forecastedr/collections/harmonie_dini_sf/position";
         private readonly ILogger<EdrService> _logger;
 
         private readonly JsonSerializerOptions _serializerOptions = new()
@@ -39,7 +39,7 @@ namespace DMIProxy.DomainService
             var parameters = new Dictionary<string, string> {
                 { "coords", "POINT(10.137 56.173)" },
                 { "csr", "csr84" },
-                { "parameter-name", "temperature-2m,wind-speed,wind-dir,relative-humidity,pressure-sealevel,cloudcover" }
+                { "parameter-name", "temperature-2m,wind-speed,wind-dir,pressure-sealevel,relative-humidity-2m,fraction-of-cloud-cover,cloud-transmittance" } 
             };
             var encodedContent = new FormUrlEncodedContent(parameters);
             string query = await ParamsToStringAsync(parameters);
@@ -74,12 +74,13 @@ namespace DMIProxy.DomainService
             var startTime = data.domain.axes.t.values.First();
             var windspeed = ArrayRound(data.ranges.windspeed.values, 1);
             var windDir = ArrayRound(data.ranges.winddir.values, 0);
+            var humidityPct = ArrayRound(data.ranges.relativehumidity.values, 2);
+
+            var cloudTransmit = ArrayMultiply(data.ranges.cloudTransmit.values, 100);
+            cloudTransmit = ArrayRound(cloudTransmit, 2);
 
             var cloudCoverPct = ArrayMultiply(data.ranges.cloudcover.values, 100);
             cloudCoverPct = ArrayRound(cloudCoverPct, 2);
-
-            var humidityPct = ArrayMultiply(data.ranges.relativehumidity.values, 100);
-            humidityPct = ArrayRound(humidityPct, 2);
 
             var presurehPa = ArrayDivide(data.ranges.pressuresealevel.values, 100);
             presurehPa = ArrayRound(presurehPa, 1);
@@ -92,12 +93,11 @@ namespace DMIProxy.DomainService
                 StartTime = startTime,
                 WindSpeed = windspeed,
                 WindDir = windDir,
-                CloudCover = cloudCoverPct,
+                CloudCover = cloudTransmit,
                 RelativeHumidity = humidityPct,
                 PressureSeaLevel = presurehPa,
                 Temperatur2m = temperaturCelsius
             };
-
 
             return forcastDto;
         }

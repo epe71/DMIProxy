@@ -16,12 +16,16 @@ namespace DMIProxy.ApplicationService
 
         public async Task<ForcastDTO> GetForcast()
         {
-            if (!_requestCache.GetForcastDTO(out var forcastDto))
+            if (!_requestCache.GetForcastDTO(out ForcastDTO? forcastDto))
             {
                 forcastDto = await _service.GetForcast();
+                if (forcastDto == null)
+                {
+                    throw new InvalidOperationException("Failed to retrive forcast data.");
+                }
                 _requestCache.SaveForcastDTO(forcastDto);
             }
-            return forcastDto;
+            return forcastDto ?? throw new InvalidOperationException("Forcast data could not be retrieved.");
         }
     }
 }

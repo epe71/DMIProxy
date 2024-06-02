@@ -17,12 +17,6 @@ namespace DMIProxy.DomainService
             _cache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
         }
 
-        public void ClearCache()
-        {
-            _cache.Remove(rainCacheKey);
-            _cache.Remove(forcastCacheKey);
-        }
-
         public bool GetRainDTO(string stationId, out RainDTO? rainDto)
         {
             return _cache.TryGetValue(rainCacheKey + stationId, out rainDto);
@@ -35,9 +29,9 @@ namespace DMIProxy.DomainService
             if (rainDTO.Rain1h > 0) { nextUpdate = 1; }
 
             var cacheEntryOptions = new MemoryCacheEntryOptions()
-                       .SetSlidingExpiration(TimeSpan.FromMinutes(slidingCacheExpirationMinutes))
                        .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(nextUpdate))
                        .SetPriority(CacheItemPriority.Normal);
+            _cache.Remove(rainCacheKey);
             _cache.Set(rainCacheKey + stationId, rainDTO, cacheEntryOptions);
         }
 
@@ -53,6 +47,7 @@ namespace DMIProxy.DomainService
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                        .SetAbsoluteExpiration(timeOut)
                        .SetPriority(CacheItemPriority.Normal);
+            _cache.Remove(forcastCacheKey);
             _cache.Set(forcastCacheKey, forcastDTO, cacheEntryOptions);
         }
 

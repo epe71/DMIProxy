@@ -94,7 +94,7 @@ namespace DMIProxy.BusinessEntity.EDR
         [JsonPropertyName("temperature-2m")]
         public RangeData temperature2m { get; set; }
 
-        [JsonPropertyName("relative-humidity")]
+        [JsonPropertyName("relative-humidity-2m")]
         public RangeData relativehumidity { get; set; }
 
         [JsonPropertyName("wind-speed")]
@@ -106,8 +106,11 @@ namespace DMIProxy.BusinessEntity.EDR
         [JsonPropertyName("wind-dir")]
         public RangeData winddir { get; set; }
 
-        [JsonPropertyName("cloudcover")]
+        [JsonPropertyName("fraction-of-cloud-cover")]
         public RangeData cloudcover { get; set; }
+
+        [JsonPropertyName("cloud-transmittance")]
+        public RangeData cloudTransmit { get; set; }
     }
 
     public class RangeData

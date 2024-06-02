@@ -42,7 +42,7 @@ namespace DMIProxy.HealthCheck
                 return Task.FromResult(HealthCheckResult.Degraded("Data delayed", null, data));
             }
 
-            if (rainDto.NumberReturned < 390)
+            if (rainDto.NumberReturned < 28*24)
             {
                 return Task.FromResult(HealthCheckResult.Unhealthy("To few data points", null, data));
             }
