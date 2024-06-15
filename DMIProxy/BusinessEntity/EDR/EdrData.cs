@@ -69,6 +69,10 @@ namespace DMIProxy.BusinessEntity.EDR
 
         [JsonPropertyName("cloudcover")]
         public ParameterData cloudcover { get; set; }
+
+        [JsonPropertyName("cloud-transmittance")]
+        public ParameterData cloudtransmittance { get; set; }
+        
     }
 
     public class ParameterData

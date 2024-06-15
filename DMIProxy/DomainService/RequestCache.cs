@@ -9,6 +9,7 @@ namespace DMIProxy.DomainService
 
         private const string rainCacheKey = "Rain";
         private const string forcastCacheKey = "Forcast";
+        private const string cloudForcastCacheKey = "CloudForcast";
 
         private const int slidingCacheExpirationMinutes = 15;
 
@@ -49,6 +50,20 @@ namespace DMIProxy.DomainService
                        .SetPriority(CacheItemPriority.Normal);
             _cache.Remove(forcastCacheKey);
             _cache.Set(forcastCacheKey, forcastDTO, cacheEntryOptions);
+        }
+
+        public bool GetCloudForcastDTO(out HomeAssistantDTO? forcastDto)
+        {
+            return _cache.TryGetValue(cloudForcastCacheKey, out forcastDto);
+        }
+
+        public void SaveCloudForcastDTO(HomeAssistantDTO forcastDTO)
+        {
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                       .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(2))
+                       .SetPriority(CacheItemPriority.Normal);
+            _cache.Remove(forcastCacheKey);
+            _cache.Set(cloudForcastCacheKey, forcastDTO, cacheEntryOptions);
         }
 
         private TimeSpan AbsoluteCacheExpirationTimeInHour(int hours)

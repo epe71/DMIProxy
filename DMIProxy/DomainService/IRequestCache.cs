@@ -11,6 +11,9 @@ namespace DMIProxy.DomainService
         bool GetForcastDTO(out ForcastDTO? forcastDto);
         void SaveForcastDTO(ForcastDTO forcastDTO);
 
+        bool GetCloudForcastDTO(out HomeAssistantDTO? forcastDto);
+        void SaveCloudForcastDTO(HomeAssistantDTO forcastDTO);
+
         MemoryCacheStatistics? CacheStatistics();
     }
 }

@@ -2,7 +2,6 @@
 using DMIProxy.Contract;
 using System.Net;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DMIProxy.DomainService
 {
@@ -29,6 +28,42 @@ namespace DMIProxy.DomainService
 
         public async Task<ForcastDTO> GetForcast()
         {
+            var weatherParameters = "temperature-2m,wind-speed,wind-dir,pressure-sealevel,relative-humidity-2m,fraction-of-cloud-cover";
+            HttpRequestMessage httpRequestMessage = await SetupRequestMessage(weatherParameters);
+
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
+            await using var contentStream = await (await _httpClient.SendAsync(httpRequestMessage))
+            .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
+
+            EdrData? dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
+            if (dmiResult == null)
+            {
+                _logger.LogError("No response from DMI-EDR");
+                throw new SystemException("No response from DMI-EDR");
+            }
+            return ExtractData(dmiResult);
+        }
+
+        public async Task<HomeAssistantDTO> GetCloudForcast()
+        {
+            var weatherParameters = "cloud-transmittance";
+            HttpRequestMessage httpRequestMessage = await SetupRequestMessage(weatherParameters);
+
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
+            await using var contentStream = await (await _httpClient.SendAsync(httpRequestMessage))
+            .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
+
+            EdrData? dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
+            if (dmiResult == null)
+            {
+                _logger.LogError("No response from DMI-EDR");
+                throw new SystemException("No response from DMI-EDR");
+            }
+            return ExtractCloudData(dmiResult);
+        }
+
+        private async Task<HttpRequestMessage> SetupRequestMessage(string weatherParameters)
+        {
             var apiKey = Environment.GetEnvironmentVariable("DMI_EDR_API_KEY");
             if (apiKey == null)
             {
@@ -39,7 +74,7 @@ namespace DMIProxy.DomainService
             var parameters = new Dictionary<string, string> {
                 { "coords", "POINT(10.137 56.173)" },
                 { "csr", "csr84" },
-                { "parameter-name", "temperature-2m,wind-speed,wind-dir,pressure-sealevel,relative-humidity-2m,fraction-of-cloud-cover,cloud-transmittance" } 
+                { "parameter-name", weatherParameters }
             };
             var encodedContent = new FormUrlEncodedContent(parameters);
             string query = await ParamsToStringAsync(parameters);
@@ -54,38 +89,36 @@ namespace DMIProxy.DomainService
                 },
                 Content = encodedContent
             };
-
-            _httpClient.Timeout = TimeSpan.FromSeconds(30);
-            await using var contentStream = await (
-                await _httpClient.SendAsync(httpRequestMessage))
-            .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
-
-            EdrData? dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
-            if (dmiResult == null)
-            {
-                _logger.LogError("No response from DMI-EDR");
-                throw new SystemException("No response from DMI-EDR");
-            }
-            return ExtractData(dmiResult);
+            return httpRequestMessage;
         }
 
         private ForcastDTO ExtractData(EdrData data)
         {
             var startTime = data.domain.axes.t.values.First();
-            var windspeed = ArrayRound(data.ranges.windspeed.values, 1);
-            var windDir = ArrayRound(data.ranges.winddir.values, 0);
-            var humidityPct = ArrayRound(data.ranges.relativehumidity.values, 2);
 
-            var cloudTransmit = ArrayMultiply(data.ranges.cloudTransmit.values, 100);
+            var rawWindspeed = ConvertToDoubles(data.ranges.windspeed.values);
+            var windspeed = ArrayRound(rawWindspeed, 1);
+
+            var rawWindDir = ConvertToDoubles(data.ranges.winddir.values);
+            var windDir = ArrayRound(rawWindDir, 0);
+
+            var rawHumidityPct = ConvertToDoubles(data.ranges.relativehumidity.values);
+            var humidityPct = ArrayRound(rawHumidityPct, 2);
+
+            var rawCloudTransmit = ConvertToDoubles(data.ranges.cloudTransmit.values);
+            var cloudTransmit = ArrayMultiply(rawCloudTransmit, 100);
             cloudTransmit = ArrayRound(cloudTransmit, 2);
 
-            var cloudCoverPct = ArrayMultiply(data.ranges.cloudcover.values, 100);
+            var rawCloudCoverPct = ConvertToDoubles(data.ranges.cloudcover.values);
+            var cloudCoverPct = ArrayMultiply(rawCloudCoverPct, 100);
             cloudCoverPct = ArrayRound(cloudCoverPct, 2);
 
-            var presurehPa = ArrayDivide(data.ranges.pressuresealevel.values, 100);
+            var rawPresurehPa = ConvertToDoubles(data.ranges.pressuresealevel.values);
+            var presurehPa = ArrayDivide(rawPresurehPa, 100);
             presurehPa = ArrayRound(presurehPa, 1);
 
-            var temperaturCelsius = ArraySubtract(data.ranges.temperature2m.values, 273.15f);
+            var rawTemperatureCelsius = ConvertToDoubles(data.ranges.temperature2m.values);
+            var temperaturCelsius = ArraySubtract(rawTemperatureCelsius, 273.15f);
             temperaturCelsius = ArrayRound(temperaturCelsius, 1);
 
             var forcastDto = new ForcastDTO()
@@ -102,43 +135,89 @@ namespace DMIProxy.DomainService
             return forcastDto;
         }
 
-        private float[] ArrayDivide(float[] numbers, float fraction)
+        private HomeAssistantDTO ExtractCloudData(EdrData data)
         {
-            var result = new float[numbers.Length];
-            for (int i = 0; i < numbers.Length; i++)
+            var time = data.domain.axes.t.values;
+            var values = ConvertToDoubles(data.ranges.cloudTransmit.values);
+
+            var cloudTransmit = ArrayMultiply(values, 100);
+            var cloudTransmitRounded = ArrayRound(cloudTransmit, 2);
+            var transmittance = DataToPointDTOList(time, cloudTransmitRounded);
+
+            var forcastDto = new HomeAssistantDTO()
             {
-                result[i] = numbers[i]/fraction;
-            }
-            return result;
-        }
-        private float[] ArrayMultiply(float[] numbers, float times)
-        {
-            var result = new float[numbers.Length];
-            for (int i = 0; i < numbers.Length; i++)
-            {
-                result[i] = numbers[i] * times;
-            }
-            return result;
+                data = transmittance,
+                description = data.parameters.cloudtransmittance.description.en
+            };
+
+            return forcastDto;
         }
 
-        private float[] ArraySubtract(float[] numbers, float subtract)
+        private List<PointDTO> DataToPointDTOList(DateTime[] time, List<double> cloudTransmit)
         {
-            var result = new float[numbers.Length];
-            for (int i = 0; i < numbers.Length; i++)
+            var transmittance = new List<PointDTO>();
+            for (int i = 0; i < time.Length; i++)
             {
-                result[i] = numbers[i] - subtract;
+                var point = new PointDTO()
+                {
+                    date = time[i].ToString("yyyy-MM-ddTHH:mm:ss"),
+                    value = cloudTransmit[i]
+                };
+                transmittance.Add(point);
             }
-            return result;
+
+            return transmittance;
         }
 
-        private float[] ArrayRound(float[] numbers, int digits)
+        private List<double> ConvertToDoubles(float[] data)
         {
-            var result = new float[numbers.Length];
-            for (int i = 0; i < numbers.Length; i++)
+            var dataList = data.ToList();
+            List<double> converted = dataList.Select(x => (double)x).ToList();
+            return converted;
+        }
+
+        private List<double> ArrayDivide(List<double> numbers, double fraction)
+        {
+            var calculatedNumbers = new List<double>();
+            foreach (var number in numbers)
             {
-                result[i] = (float)Math.Round(numbers[i], digits);
+                var newValue = number / fraction;
+                calculatedNumbers.Add(newValue);
             }
-            return result;
+            return calculatedNumbers;
+        }
+
+        private List<double> ArrayMultiply(List<double> numbers, double times)
+        {
+            var calculatedNumbers = new List<double>();
+            foreach (var number in numbers)
+            {
+                var newValue = number * times;
+                calculatedNumbers.Add(newValue);
+            }
+            return calculatedNumbers;
+        }
+
+        private List<double> ArraySubtract(List<double> numbers, double subtract)
+        {
+            var calculatedNumbers = new List<double>();
+            foreach (var number in numbers)
+            {
+                var newValue = number - subtract;
+                calculatedNumbers.Add(newValue);
+            }
+            return calculatedNumbers;
+        }
+
+        private List<double> ArrayRound(List<double> numbers, int digits)
+        {
+            var calculatedNumbers = new List<double>();
+            foreach (var number in numbers)
+            {
+                var newValue = (double)Math.Round(number, digits); 
+                calculatedNumbers.Add(newValue);
+            }
+            return calculatedNumbers;
         }
 
         private static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)

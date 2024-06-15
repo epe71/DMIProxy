@@ -46,5 +46,17 @@ namespace DMIProxy.Controllers
             var forcastDTO = await _edrApplicationService.GetForcast();
             return new JsonResult(forcastDTO);
         }
+
+        /// <summary>
+        /// Cloud transmittance forcast
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("Forcast/Cloud")]
+        public async Task<IActionResult> GetCloudForcast()
+        {
+            var forcastDTO = await _edrApplicationService.GetCloudForcast();
+            return new JsonResult(forcastDTO);
+        }
+
     }
 }
