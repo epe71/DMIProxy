@@ -35,7 +35,7 @@ namespace DMIProxy.DomainService
             await using var contentStream = await (await _httpClient.SendAsync(httpRequestMessage))
             .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
 
-            EdrData? dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
+            var dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
             if (dmiResult == null)
             {
                 _logger.LogError("No response from DMI-EDR");
@@ -53,7 +53,7 @@ namespace DMIProxy.DomainService
             await using var contentStream = await (await _httpClient.SendAsync(httpRequestMessage))
             .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
 
-            EdrData? dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
+            var dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
             if (dmiResult == null)
             {
                 _logger.LogError("No response from DMI-EDR");
@@ -105,10 +105,6 @@ namespace DMIProxy.DomainService
             var rawHumidityPct = ConvertToDoubles(data.ranges.relativehumidity.values);
             var humidityPct = ArrayRound(rawHumidityPct, 2);
 
-            var rawCloudTransmit = ConvertToDoubles(data.ranges.cloudTransmit.values);
-            var cloudTransmit = ArrayMultiply(rawCloudTransmit, 100);
-            cloudTransmit = ArrayRound(cloudTransmit, 2);
-
             var rawCloudCoverPct = ConvertToDoubles(data.ranges.cloudcover.values);
             var cloudCoverPct = ArrayMultiply(rawCloudCoverPct, 100);
             cloudCoverPct = ArrayRound(cloudCoverPct, 2);
@@ -126,7 +122,7 @@ namespace DMIProxy.DomainService
                 StartTime = startTime,
                 WindSpeed = windspeed,
                 WindDir = windDir,
-                CloudCover = cloudTransmit,
+                CloudCover = cloudCoverPct,
                 RelativeHumidity = humidityPct,
                 PressureSeaLevel = presurehPa,
                 Temperatur2m = temperaturCelsius
