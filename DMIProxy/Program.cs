@@ -1,3 +1,4 @@
+using DMIProxy;
 using DMIProxy.ApplicationService;
 using DMIProxy.DomainService;
 using DMIProxy.HealthCheck;
@@ -27,6 +28,8 @@ builder.Services.AddHealthChecks()
     .AddProcessAllocatedMemoryHealthCheck(60)
     .AddPrivateMemoryHealthCheck(350000000);
 
+builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
+
 builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>();
 builder.Services.AddScoped<IMetObsService, MetObsService>();
 builder.Services.AddScoped<IEdrApplicationService, EdrApplicationService>();
@@ -54,6 +57,8 @@ app.MapHealthChecks("/healthcheck", new HealthCheckOptions
     Predicate = _ => true,
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
+
+app.UseExceptionHandler(opt => { });
 
 app.UseHttpsRedirection();
 
