@@ -1,5 +1,4 @@
-﻿using DMIProxy.Contract;
-using DMIProxy.ApplicationService;
+﻿using DMIProxy.ApplicationService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMIProxy.Controllers
