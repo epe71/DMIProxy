@@ -20,7 +20,7 @@ namespace DMIProxy.DomainService
             IHttpClientFactory httpClientFactory, 
             ILogger<MetObsService> logger)
         {
-            _httpClient = httpClientFactory.CreateClient();
+            _httpClient = httpClientFactory.CreateClient("LongTimeOutClient");
             _logger = logger;
         }
 
@@ -52,9 +52,10 @@ namespace DMIProxy.DomainService
                 Content = encodedContent
             };
 
-            await using var contentStream = await(
-                await _httpClient.SendAsync(httpRequestMessage))
-            .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
+            var response = await _httpClient.SendAsync(httpRequestMessage);
+            response.EnsureSuccessStatusCode();
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+
             _logger.LogDebug($"DMI MetObs data recived for {stationId}");
 
             DmiMetObsData? dmiResult = await JsonSerializer.DeserializeAsync<DmiMetObsData>(contentStream, _serializerOptions);

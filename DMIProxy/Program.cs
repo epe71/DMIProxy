@@ -38,10 +38,13 @@ builder.Services.AddScoped<IRequestCache, RequestCache>();
 
 builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
 builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("LongTimeOutClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
                 .ReadFrom.Configuration(hostingContext.Configuration));
-
 
 var app = builder.Build();
 

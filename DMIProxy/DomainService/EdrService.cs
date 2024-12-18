@@ -8,6 +8,7 @@ namespace DMIProxy.DomainService
     public class EdrService : IEdrService
     {
         // parameter list: https://confluence.govcloud.dk/pages/viewpage.action?pageId=110690581
+        // Status page: https://statuspage.freshping.io/25721-DMIOpenDatas
 
         private string baseUrl = "https://dmigw.govcloud.dk/v1/forecastedr/collections/harmonie_dini_sf/position";
         private readonly ILogger<EdrService> _logger;
@@ -22,7 +23,7 @@ namespace DMIProxy.DomainService
             IHttpClientFactory httpClientFactory,
             ILogger<EdrService> logger)
         {
-            _httpClient = httpClientFactory.CreateClient();
+            _httpClient = httpClientFactory.CreateClient("LongTimeOutClient");
             _logger = logger;
         }
 
@@ -31,9 +32,9 @@ namespace DMIProxy.DomainService
             var weatherParameters = "temperature-2m,wind-speed,wind-dir,pressure-sealevel,relative-humidity-2m,fraction-of-cloud-cover";
             HttpRequestMessage httpRequestMessage = await SetupRequestMessage(weatherParameters);
 
-            _httpClient.Timeout = TimeSpan.FromSeconds(30);
-            await using var contentStream = await (await _httpClient.SendAsync(httpRequestMessage))
-            .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
+            var response = await _httpClient.SendAsync(httpRequestMessage);
+            response.EnsureSuccessStatusCode();
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
 
             var dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
             if (dmiResult == null)
@@ -49,9 +50,9 @@ namespace DMIProxy.DomainService
             var weatherParameters = "cloud-transmittance";
             HttpRequestMessage httpRequestMessage = await SetupRequestMessage(weatherParameters);
 
-            _httpClient.Timeout = TimeSpan.FromSeconds(30);
-            await using var contentStream = await (await _httpClient.SendAsync(httpRequestMessage))
-            .EnsureSuccessStatusCode().Content.ReadAsStreamAsync();
+            var response = await _httpClient.SendAsync(httpRequestMessage);
+            response.EnsureSuccessStatusCode();
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
 
             var dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
             if (dmiResult == null)
