@@ -37,11 +37,12 @@ builder.Services.AddScoped<IEdrService, EdrService>();
 builder.Services.AddScoped<IRequestCache, RequestCache>();
 
 builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
-builder.Services.AddHttpClient();
 builder.Services.AddHttpClient("LongTimeOutClient", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(30);
-});
+})
+.AddPolicyHandler(PollyConfiguration.GetRetryPolicy())
+.AddPolicyHandler(PollyConfiguration.GetCircuitBreakerPolicy());
 
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
                 .ReadFrom.Configuration(hostingContext.Configuration));

@@ -21,7 +21,6 @@ namespace DMIProxy.Controllers
             _edrApplicationService = edrApplicationService;
         }
 
-
         /// <summary>
         /// Get rain mesaurement from the last hour, day and month
         /// </summary>
@@ -56,6 +55,5 @@ namespace DMIProxy.Controllers
             var forcastDTO = await _edrApplicationService.GetCloudForcast();
             return new JsonResult(forcastDTO);
         }
-
     }
 }
