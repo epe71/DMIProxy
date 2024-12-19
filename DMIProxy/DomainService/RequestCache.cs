@@ -11,8 +11,6 @@ namespace DMIProxy.DomainService
         private const string forcastCacheKey = "Forcast";
         private const string cloudForcastCacheKey = "CloudForcast";
 
-        private const int slidingCacheExpirationMinutes = 15;
-
         public RequestCache(IMemoryCache memoryCache)
         {
             _cache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));

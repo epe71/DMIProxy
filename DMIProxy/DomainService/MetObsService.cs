@@ -9,10 +9,7 @@ namespace DMIProxy.DomainService
         private string baseUrl = "https://dmigw.govcloud.dk/v2/metObs/collections/observation/items";
         private readonly ILogger<MetObsService> _logger;
 
-        private readonly JsonSerializerOptions _serializerOptions = new()
-        {
-            PropertyNameCaseInsensitive = true,
-        };
+        private readonly JsonSerializerOptions _serializerOptions;
 
         private readonly HttpClient _httpClient;
 
@@ -22,6 +19,10 @@ namespace DMIProxy.DomainService
         {
             _httpClient = httpClientFactory.CreateClient("LongTimeOutClient");
             _logger = logger;
+            _serializerOptions = new()
+            {
+                PropertyNameCaseInsensitive = true,
+            };
         }
 
         public async Task<DmiMetObsData> GetRain(string stationId)
@@ -39,7 +40,7 @@ namespace DMIProxy.DomainService
                 { "parameterId", "precip_past1h" } 
             };
             var encodedContent = new FormUrlEncodedContent(parameters);
-            string query = await ParamsToStringAsync(parameters);
+            var query = await ParamsToStringAsync(parameters);
 
             var httpRequestMessage = new HttpRequestMessage
             {

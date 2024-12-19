@@ -13,10 +13,7 @@ namespace DMIProxy.DomainService
         private string baseUrl = "https://dmigw.govcloud.dk/v1/forecastedr/collections/harmonie_dini_sf/position";
         private readonly ILogger<EdrService> _logger;
 
-        private readonly JsonSerializerOptions _serializerOptions = new()
-        {
-            PropertyNameCaseInsensitive = true,
-        };
+        private readonly JsonSerializerOptions _serializerOptions;
 
         private readonly HttpClient _httpClient;
         public EdrService(
@@ -25,15 +22,20 @@ namespace DMIProxy.DomainService
         {
             _httpClient = httpClientFactory.CreateClient("LongTimeOutClient");
             _logger = logger;
+            _serializerOptions = new()
+            {
+                PropertyNameCaseInsensitive = true,
+            };
         }
 
         public async Task<ForcastDTO> GetForcast()
         {
             var weatherParameters = "temperature-2m,wind-speed,wind-dir,pressure-sealevel,relative-humidity-2m,fraction-of-cloud-cover";
-            HttpRequestMessage httpRequestMessage = await SetupRequestMessage(weatherParameters);
+            var httpRequestMessage = await SetupRequestMessage(weatherParameters);
 
-            var response = await _httpClient.SendAsync(httpRequestMessage);
+            var response = await _httpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
+            
             await using var contentStream = await response.Content.ReadAsStreamAsync();
 
             var dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
@@ -48,7 +50,7 @@ namespace DMIProxy.DomainService
         public async Task<HomeAssistantDTO> GetCloudForcast()
         {
             var weatherParameters = "cloud-transmittance";
-            HttpRequestMessage httpRequestMessage = await SetupRequestMessage(weatherParameters);
+            var httpRequestMessage = await SetupRequestMessage(weatherParameters);
 
             var response = await _httpClient.SendAsync(httpRequestMessage);
             response.EnsureSuccessStatusCode();
@@ -168,53 +170,27 @@ namespace DMIProxy.DomainService
 
         private List<double> ConvertToDoubles(float[] data)
         {
-            var dataList = data.ToList();
-            List<double> converted = dataList.Select(x => (double)x).ToList();
-            return converted;
+            return data.Select(x => (double)x).ToList();
         }
 
         private List<double> ArrayDivide(List<double> numbers, double fraction)
         {
-            var calculatedNumbers = new List<double>();
-            foreach (var number in numbers)
-            {
-                var newValue = number / fraction;
-                calculatedNumbers.Add(newValue);
-            }
-            return calculatedNumbers;
+            return numbers.Select(number => number / fraction).ToList();
         }
 
         private List<double> ArrayMultiply(List<double> numbers, double times)
         {
-            var calculatedNumbers = new List<double>();
-            foreach (var number in numbers)
-            {
-                var newValue = number * times;
-                calculatedNumbers.Add(newValue);
-            }
-            return calculatedNumbers;
+            return numbers.Select(number => number * times).ToList();
         }
 
         private List<double> ArraySubtract(List<double> numbers, double subtract)
         {
-            var calculatedNumbers = new List<double>();
-            foreach (var number in numbers)
-            {
-                var newValue = number - subtract;
-                calculatedNumbers.Add(newValue);
-            }
-            return calculatedNumbers;
+            return numbers.Select(number => number - subtract).ToList();
         }
 
         private List<double> ArrayRound(List<double> numbers, int digits)
         {
-            var calculatedNumbers = new List<double>();
-            foreach (var number in numbers)
-            {
-                var newValue = (double)Math.Round(number, digits); 
-                calculatedNumbers.Add(newValue);
-            }
-            return calculatedNumbers;
+            return numbers.Select(number => Math.Round(number, digits)).ToList();
         }
 
         private static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
