@@ -17,7 +17,7 @@ namespace DMIProxy.HealthCheck
             var statistics = _requestCache.CacheStatistics();
             if (statistics == null)
             {
-                return Task.FromResult(HealthCheckResult.Degraded("No statistics data"));
+                return Task.FromResult(HealthCheckResult.Unhealthy("No statistics data"));
             }
 
             var totalCalls = statistics.TotalHits + statistics.TotalMisses;
@@ -34,9 +34,9 @@ namespace DMIProxy.HealthCheck
                 data.Add("Current estimated size", statistics.CurrentEstimatedSize);
             }
 
-            if (statistics.CurrentEntryCount != 3)
+            if (statistics.CurrentEntryCount < 3)
             {
-                return Task.FromResult(HealthCheckResult.Degraded("Cache load not completed", null, data));
+                return Task.FromResult(HealthCheckResult.Unhealthy("Cache load not completed", null, data));
             }
             if (statistics.CurrentEstimatedSize > 10)
             {

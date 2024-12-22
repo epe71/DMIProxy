@@ -5,18 +5,26 @@ namespace DMIProxy;
 
 public class PollyConfiguration
 {
-    public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+    public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(int retries = 3)
     {
-        // Retry op til 3 gange med exponential backoff
         return HttpPolicyExtensions
             .HandleTransientHttpError() // Fanger 5xx og timeout-fejl
             .WaitAndRetryAsync(
-                3,  // Antal retries
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // Exponential backoff
+                retries,
+                retryAttempt => TimeSpan.FromMinutes(Math.Pow(2, retryAttempt)), // Exponential backoff
                 (result, timeSpan, retryCount, context) =>
                 {
                     Console.WriteLine($"Retry {retryCount} - Ventetid: {timeSpan.TotalSeconds} sekunder");
                 });
+    }
+
+    public static IAsyncPolicy<HttpResponseMessage> GetRequestRetryPolicy(int retries = 3, double waitSeconds = 1)
+    {
+        return HttpPolicyExtensions
+        .HandleTransientHttpError() // <- an extension method from Polly
+        .WaitAndRetryAsync(
+        retryCount: retries,
+        sleepDurationProvider: retryCount => TimeSpan.FromSeconds(waitSeconds * retryCount));
     }
 
     public static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()

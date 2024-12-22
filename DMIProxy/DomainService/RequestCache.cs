@@ -41,10 +41,8 @@ namespace DMIProxy.DomainService
 
         public void SaveForcastDTO(ForcastDTO forcastDTO)
         {
-            var timeOut = forcastDTO.StartTime.AddHours(6).AddMinutes(1) - DateTime.UtcNow;
-
             var cacheEntryOptions = new MemoryCacheEntryOptions()
-                       .SetAbsoluteExpiration(timeOut)
+                       .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(4))
                        .SetPriority(CacheItemPriority.Normal);
             _cache.Remove(forcastCacheKey);
             _cache.Set(forcastCacheKey, forcastDTO, cacheEntryOptions);

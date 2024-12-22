@@ -39,7 +39,7 @@ builder.Services.AddScoped<IRequestCache, RequestCache>();
 builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
 builder.Services.AddHttpClient("LongTimeOutClient", client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(30);
+    client.Timeout = TimeSpan.FromSeconds(60);
 })
 .AddPolicyHandler(PollyConfiguration.GetRetryPolicy())
 .AddPolicyHandler(PollyConfiguration.GetCircuitBreakerPolicy());
