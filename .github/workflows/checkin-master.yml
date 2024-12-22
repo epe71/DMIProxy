@@ -27,21 +27,21 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release
 
-    # - name: Run tests
-    #   run: dotnet test --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
+    - name: Run tests
+      run: dotnet test --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
     
-    # - name: Publish Test Results
-    #   if: always()
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: test-results
-    #     path: TestResults/test_results.trx
+    - name: Publish Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: TestResults/test_results.trx
 
-    # - name: Publish Test Report
-    #   if: always()
-    #   uses: dorny/test-reporter@v1
-    #   with:
-    #     artifact: test-results
-    #     name: Test Results
-    #     path: test_results.trx
-    #     reporter: dotnet-trx
+    - name: Publish Test Report
+      if: always()
+      uses: dorny/test-reporter@v1
+      with:
+        artifact: test-results
+        name: Test Results
+        path: test_results.trx
+        reporter: dotnet-trx
