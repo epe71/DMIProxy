@@ -9,9 +9,11 @@ public class PollyConfiguration
     {
         return HttpPolicyExtensions
             .HandleTransientHttpError() // Fanger 5xx og timeout-fejl
+            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
+            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             .WaitAndRetryAsync(
                 retries,
-                retryAttempt => TimeSpan.FromMinutes(Math.Pow(2, retryAttempt)), // Exponential backoff
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // Exponential backoff
                 (result, timeSpan, retryCount, context) =>
                 {
                     Console.WriteLine($"Retry {retryCount} - Ventetid: {timeSpan.TotalSeconds} sekunder");
