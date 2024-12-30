@@ -83,7 +83,7 @@ namespace DMIProxy.DomainService
             var forcastDto = new HomeAssistantDTO()
             {
                 data = transmittance,
-                description = description
+                description = description ?? forcastParameter
             };
 
             return forcastDto;
@@ -100,6 +100,7 @@ namespace DMIProxy.DomainService
                 case "wind-dir":                return ArrayRound(values, 0);
                 case "fraction-of-cloud-cover": return ArrayRound(ArrayMultiply(values, 100), 2);
                 case "cloud-transmittance":     return ArrayRound(ArrayMultiply(values, 100), 2);
+                case "total-precipitation":     return ArrayRound(Difference(values), 1);
                 default: return values;
             }
         }
@@ -138,6 +139,16 @@ namespace DMIProxy.DomainService
         private List<double> ArrayRound(List<double> numbers, int digits)
         {
             return numbers.Select(number => Math.Round(number, digits)).ToList();
+        }
+        private List<double> Difference(List<double> numbers)
+        {
+            var differences = new List<double>();
+            differences.Add(0.0);
+            for (int i = 0; i < numbers.Count - 1; i++)
+            {
+                differences.Add(numbers[i + 1] - numbers[i]);
+            }
+            return differences;
         }
 
         private static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
