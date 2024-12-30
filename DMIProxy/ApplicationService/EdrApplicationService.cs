@@ -27,6 +27,5 @@ namespace DMIProxy.ApplicationService
             }
             return forcastDto ?? throw new InvalidOperationException($"Forcast data could not be retrieved: {forcastParameter}");
         }
-
     }
 }

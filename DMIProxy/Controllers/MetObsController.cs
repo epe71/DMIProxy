@@ -37,7 +37,8 @@ namespace DMIProxy.Controllers
         /// <summary>
         /// Get forcast from DMI Open Data service via EDR api
         /// </summary>
-        /// <returns></returns>
+        /// <param name="forcastParameter">The parameter to get the forecast for.</param>
+        /// <returns>A JSON result containing the forecast data i Home Assistant format.</returns>
         [HttpGet("EDR/{forcastParameter}")]
         public async Task<IActionResult> GetEdrForcast(string forcastParameter)
         {

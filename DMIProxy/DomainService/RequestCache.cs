@@ -8,8 +8,7 @@ namespace DMIProxy.DomainService
         private readonly IMemoryCache _cache;
 
         private const string rainCacheKey = "Rain";
-        private const string forcastCacheKey = "Forcast";
-        private const string cloudForcastCacheKey = "CloudForcast";
+        private const string edrCacheKey = "EDR-";
 
         public RequestCache(IMemoryCache memoryCache)
         {
@@ -36,7 +35,7 @@ namespace DMIProxy.DomainService
 
         public bool GetEdrForcastDTO(string forcastParameter, out HomeAssistantDTO? forcastDto)
         {
-            return _cache.TryGetValue("EDR-" + forcastParameter, out forcastDto);
+            return _cache.TryGetValue(edrCacheKey + forcastParameter, out forcastDto);
         }
 
         public void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO)
@@ -44,8 +43,8 @@ namespace DMIProxy.DomainService
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                        .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(4))
                        .SetPriority(CacheItemPriority.Normal);
-            _cache.Remove("EDR-" + forcastParameter);
-            _cache.Set("EDR-" + forcastParameter, forcastDTO, cacheEntryOptions);
+            _cache.Remove(edrCacheKey + forcastParameter);
+            _cache.Set(edrCacheKey + forcastParameter, forcastDTO, cacheEntryOptions);
         }
 
         private TimeSpan AbsoluteCacheExpirationTimeInHour(int hours)

@@ -1,5 +1,4 @@
-﻿using DMIProxy.BusinessEntity.EDR;
-using DMIProxy.Contract;
+﻿using DMIProxy.Contract;
 using System.Net;
 using System.Text.Json;
 
@@ -36,12 +35,8 @@ namespace DMIProxy.DomainService
             response.EnsureSuccessStatusCode();
             await using var contentStream = await response.Content.ReadAsStreamAsync();
 
-            var dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
-            if (dmiResult == null)
-            {
-                _logger.LogError($"No response from DMI-EDR: {forcastParameter}");
-                throw new SystemException($"No response from DMI-EDR: {forcastParameter}");
-            }
+            var dmiResult = await JsonSerializer.DeserializeAsync<JsonElement>(contentStream, _serializerOptions);
+
             return ExtractForcastData(forcastParameter, dmiResult);
         }
 
@@ -76,10 +71,12 @@ namespace DMIProxy.DomainService
             return httpRequestMessage;
         }
 
-        private HomeAssistantDTO ExtractForcastData(string forcastParameter, EdrData data)
+        private HomeAssistantDTO ExtractForcastData(string forcastParameter, JsonElement jsonElement)
         {
-            var time = data.domain.axes.t.values;
-            var values = GetWeatherData(forcastParameter, data, out var description);
+            var time = jsonElement.GetProperty("domain").GetProperty("axes").GetProperty("t").GetProperty("values").EnumerateArray().Select(x => x.GetDateTime()).ToArray();
+            var description = jsonElement.GetProperty("parameters").GetProperty(forcastParameter).GetProperty("description").GetProperty("en").GetString();
+            var values = jsonElement.GetProperty("ranges").GetProperty(forcastParameter).GetProperty("values").EnumerateArray().Select(x => x.GetDouble()).ToList();
+
             var adjustedValues = AdjustData(forcastParameter, values);
             var transmittance = DataToPointDTOList(time, adjustedValues);
 
@@ -92,56 +89,18 @@ namespace DMIProxy.DomainService
             return forcastDto;
         }
 
-        private List<double> GetWeatherData(string forcastParameter, EdrData edrData, out string description)
-        {
-            switch (forcastParameter)
-            {
-                case "temperature-2m":
-                    description = edrData.parameters.temperature2m.description.en;
-                    return ConvertToDoubles(edrData.ranges.temperature2m.values);
-                case "relative-humidity-2m":
-                    description = edrData.parameters.relativeHumidity.description.en;
-                    return ConvertToDoubles(edrData.ranges.relativeHumidity2m.values);
-                case "wind-speed":
-                    description = edrData.parameters.windSpeed.description.en;
-                    return ConvertToDoubles(edrData.ranges.windSpeed.values);
-                case "pressure-sealevel":
-                    description = edrData.parameters.pressureSeaLevel.description.en;
-                    return ConvertToDoubles(edrData.ranges.pressureSeaLevel.values);
-                case "wind-dir":
-                    description = edrData.parameters.windDir.description.en;
-                    return ConvertToDoubles(edrData.ranges.windDir.values);
-                case "fraction-of-cloud-cover":
-                    description = edrData.parameters.fractionOfCloudCover.description.en;
-                    return ConvertToDoubles(edrData.ranges.fractionOfCloudCover.values);
-                case "cloud-transmittance":
-                    description = edrData.parameters.cloudtransmittance.description.en;
-                    return ConvertToDoubles(edrData.ranges.cloudTransmit.values);
-                default:
-                    throw new ArgumentException($"Unknown forcast parameter: {forcastParameter}");
-            }
-        }
-
         private List<double> AdjustData(string forcastParameter, List<double> values)
         {
             switch (forcastParameter)
             {
-                case "temperature-2m":
-                    return ArrayRound(ArraySubtract(values, 273.15f), 1);
-                case "relative-humidity-2m":
-                    return ArrayRound(values, 2);
-                case "wind-speed":
-                    return ArrayRound(values, 1);
-                case "pressure-sealevel":
-                    return ArrayRound(ArrayDivide(values, 100), 1);
-                case "wind-dir":
-                    return ArrayRound(values, 0);
-                case "fraction-of-cloud-cover":
-                    return ArrayRound(ArrayMultiply(values, 100), 2);
-                case "cloud-transmittance":
-                    return ArrayRound(ArrayMultiply(values, 100), 2);
-                default:
-                    return values;
+                case "temperature-2m":          return ArrayRound(ArraySubtract(values, 273.15f), 1);
+                case "relative-humidity-2m":    return ArrayRound(values, 2);
+                case "wind-speed":              return ArrayRound(values, 1);
+                case "pressure-sealevel":       return ArrayRound(ArrayDivide(values, 100), 1);
+                case "wind-dir":                return ArrayRound(values, 0);
+                case "fraction-of-cloud-cover": return ArrayRound(ArrayMultiply(values, 100), 2);
+                case "cloud-transmittance":     return ArrayRound(ArrayMultiply(values, 100), 2);
+                default: return values;
             }
         }
 
@@ -159,11 +118,6 @@ namespace DMIProxy.DomainService
             }
 
             return transmittance;
-        }
-
-        private List<double> ConvertToDoubles(float[] data)
-        {
-            return data.Select(x => (double)x).ToList();
         }
 
         private List<double> ArrayDivide(List<double> numbers, double fraction)
