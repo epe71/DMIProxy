@@ -5,7 +5,7 @@ namespace DMIProxy.DomainService
 {
     public class RequestCache : IRequestCache
     {
-        private IMemoryCache _cache;
+        private readonly IMemoryCache _cache;
 
         private const string rainCacheKey = "Rain";
         private const string forcastCacheKey = "Forcast";
@@ -30,36 +30,22 @@ namespace DMIProxy.DomainService
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                        .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(nextUpdate))
                        .SetPriority(CacheItemPriority.Normal);
-            _cache.Remove(rainCacheKey);
+            _cache.Remove(rainCacheKey + stationId);
             _cache.Set(rainCacheKey + stationId, rainDTO, cacheEntryOptions);
         }
 
-        public bool GetForcastDTO(out ForcastDTO? forcastDto)
+        public bool GetEdrForcastDTO(string forcastParameter, out HomeAssistantDTO? forcastDto)
         {
-            return _cache.TryGetValue(forcastCacheKey, out forcastDto);
+            return _cache.TryGetValue("EDR-" + forcastParameter, out forcastDto);
         }
 
-        public void SaveForcastDTO(ForcastDTO forcastDTO)
+        public void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO)
         {
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                        .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(4))
                        .SetPriority(CacheItemPriority.Normal);
-            _cache.Remove(forcastCacheKey);
-            _cache.Set(forcastCacheKey, forcastDTO, cacheEntryOptions);
-        }
-
-        public bool GetCloudForcastDTO(out HomeAssistantDTO? forcastDto)
-        {
-            return _cache.TryGetValue(cloudForcastCacheKey, out forcastDto);
-        }
-
-        public void SaveCloudForcastDTO(HomeAssistantDTO forcastDTO)
-        {
-            var cacheEntryOptions = new MemoryCacheEntryOptions()
-                       .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(2))
-                       .SetPriority(CacheItemPriority.Normal);
-            _cache.Remove(forcastCacheKey);
-            _cache.Set(cloudForcastCacheKey, forcastDTO, cacheEntryOptions);
+            _cache.Remove("EDR-" + forcastParameter);
+            _cache.Set("EDR-" + forcastParameter, forcastDTO, cacheEntryOptions);
         }
 
         private TimeSpan AbsoluteCacheExpirationTimeInHour(int hours)

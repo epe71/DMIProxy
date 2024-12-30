@@ -14,32 +14,19 @@ namespace DMIProxy.ApplicationService
             _requestCache = requestCache;
         }
 
-        public async Task<ForcastDTO> GetForcast()
+        public async Task<HomeAssistantDTO> GetEdrForcast(string forcastParameter)
         {
-            if (!_requestCache.GetForcastDTO(out ForcastDTO? forcastDto))
+            if (!_requestCache.GetEdrForcastDTO(forcastParameter, out HomeAssistantDTO? forcastDto))
             {
-                forcastDto = await _service.GetForcast();
+                forcastDto = await _service.GetEdrForcast(forcastParameter);
                 if (forcastDto == null)
                 {
-                    throw new InvalidOperationException("Failed to retrive forcast data.");
+                    throw new InvalidOperationException($"Failed to retrive forcast data: {forcastParameter}");
                 }
-                _requestCache.SaveForcastDTO(forcastDto);
+                _requestCache.SaveEdrForcastDTO(forcastParameter, forcastDto);
             }
-            return forcastDto ?? throw new InvalidOperationException("Forcast data could not be retrieved.");
+            return forcastDto ?? throw new InvalidOperationException($"Forcast data could not be retrieved: {forcastParameter}");
         }
 
-        public async Task<HomeAssistantDTO> GetCloudForcast()
-        {
-            if (!_requestCache.GetCloudForcastDTO(out HomeAssistantDTO? forcastDto))
-            {
-                forcastDto = await _service.GetCloudForcast();
-                if (forcastDto == null)
-                {
-                    throw new InvalidOperationException("Failed to retrive forcast data.");
-                }
-                _requestCache.SaveCloudForcastDTO(forcastDto);
-            }
-            return forcastDto ?? throw new InvalidOperationException("Forcast data could not be retrieved.");
-        }
     }
 }

@@ -55,20 +55,20 @@ namespace DMIProxy.BusinessEntity.EDR
         [JsonPropertyName("temperature-2m")]
         public ParameterData temperature2m { get; set; }
 
-        [JsonPropertyName("relative-humidity")]
-        public ParameterData relativehumidity { get; set; }
+        [JsonPropertyName("relative-humidity-2m")]
+        public ParameterData relativeHumidity { get; set; }
 
         [JsonPropertyName("wind-speed")]
-        public ParameterData windspeed { get; set; }
+        public ParameterData windSpeed { get; set; }
 
         [JsonPropertyName("pressure-sealevel")]
-        public ParameterData pressuresealevel { get; set; }
+        public ParameterData pressureSeaLevel { get; set; }
 
         [JsonPropertyName("wind-dir")]
-        public ParameterData winddir { get; set; }
+        public ParameterData windDir { get; set; }
 
-        [JsonPropertyName("cloudcover")]
-        public ParameterData cloudcover { get; set; }
+        [JsonPropertyName("fraction-of-cloud-cover")]
+        public ParameterData fractionOfCloudCover { get; set; }
 
         [JsonPropertyName("cloud-transmittance")]
         public ParameterData cloudtransmittance { get; set; }
@@ -99,19 +99,19 @@ namespace DMIProxy.BusinessEntity.EDR
         public RangeData temperature2m { get; set; }
 
         [JsonPropertyName("relative-humidity-2m")]
-        public RangeData relativehumidity { get; set; }
+        public RangeData relativeHumidity2m { get; set; }
 
         [JsonPropertyName("wind-speed")]
-        public RangeData windspeed { get; set; }
+        public RangeData windSpeed { get; set; }
 
         [JsonPropertyName("pressure-sealevel")]
-        public RangeData pressuresealevel { get; set; }
+        public RangeData pressureSeaLevel { get; set; }
 
         [JsonPropertyName("wind-dir")]
-        public RangeData winddir { get; set; }
+        public RangeData windDir { get; set; }
 
         [JsonPropertyName("fraction-of-cloud-cover")]
-        public RangeData cloudcover { get; set; }
+        public RangeData fractionOfCloudCover { get; set; }
 
         [JsonPropertyName("cloud-transmittance")]
         public RangeData cloudTransmit { get; set; }

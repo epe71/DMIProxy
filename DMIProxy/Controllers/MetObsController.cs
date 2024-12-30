@@ -35,24 +35,13 @@ namespace DMIProxy.Controllers
         }
 
         /// <summary>
-        /// Get 2 day forcast
+        /// Get forcast from DMI Open Data service via EDR api
         /// </summary>
         /// <returns></returns>
-        [HttpGet("Forcast/")]
-        public async Task<IActionResult> GetForcast()
+        [HttpGet("EDR/{forcastParameter}")]
+        public async Task<IActionResult> GetEdrForcast(string forcastParameter)
         {
-            var forcastDTO = await _edrApplicationService.GetForcast();
-            return new JsonResult(forcastDTO);
-        }
-
-        /// <summary>
-        /// Cloud transmittance forcast
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("Forcast/Cloud")]
-        public async Task<IActionResult> GetCloudForcast()
-        {
-            var forcastDTO = await _edrApplicationService.GetCloudForcast();
+            var forcastDTO = await _edrApplicationService.GetEdrForcast(forcastParameter);
             return new JsonResult(forcastDTO);
         }
     }

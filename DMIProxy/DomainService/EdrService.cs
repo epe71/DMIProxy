@@ -28,29 +28,9 @@ namespace DMIProxy.DomainService
             };
         }
 
-        public async Task<ForcastDTO> GetForcast()
+        public async Task<HomeAssistantDTO> GetEdrForcast(string forcastParameter)
         {
-            var weatherParameters = "temperature-2m,wind-speed,wind-dir,pressure-sealevel,relative-humidity-2m,fraction-of-cloud-cover";
-            var httpRequestMessage = await SetupRequestMessage(weatherParameters);
-
-            var response = await _httpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            
-            await using var contentStream = await response.Content.ReadAsStreamAsync();
-
-            var dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
-            if (dmiResult == null)
-            {
-                _logger.LogError("No response from DMI-EDR");
-                throw new SystemException("No response from DMI-EDR");
-            }
-            return ExtractData(dmiResult);
-        }
-
-        public async Task<HomeAssistantDTO> GetCloudForcast()
-        {
-            var weatherParameters = "cloud-transmittance";
-            var httpRequestMessage = await SetupRequestMessage(weatherParameters);
+            var httpRequestMessage = await SetupRequestMessage(forcastParameter);
 
             var response = await _httpClient.SendAsync(httpRequestMessage);
             response.EnsureSuccessStatusCode();
@@ -59,11 +39,12 @@ namespace DMIProxy.DomainService
             var dmiResult = await JsonSerializer.DeserializeAsync<EdrData>(contentStream, _serializerOptions);
             if (dmiResult == null)
             {
-                _logger.LogError("No response from DMI-EDR");
-                throw new SystemException("No response from DMI-EDR");
+                _logger.LogError($"No response from DMI-EDR: {forcastParameter}");
+                throw new SystemException($"No response from DMI-EDR: {forcastParameter}");
             }
-            return ExtractCloudData(dmiResult);
+            return ExtractForcastData(forcastParameter, dmiResult);
         }
+
 
         private async Task<HttpRequestMessage> SetupRequestMessage(string weatherParameters)
         {
@@ -95,61 +76,73 @@ namespace DMIProxy.DomainService
             return httpRequestMessage;
         }
 
-        private ForcastDTO ExtractData(EdrData data)
+        private HomeAssistantDTO ExtractForcastData(string forcastParameter, EdrData data)
         {
-            var startTime = data.domain.axes.t.values.First();
+            var time = data.domain.axes.t.values;
+            var values = GetWeatherData(forcastParameter, data, out var description);
+            var adjustedValues = AdjustData(forcastParameter, values);
+            var transmittance = DataToPointDTOList(time, adjustedValues);
 
-            var rawWindspeed = ConvertToDoubles(data.ranges.windspeed.values);
-            var windspeed = ArrayRound(rawWindspeed, 1);
-
-            var rawWindDir = ConvertToDoubles(data.ranges.winddir.values);
-            var windDir = ArrayRound(rawWindDir, 0);
-
-            var rawHumidityPct = ConvertToDoubles(data.ranges.relativehumidity.values);
-            var humidityPct = ArrayRound(rawHumidityPct, 2);
-
-            var rawCloudCoverPct = ConvertToDoubles(data.ranges.cloudcover.values);
-            var cloudCoverPct = ArrayMultiply(rawCloudCoverPct, 100);
-            cloudCoverPct = ArrayRound(cloudCoverPct, 2);
-
-            var rawPresurehPa = ConvertToDoubles(data.ranges.pressuresealevel.values);
-            var presurehPa = ArrayDivide(rawPresurehPa, 100);
-            presurehPa = ArrayRound(presurehPa, 1);
-
-            var rawTemperatureCelsius = ConvertToDoubles(data.ranges.temperature2m.values);
-            var temperaturCelsius = ArraySubtract(rawTemperatureCelsius, 273.15f);
-            temperaturCelsius = ArrayRound(temperaturCelsius, 1);
-
-            var forcastDto = new ForcastDTO()
-            { 
-                StartTime = startTime,
-                WindSpeed = windspeed,
-                WindDir = windDir,
-                CloudCover = cloudCoverPct,
-                RelativeHumidity = humidityPct,
-                PressureSeaLevel = presurehPa,
-                Temperatur2m = temperaturCelsius
+            var forcastDto = new HomeAssistantDTO()
+            {
+                data = transmittance,
+                description = description
             };
 
             return forcastDto;
         }
 
-        private HomeAssistantDTO ExtractCloudData(EdrData data)
+        private List<double> GetWeatherData(string forcastParameter, EdrData edrData, out string description)
         {
-            var time = data.domain.axes.t.values;
-            var values = ConvertToDoubles(data.ranges.cloudTransmit.values);
-
-            var cloudTransmit = ArrayMultiply(values, 100);
-            var cloudTransmitRounded = ArrayRound(cloudTransmit, 2);
-            var transmittance = DataToPointDTOList(time, cloudTransmitRounded);
-
-            var forcastDto = new HomeAssistantDTO()
+            switch (forcastParameter)
             {
-                data = transmittance,
-                description = data.parameters.cloudtransmittance.description.en
-            };
+                case "temperature-2m":
+                    description = edrData.parameters.temperature2m.description.en;
+                    return ConvertToDoubles(edrData.ranges.temperature2m.values);
+                case "relative-humidity-2m":
+                    description = edrData.parameters.relativeHumidity.description.en;
+                    return ConvertToDoubles(edrData.ranges.relativeHumidity2m.values);
+                case "wind-speed":
+                    description = edrData.parameters.windSpeed.description.en;
+                    return ConvertToDoubles(edrData.ranges.windSpeed.values);
+                case "pressure-sealevel":
+                    description = edrData.parameters.pressureSeaLevel.description.en;
+                    return ConvertToDoubles(edrData.ranges.pressureSeaLevel.values);
+                case "wind-dir":
+                    description = edrData.parameters.windDir.description.en;
+                    return ConvertToDoubles(edrData.ranges.windDir.values);
+                case "fraction-of-cloud-cover":
+                    description = edrData.parameters.fractionOfCloudCover.description.en;
+                    return ConvertToDoubles(edrData.ranges.fractionOfCloudCover.values);
+                case "cloud-transmittance":
+                    description = edrData.parameters.cloudtransmittance.description.en;
+                    return ConvertToDoubles(edrData.ranges.cloudTransmit.values);
+                default:
+                    throw new ArgumentException($"Unknown forcast parameter: {forcastParameter}");
+            }
+        }
 
-            return forcastDto;
+        private List<double> AdjustData(string forcastParameter, List<double> values)
+        {
+            switch (forcastParameter)
+            {
+                case "temperature-2m":
+                    return ArrayRound(ArraySubtract(values, 273.15f), 1);
+                case "relative-humidity-2m":
+                    return ArrayRound(values, 2);
+                case "wind-speed":
+                    return ArrayRound(values, 1);
+                case "pressure-sealevel":
+                    return ArrayRound(ArrayDivide(values, 100), 1);
+                case "wind-dir":
+                    return ArrayRound(values, 0);
+                case "fraction-of-cloud-cover":
+                    return ArrayRound(ArrayMultiply(values, 100), 2);
+                case "cloud-transmittance":
+                    return ArrayRound(ArrayMultiply(values, 100), 2);
+                default:
+                    return values;
+            }
         }
 
         private List<PointDTO> DataToPointDTOList(DateTime[] time, List<double> cloudTransmit)

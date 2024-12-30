@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Rewrite;
-
-namespace DMIProxy.Contract
+﻿namespace DMIProxy.Contract
 {
     public class HomeAssistantDTO
     {
