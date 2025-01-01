@@ -101,6 +101,7 @@ namespace DMIProxy.DomainService
                 case "fraction-of-cloud-cover": return ArrayRound(ArrayMultiply(values, 100), 2);
                 case "cloud-transmittance":     return ArrayRound(ArrayMultiply(values, 100), 2);
                 case "total-precipitation":     return ArrayRound(Difference(values), 1);
+                case "global-radiation-flux":   return ArrayRound(ArrayDivide(Difference(values),1000), 1);
                 default: return values;
             }
         }

@@ -48,7 +48,7 @@ namespace DMIProxy.HealthCheck
                 return Task.FromResult(HealthCheckResult.Degraded("Cache is starting up", null, data));
             }
 
-            if (hitRatio < 0.8)
+            if (hitRatio < 0.85)
             {
                 return Task.FromResult(HealthCheckResult.Degraded("To low cache hit ratio", null, data));
             }
