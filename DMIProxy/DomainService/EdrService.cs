@@ -93,15 +93,15 @@ namespace DMIProxy.DomainService
         {
             switch (forcastParameter)
             {
-                case "temperature-2m":          return ArrayRound(ArraySubtract(values, 273.15f), 1);
-                case "relative-humidity-2m":    return ArrayRound(values, 2);
-                case "wind-speed":              return ArrayRound(values, 1);
-                case "pressure-sealevel":       return ArrayRound(ArrayDivide(values, 100), 1);
-                case "wind-dir":                return ArrayRound(values, 0);
-                case "fraction-of-cloud-cover": return ArrayRound(ArrayMultiply(values, 100), 2);
-                case "cloud-transmittance":     return ArrayRound(ArrayMultiply(values, 100), 2);
-                case "total-precipitation":     return ArrayRound(Difference(values), 1);
-                case "global-radiation-flux":   return ArrayRound(ArrayDivide(Difference(values),1000), 1);
+                case "temperature-2m":          return new AdjustList(values).Subtract(273.15f).Round(1).Run();
+                case "relative-humidity-2m":    return new AdjustList(values).Round(2).Run();
+                case "wind-speed":              return new AdjustList(values).Round(1).Run();
+                case "pressure-sealevel":       return new AdjustList(values).Divide(100).Round(1).Run();
+                case "wind-dir":                return new AdjustList(values).Round(0).Run();
+                case "fraction-of-cloud-cover": return new AdjustList(values).Multiply(100).Round(2).Run();
+                case "cloud-transmittance":     return new AdjustList(values).Multiply(100).Round(2).Run();
+                case "total-precipitation":     return new AdjustList(values).Difference().Round(1).Run();
+                case "global-radiation-flux":   return new AdjustList(values).Difference().Divide(1000).Round(1).Run();
                 default: return values;
             }
         }
@@ -120,36 +120,6 @@ namespace DMIProxy.DomainService
             }
 
             return transmittance;
-        }
-
-        private List<double> ArrayDivide(List<double> numbers, double fraction)
-        {
-            return numbers.Select(number => number / fraction).ToList();
-        }
-
-        private List<double> ArrayMultiply(List<double> numbers, double times)
-        {
-            return numbers.Select(number => number * times).ToList();
-        }
-
-        private List<double> ArraySubtract(List<double> numbers, double subtract)
-        {
-            return numbers.Select(number => number - subtract).ToList();
-        }
-
-        private List<double> ArrayRound(List<double> numbers, int digits)
-        {
-            return numbers.Select(number => Math.Round(number, digits)).ToList();
-        }
-        private List<double> Difference(List<double> numbers)
-        {
-            var differences = new List<double>();
-            differences.Add(0.0);
-            for (int i = 0; i < numbers.Count - 1; i++)
-            {
-                differences.Add(numbers[i + 1] - numbers[i]);
-            }
-            return differences;
         }
 
         private static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
