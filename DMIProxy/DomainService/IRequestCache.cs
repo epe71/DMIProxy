@@ -11,6 +11,9 @@ namespace DMIProxy.DomainService
         bool GetEdrForcastDTO(string forcastParameter, out HomeAssistantDTO? forcastDto);
         void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO);
 
+        bool GetTextForcast(string stationId, out ForcastMessageDTO? dto);
+        void SaveTextForcast(string stationId, ForcastMessageDTO dto);
+
         MemoryCacheStatistics? CacheStatistics();
     }
 }

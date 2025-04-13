@@ -10,15 +10,18 @@ namespace DMIProxy.Controllers
         private readonly ILogger<MetObsController> _logger;
         private readonly IMetObsApplicationService _metObsApplicationService;
         private readonly IEdrApplicationService _edrApplicationService;
+        private readonly IWeatherForcastService _weatherForcastService;
 
         public MetObsController(
             ILogger<MetObsController> logger,
             IMetObsApplicationService nordPoolApplicationService,
-            IEdrApplicationService edrApplicationService)
+            IEdrApplicationService edrApplicationService,
+            IWeatherForcastService weatherForcastService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _metObsApplicationService = nordPoolApplicationService;
             _edrApplicationService = edrApplicationService;
+            _weatherForcastService = weatherForcastService;
         }
 
         /// <summary>
@@ -43,6 +46,18 @@ namespace DMIProxy.Controllers
         public async Task<IActionResult> GetEdrForcast(string forcastParameter)
         {
             var forcastDTO = await _edrApplicationService.GetEdrForcast(forcastParameter);
+            return new JsonResult(forcastDTO);
+        }
+
+        /// <summary>
+        /// Get the current weather forcast for Aarhus
+        /// </summary>
+        /// <param name="stationId" example="2624652">The station id to get the weather forcast for</param>
+        /// <returns>A Danish text with the wheather forcast for today</returns>
+        [HttpGet("WeatherForcast/{stationId}")]
+        public async Task<IActionResult> GetWeatherForcast(string stationId)
+        {
+            var forcastDTO = await _weatherForcastService.GetWeatherForcast(stationId);
             return new JsonResult(forcastDTO);
         }
     }

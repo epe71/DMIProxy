@@ -1,5 +1,6 @@
 using DMIProxy;
 using DMIProxy.ApplicationService;
+using DMIProxy.BusinessEntity;
 using DMIProxy.DomainService;
 using DMIProxy.HealthCheck;
 using HealthChecks.UI.Client;
@@ -34,7 +35,11 @@ builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>(
 builder.Services.AddScoped<IMetObsService, MetObsService>();
 builder.Services.AddScoped<IEdrApplicationService, EdrApplicationService>();
 builder.Services.AddScoped<IEdrService, EdrService>();
+builder.Services.AddScoped<IWeatherForcastService, WeatherForcastService>();
+builder.Services.AddScoped<IWebScrapeService, WebScrapeService>();
 builder.Services.AddScoped<IRequestCache, RequestCache>();
+builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+builder.Services.AddScoped<ITimeSpanCalculator, TimeSpanCalculator>();
 
 builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
 builder.Services.AddHttpClient("LongTimeOutClient", client =>

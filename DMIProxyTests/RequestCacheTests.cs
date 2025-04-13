@@ -1,4 +1,5 @@
-﻿using DMIProxy.Contract;
+﻿using DMIProxy.BusinessEntity;
+using DMIProxy.Contract;
 using DMIProxy.DomainService;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -12,8 +13,10 @@ namespace DMIProxyTests
         {
             // Arrange
             IMemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var dateTimeProvider = new DateTimeProvider();
+            ITimeSpanCalculator timeSpanCalculator = new TimeSpanCalculator(dateTimeProvider);
 
-            var requestCache = new RequestCache(memoryCache);
+            var requestCache = new RequestCache(memoryCache, timeSpanCalculator);
             var rainDTO = new RainDTO
             {
                 Rain1h = 1,
@@ -25,8 +28,8 @@ namespace DMIProxyTests
             requestCache.GetRainDTO("1234", out var cacheItem);
 
             // Assert
-            Assert.AreEqual(rainDTO.Rain1h, cacheItem.Rain1h);
-            Assert.AreEqual(rainDTO.RainToday, cacheItem.RainToday);
+            Assert.AreEqual(rainDTO.Rain1h, cacheItem?.Rain1h);
+            Assert.AreEqual(rainDTO.RainToday, cacheItem?.RainToday);
         }
     }
 }

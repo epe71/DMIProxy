@@ -1,62 +1,67 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using DMIProxy.Contract;
 
-namespace DMIProxy.DomainService
+namespace DMIProxy.DomainService;
+
+public class RequestCache(IMemoryCache cache, ITimeSpanCalculator timeSpanCalculator) : IRequestCache
 {
-    public class RequestCache : IRequestCache
+    private const string rainCacheKey = "Rain-";
+    private const string edrCacheKey = "EDR-";
+    private const string textForcastCacheKey = "TextForcast-";
+
+    public bool GetRainDTO(string stationId, out RainDTO? rainDto)
     {
-        private readonly IMemoryCache _cache;
+        return cache.TryGetValue(rainCacheKey + stationId, out rainDto);
+    }
 
-        private const string rainCacheKey = "Rain";
-        private const string edrCacheKey = "EDR-";
+    public void SaveRainDTO(string stationId, RainDTO rainDTO)
+    {
+        var nextUpdate = 3;
+        if (rainDTO.RainToday > 0) { nextUpdate = 2; }
+        if (rainDTO.Rain1h > 0) { nextUpdate = 1; }
 
-        public RequestCache(IMemoryCache memoryCache)
-        {
-            _cache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-        }
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+                   .SetAbsoluteExpiration(timeSpanCalculator.AtTheTopOfTheHour(nextUpdate))
+                   .SetPriority(CacheItemPriority.Normal);
+        cache.Remove(rainCacheKey + stationId);
+        cache.Set(rainCacheKey + stationId, rainDTO, cacheEntryOptions);
+    }
 
-        public bool GetRainDTO(string stationId, out RainDTO? rainDto)
-        {
-            return _cache.TryGetValue(rainCacheKey + stationId, out rainDto);
-        }
+    public bool GetEdrForcastDTO(string forcastParameter, out HomeAssistantDTO? forcastDto)
+    {
+        return cache.TryGetValue(edrCacheKey + forcastParameter, out forcastDto);
+    }
 
-        public void SaveRainDTO(string stationId, RainDTO rainDTO)
-        {
-            var nextUpdate = 3;
-            if (rainDTO.RainToday > 0) { nextUpdate = 2; }
-            if (rainDTO.Rain1h > 0) { nextUpdate = 1; }
+    public void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO)
+    {
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+                   .SetAbsoluteExpiration(timeSpanCalculator.AtTheTopOfTheHour(4))
+                   .SetPriority(CacheItemPriority.Normal);
+        cache.Remove(edrCacheKey + forcastParameter);
+        cache.Set(edrCacheKey + forcastParameter, forcastDTO, cacheEntryOptions);
+    }
 
-            var cacheEntryOptions = new MemoryCacheEntryOptions()
-                       .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(nextUpdate))
-                       .SetPriority(CacheItemPriority.Normal);
-            _cache.Remove(rainCacheKey + stationId);
-            _cache.Set(rainCacheKey + stationId, rainDTO, cacheEntryOptions);
-        }
+    public bool GetTextForcast(string stationId, out ForcastMessageDTO? dto)
+    {
+        return cache.TryGetValue(textForcastCacheKey + stationId, out dto);
+    }
 
-        public bool GetEdrForcastDTO(string forcastParameter, out HomeAssistantDTO? forcastDto)
-        {
-            return _cache.TryGetValue(edrCacheKey + forcastParameter, out forcastDto);
-        }
+    public void SaveTextForcast(string stationId, ForcastMessageDTO dto)
+    {
+        var updateTime = new List<TimeOnly> 
+        { 
+            new(6, 0), 
+            new(17, 0)   
+        };
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+                   .SetAbsoluteExpiration(timeSpanCalculator.FixTime(updateTime))
+                   .SetPriority(CacheItemPriority.Normal);
+        cache.Remove(textForcastCacheKey + stationId);
+        cache.Set(textForcastCacheKey + stationId, dto, cacheEntryOptions);
+    }
 
-        public void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO)
-        {
-            var cacheEntryOptions = new MemoryCacheEntryOptions()
-                       .SetAbsoluteExpiration(AbsoluteCacheExpirationTimeInHour(4))
-                       .SetPriority(CacheItemPriority.Normal);
-            _cache.Remove(edrCacheKey + forcastParameter);
-            _cache.Set(edrCacheKey + forcastParameter, forcastDTO, cacheEntryOptions);
-        }
-
-        private TimeSpan AbsoluteCacheExpirationTimeInHour(int hours)
-        {
-            var minutesToTopOfTheHour = 5 + 60 - DateTime.Now.Minute;
-            int absoluteCacheExpirationMinutes = (hours-1) * 60 + minutesToTopOfTheHour;
-            return TimeSpan.FromMinutes(absoluteCacheExpirationMinutes);
-        }
-
-        public MemoryCacheStatistics? CacheStatistics()
-        {
-            return _cache.GetCurrentStatistics();
-        }
+    public MemoryCacheStatistics? CacheStatistics()
+    {
+        return cache.GetCurrentStatistics();
     }
 }
