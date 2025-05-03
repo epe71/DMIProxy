@@ -1,4 +1,5 @@
 ﻿using Polly.Extensions.Http;
+using Polly.Contrib.WaitAndRetry;
 using Polly;
 
 namespace DMIProxy;
@@ -7,16 +8,12 @@ public class PollyConfiguration
 {
     public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(int retries = 2)
     {
+        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMinutes(5), retryCount: retries);
+
         return HttpPolicyExtensions
             .HandleTransientHttpError() // Fanger 5xx og timeout-fejl
             .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
-            .WaitAndRetryAsync(
-                retries,
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // Exponential backoff
-                (result, timeSpan, retryCount, context) =>
-                {
-                    Console.WriteLine($"Retry {retryCount} - Delay before next call: {timeSpan.TotalSeconds} seconds");
-                });
+            .WaitAndRetryAsync(delay);
     }
 
     public static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy(int retries = 1)

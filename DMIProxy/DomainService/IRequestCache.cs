@@ -14,6 +14,9 @@ namespace DMIProxy.DomainService
         bool GetTextForcast(string stationId, out ForcastMessageDTO? dto);
         void SaveTextForcast(string stationId, ForcastMessageDTO dto);
 
+        bool GetEdrKeys(out Dictionary<string, DateTime>? keys);
+        void SaveEdrKey(string key);
+
         MemoryCacheStatistics? CacheStatistics();
     }
 }

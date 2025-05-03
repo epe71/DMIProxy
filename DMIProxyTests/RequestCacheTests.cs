@@ -16,7 +16,7 @@ namespace DMIProxyTests
             var dateTimeProvider = new DateTimeProvider();
             ITimeSpanCalculator timeSpanCalculator = new TimeSpanCalculator(dateTimeProvider);
 
-            var requestCache = new RequestCache(memoryCache, timeSpanCalculator);
+            var requestCache = new RequestCache(memoryCache, timeSpanCalculator, dateTimeProvider);
             var rainDTO = new RainDTO
             {
                 Rain1h = 1,
@@ -30,6 +30,25 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual(rainDTO.Rain1h, cacheItem?.Rain1h);
             Assert.AreEqual(rainDTO.RainToday, cacheItem?.RainToday);
+        }
+
+        [TestMethod]
+        public void SaveEdrKeys()
+        {
+            // Arrange
+            IMemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var dateTimeProvider = new DateTimeProvider();
+            ITimeSpanCalculator timeSpanCalculator = new TimeSpanCalculator(dateTimeProvider);
+
+            var requestCache = new RequestCache(memoryCache, timeSpanCalculator, dateTimeProvider);
+
+            // Act
+            requestCache.SaveEdrKey("key1");
+            requestCache.SaveEdrKey("key2");
+
+            //
+            requestCache.GetEdrKeys(out var cacheItem);
+            Assert.AreEqual(2, cacheItem?.Count);
         }
     }
 }

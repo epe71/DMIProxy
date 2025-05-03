@@ -24,8 +24,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddHealthChecks()
-    .AddCheck<RequestCacheHealthCheck>("request_cache_check")
+    .AddCheck<RequestCacheHealthCheck>("Request_cache_check")
     .AddCheck<MetObsHealthCheck>("MetObs_data_check")
+    .AddCheck<EDRHealthCheck>("EDR_data_check")
     .AddProcessAllocatedMemoryHealthCheck(60)
     .AddPrivateMemoryHealthCheck(350000000);
 

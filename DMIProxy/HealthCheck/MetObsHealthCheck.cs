@@ -1,53 +1,49 @@
-﻿using DMIProxy.DomainService;
+﻿using DMIProxy.BusinessEntity;
+using DMIProxy.DomainService;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace DMIProxy.HealthCheck
+namespace DMIProxy.HealthCheck;
+
+public class MetObsHealthCheck(IRequestCache requestCache, IDateTimeProvider dateTimeProvider) : IHealthCheck
 {
-    public class MetObsHealthCheck : IHealthCheck
+    private IRequestCache _requestCache = requestCache;
+
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        private IRequestCache _requestCache;
-        public MetObsHealthCheck(IRequestCache requestCache)
+        var stationId = "06072";
+        var data = new Dictionary<string, object>()
+            {
+                { "Station id", stationId }
+            };
+
+        _requestCache.GetRainDTO(stationId, out var rainDto);
+        if (rainDto == null)
         {
-            _requestCache = requestCache;
+            return Task.FromResult(HealthCheckResult.Unhealthy("No data", null, data));
         }
 
-        public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        data = new Dictionary<string, object>()
+            {
+                { "When was data last updated (zulu time zone)", rainDto.TimeStamp },
+                { "Number of mesaurement in response", rainDto.NumberReturned },
+                { "Station id", stationId }
+            };
+
+        if (rainDto.TimeStamp < dateTimeProvider.UtcNow.AddDays(-1))
         {
-            var stationId = "06072";
-            var data = new Dictionary<string, object>()
-                {
-                    { "Station id", stationId }
-                };
-
-            _requestCache.GetRainDTO(stationId, out var rainDto);
-            if (rainDto == null)
-            {
-                return Task.FromResult(HealthCheckResult.Unhealthy("No data", null, data));
-            }
-
-            data = new Dictionary<string, object>()
-                {
-                    { "When was data last updated (zulu time zone)", rainDto.TimeStamp },
-                    { "Number of mesaurement in response", rainDto.NumberReturned },
-                    { "Station id", stationId }
-                };
-
-            if (rainDto.TimeStamp < DateTime.UtcNow.AddDays(-1))
-            {
-                return Task.FromResult(HealthCheckResult.Unhealthy("Data is to old", null, data));
-            }
-
-            if (rainDto.TimeStamp < DateTime.UtcNow.AddHours(-3))
-            {
-                return Task.FromResult(HealthCheckResult.Degraded("Data delayed", null, data));
-            }
-
-            if (rainDto.NumberReturned < 28*24)
-            {
-                return Task.FromResult(HealthCheckResult.Unhealthy("To few data points", null, data));
-            }
-
-            return Task.FromResult(HealthCheckResult.Healthy("All good", data));
+            return Task.FromResult(HealthCheckResult.Unhealthy("Data is to old", null, data));
         }
+
+        if (rainDto.TimeStamp < dateTimeProvider.UtcNow.AddHours(-3))
+        {
+            return Task.FromResult(HealthCheckResult.Degraded("Data delayed", null, data));
+        }
+
+        if (rainDto.NumberReturned < 28*24)
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy("To few data points", null, data));
+        }
+
+        return Task.FromResult(HealthCheckResult.Healthy("All good", data));
     }
 }

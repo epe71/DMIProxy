@@ -7,15 +7,18 @@ namespace DMIProxy.DomainService
     {
         private string baseUrl = "https://www.dmi.dk/dmidk_byvejrWS/rest/json/id/";
         private readonly ILogger<MetObsService> _logger;
+        private IDateTimeProvider _dateTimeProvider;
 
         private readonly HttpClient _httpClient;
 
         public WebScrapeService(
             IHttpClientFactory httpClientFactory,
-            ILogger<MetObsService> logger)
+            ILogger<MetObsService> logger,
+            IDateTimeProvider dateTimeProvider)
         {
             _httpClient = httpClientFactory.CreateClient("LongTimeOutClient");
             _logger = logger;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<TextForcast> GetWeatherForcast(string stationId)
@@ -47,7 +50,7 @@ namespace DMIProxy.DomainService
 
             return new TextForcast()
             {
-                TimeStamp = DateTime.Now,
+                TimeStamp = _dateTimeProvider.Now,
                 Valid = valid,
                 Headline = headline,
                 Forcast = forecast
