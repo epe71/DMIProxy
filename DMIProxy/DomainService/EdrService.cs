@@ -1,5 +1,4 @@
 ﻿using DMIProxy.Contract;
-using Polly.Contrib.WaitAndRetry;
 using System.Net;
 using System.Text.Json;
 
@@ -30,11 +29,6 @@ namespace DMIProxy.DomainService
 
         public async Task<HomeAssistantDTO> GetEdrForcast(string forcastParameter)
         {
-            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(60), retryCount: 1);
-
-            // Delay the request to avoid overloading the API
-            Task.Delay(delay.First()).Wait();
-
             var httpRequestMessage = await SetupRequestMessage(forcastParameter);
 
             var response = await _httpClient.SendAsync(httpRequestMessage);

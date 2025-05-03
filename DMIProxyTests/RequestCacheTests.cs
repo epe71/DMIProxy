@@ -33,7 +33,7 @@ namespace DMIProxyTests
         }
 
         [TestMethod]
-        public void SaveEdrKeys()
+        public void SaveEdrKeys_twoKeys()
         {
             // Arrange
             IMemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
@@ -49,6 +49,25 @@ namespace DMIProxyTests
             //
             requestCache.GetEdrKeys(out var cacheItem);
             Assert.AreEqual(2, cacheItem?.Count);
+        }
+
+        [TestMethod]
+        public void SaveEdrKeys_keyUpdate()
+        {
+            // Arrange
+            IMemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var dateTimeProvider = new DateTimeProvider();
+            ITimeSpanCalculator timeSpanCalculator = new TimeSpanCalculator(dateTimeProvider);
+
+            var requestCache = new RequestCache(memoryCache, timeSpanCalculator, dateTimeProvider);
+
+            // Act
+            requestCache.SaveEdrKey("key1");
+            requestCache.SaveEdrKey("key1");
+
+            //
+            requestCache.GetEdrKeys(out var cacheItem);
+            Assert.AreEqual(1, cacheItem?.Count);
         }
     }
 }

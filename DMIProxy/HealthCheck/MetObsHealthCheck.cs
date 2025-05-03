@@ -19,7 +19,7 @@ public class MetObsHealthCheck(IRequestCache requestCache, IDateTimeProvider dat
         _requestCache.GetRainDTO(stationId, out var rainDto);
         if (rainDto == null)
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("No data", null, data));
+            return Task.FromResult(HealthCheckResult.Unhealthy("No MetObs data", null, data));
         }
 
         data = new Dictionary<string, object>()
@@ -31,17 +31,17 @@ public class MetObsHealthCheck(IRequestCache requestCache, IDateTimeProvider dat
 
         if (rainDto.TimeStamp < dateTimeProvider.UtcNow.AddDays(-1))
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("Data is to old", null, data));
+            return Task.FromResult(HealthCheckResult.Unhealthy("MetObs data is to old", null, data));
         }
 
         if (rainDto.TimeStamp < dateTimeProvider.UtcNow.AddHours(-3))
         {
-            return Task.FromResult(HealthCheckResult.Degraded("Data delayed", null, data));
+            return Task.FromResult(HealthCheckResult.Degraded("MetObs data delayed", null, data));
         }
 
         if (rainDto.NumberReturned < 28*24)
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("To few data points", null, data));
+            return Task.FromResult(HealthCheckResult.Unhealthy("To few MetObs data points", null, data));
         }
 
         return Task.FromResult(HealthCheckResult.Healthy("All good", data));

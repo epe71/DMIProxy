@@ -12,26 +12,25 @@ public class EDRHealthCheck(IRequestCache requestCache, IDateTimeProvider dateTi
     {
         if (!_requestCache.GetEdrKeys(out Dictionary<string, DateTime>? keys) || keys == null)
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("No keys in cache"));
+            return Task.FromResult(HealthCheckResult.Unhealthy("No EDR keys in cache"));
         }
 
-        var oldest = keys.OrderBy(x => x.Value).FirstOrDefault();
-        var newest = keys.OrderByDescending(x => x.Value).FirstOrDefault();
-        var data = new Dictionary<string, object>
-                {
-                    { "EdrKey count", keys.Count },
-                    { "Oldest key", oldest },
-                    { "Newest key", newest }
-                };
+        var orderedKeys = keys.OrderBy(k => k.Value);
+        var data = new Dictionary<string, object>();
+        foreach (var key in orderedKeys)
+        {
+            data.Add(key.Key, key.Value.ToString("yyyy-MM-dd HH:mm:ss"));
+        }
 
         if (keys.Count < 2)
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("Cache load not completed", null, data));
+            return Task.FromResult(HealthCheckResult.Unhealthy("EDR cache load not completed", null, data));
         }
 
+        var oldest = orderedKeys.FirstOrDefault();
         if ((dateTimeProvider.Now - oldest.Value) > TimeSpan.FromHours(5))
         {
-            return Task.FromResult(HealthCheckResult.Degraded("Old values in cache", null, data));
+            return Task.FromResult(HealthCheckResult.Degraded("Old EDR values in cache", null, data));
         }
 
         return Task.FromResult(HealthCheckResult.Healthy("All good", data));

@@ -76,7 +76,14 @@ public class RequestCache(IMemoryCache cache, ITimeSpanCalculator timeSpanCalcul
 
         if (cache.TryGetValue(edrKeysKey, out Dictionary<string, DateTime>? keys) && keys != null)
         {
-            keys.Add(key, dateTimeProvider.UtcNow);
+            if (keys.ContainsKey(key))
+            {
+                keys[key] = dateTimeProvider.UtcNow;
+            }
+            else
+            {
+                keys.Add(key, dateTimeProvider.UtcNow);
+            }
             cache.Remove(edrKeysKey);
             cache.Set(edrKeysKey, keys, cacheEntryOptions);
         }

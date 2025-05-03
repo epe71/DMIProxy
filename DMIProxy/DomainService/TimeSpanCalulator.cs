@@ -5,17 +5,17 @@ namespace DMIProxy.DomainService;
 public class TimeSpanCalculator(IDateTimeProvider dateTimeProvider) : ITimeSpanCalculator
 {
     /// <summary>
-    /// Calculate the time to the top of the hour (+ 5 min and some random seconds)
+    /// Calculate the time to the top of the hour (+ 5 min)
     /// </summary>
     /// <param name="hours">the number of hour to skip</param>
     /// <returns></returns>
-    public TimeSpan AtTheTopOfTheHour(int hours)
+    public TimeSpan 
+        AtTheTopOfTheHour(int hours)
     {
         var now = dateTimeProvider.Now;
         var minutesToTopOfTheHour = 5 + 60 - now.Minute;
         int minutesToExpire = (hours - 1) * 60 + minutesToTopOfTheHour;
-        var randomDelay = new TimeSpan(0, 0, 0, now.Second);
-        return TimeSpan.FromMinutes(minutesToExpire).Add(randomDelay);
+        return TimeSpan.FromMinutes(minutesToExpire);
     }
 
     /// <summary>
