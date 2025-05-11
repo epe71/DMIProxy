@@ -28,7 +28,7 @@ public class EDRHealthCheck(IRequestCache requestCache, IDateTimeProvider dateTi
         }
 
         var oldest = orderedKeys.FirstOrDefault();
-        if ((dateTimeProvider.Now - oldest.Value) > TimeSpan.FromHours(5))
+        if ((dateTimeProvider.UtcNow - oldest.Value) > TimeSpan.FromHours(5))
         {
             return Task.FromResult(HealthCheckResult.Degraded("Old EDR values in cache", null, data));
         }

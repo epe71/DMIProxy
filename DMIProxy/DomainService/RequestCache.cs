@@ -36,8 +36,9 @@ public class RequestCache(IMemoryCache cache, ITimeSpanCalculator timeSpanCalcul
 
     public void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO)
     {
+        var expiration = new TimeSpan(4, 0, 0);
         var cacheEntryOptions = new MemoryCacheEntryOptions()
-                   .SetAbsoluteExpiration(timeSpanCalculator.AtTheTopOfTheHour(4))
+                   .SetAbsoluteExpiration(expiration)
                    .SetPriority(CacheItemPriority.Normal);
         cache.Remove(edrCacheKey + forcastParameter);
         cache.Set(edrCacheKey + forcastParameter, forcastDTO, cacheEntryOptions);
