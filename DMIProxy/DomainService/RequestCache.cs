@@ -10,10 +10,16 @@ public class RequestCache(IMemoryCache cache, ITimeSpanCalculator timeSpanCalcul
     private const string edrCacheKey = "EDR-";
     private const string edrKeysKey = "EdrKeys";
     private const string textForcastCacheKey = "TextForcast-";
+    private static readonly object _rainForcastLock = new();
+    private static readonly object _edrForcastLock = new();
+    private static readonly object _textForcastLock = new();
 
     public bool GetRainDTO(string stationId, out RainDTO? rainDto)
     {
-        return cache.TryGetValue(rainCacheKey + stationId, out rainDto);
+        lock (_rainForcastLock)
+        {
+            return cache.TryGetValue(rainCacheKey + stationId, out rainDto);
+        }
     }
 
     public void SaveRainDTO(string stationId, RainDTO rainDTO)
@@ -25,13 +31,19 @@ public class RequestCache(IMemoryCache cache, ITimeSpanCalculator timeSpanCalcul
         var cacheEntryOptions = new MemoryCacheEntryOptions()
                    .SetAbsoluteExpiration(timeSpanCalculator.AtTheTopOfTheHour(nextUpdate))
                    .SetPriority(CacheItemPriority.Normal);
-        cache.Remove(rainCacheKey + stationId);
-        cache.Set(rainCacheKey + stationId, rainDTO, cacheEntryOptions);
+        lock (_rainForcastLock)
+        {
+            cache.Remove(rainCacheKey + stationId);
+            cache.Set(rainCacheKey + stationId, rainDTO, cacheEntryOptions);
+        }
     }
 
     public bool GetEdrForcastDTO(string forcastParameter, out HomeAssistantDTO? forcastDto)
     {
-        return cache.TryGetValue(edrCacheKey + forcastParameter, out forcastDto);
+        lock (_edrForcastLock)
+        {
+            return cache.TryGetValue(edrCacheKey + forcastParameter, out forcastDto);
+        }
     }
 
     public void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO)
@@ -40,14 +52,20 @@ public class RequestCache(IMemoryCache cache, ITimeSpanCalculator timeSpanCalcul
         var cacheEntryOptions = new MemoryCacheEntryOptions()
                    .SetAbsoluteExpiration(expiration)
                    .SetPriority(CacheItemPriority.Normal);
-        cache.Remove(edrCacheKey + forcastParameter);
-        cache.Set(edrCacheKey + forcastParameter, forcastDTO, cacheEntryOptions);
-        SaveEdrKey(forcastParameter);
+        lock (_edrForcastLock)
+        {
+            cache.Remove(edrCacheKey + forcastParameter);
+            cache.Set(edrCacheKey + forcastParameter, forcastDTO, cacheEntryOptions);
+            SaveEdrKey(forcastParameter);
+        }
     }
 
     public bool GetTextForcast(string stationId, out ForcastMessageDTO? dto)
     {
-        return cache.TryGetValue(textForcastCacheKey + stationId, out dto);
+        lock (_textForcastLock)
+        {
+            return cache.TryGetValue(textForcastCacheKey + stationId, out dto);
+        }
     }
 
     public void SaveTextForcast(string stationId, ForcastMessageDTO dto)
@@ -60,8 +78,11 @@ public class RequestCache(IMemoryCache cache, ITimeSpanCalculator timeSpanCalcul
         var cacheEntryOptions = new MemoryCacheEntryOptions()
                    .SetAbsoluteExpiration(timeSpanCalculator.FixTime(updateTime))
                    .SetPriority(CacheItemPriority.Normal);
-        cache.Remove(textForcastCacheKey + stationId);
-        cache.Set(textForcastCacheKey + stationId, dto, cacheEntryOptions);
+        lock (_textForcastLock)
+        {
+            cache.Remove(textForcastCacheKey + stationId);
+            cache.Set(textForcastCacheKey + stationId, dto, cacheEntryOptions);
+        }
     }
 
     public bool GetEdrKeys(out Dictionary<string, DateTime>? keys)
