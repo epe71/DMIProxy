@@ -11,6 +11,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+      checks: write
 
     steps:
     - name: Checkout repository
@@ -19,7 +23,7 @@ jobs:
     - name: Set up .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x' 
+        dotnet-version: '9.0.x'
 
     - name: Install dependencies
       run: dotnet restore
@@ -29,7 +33,7 @@ jobs:
 
     - name: Run tests
       run: dotnet test --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
-    
+
     - name: Publish Test Results
       if: always()
       uses: actions/upload-artifact@v4
