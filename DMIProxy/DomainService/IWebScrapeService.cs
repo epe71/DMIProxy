@@ -4,6 +4,6 @@ namespace DMIProxy.DomainService
 {
     public interface IWebScrapeService
     {
-        Task<TextForcast> GetWeatherForcast(string stationId);
+        Task<TextForecast> GetWeatherForecast(string stationId);
     }
 }

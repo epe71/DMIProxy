@@ -8,11 +8,11 @@ namespace DMIProxy.DomainService
         bool GetRainDTO(string stationId, out RainDTO? rainDto);
         void SaveRainDTO(string stationId, RainDTO rainDTO);
 
-        bool GetEdrForcastDTO(string forcastParameter, out HomeAssistantDTO? forcastDto);
-        void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO);
+        bool GetEdrForecastDTO(string forecastParameter, out HomeAssistantDTO? forecastDto);
+        void SaveEdrForecastDTO(string forecastParameter, HomeAssistantDTO forecastDTO);
 
-        bool GetTextForcast(string stationId, out ForcastMessageDTO? dto);
-        void SaveTextForcast(string stationId, ForcastMessageDTO dto);
+        bool GetTextForecast(string stationId, out ForecastMessageDTO? dto);
+        void SaveTextForecast(string stationId, ForecastMessageDTO dto);
 
         bool GetEdrKeys(out Dictionary<string, DateTime>? keys);
         void SaveEdrKey(string key);

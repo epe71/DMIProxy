@@ -1,6 +1,6 @@
 ﻿namespace DMIProxy.Contract
 {
-    public class ForcastMessageDTO
+    public class ForecastMessageDTO
     {
         public DateTime Time { get; init; }
         public string Headline { get; init; }

@@ -4,6 +4,6 @@ namespace DMIProxy.ApplicationService
 {
     public interface IEdrApplicationService
     {
-        Task<HomeAssistantDTO> GetEdrForcast(string forcastParameter);
+        Task<HomeAssistantDTO> GetEdrForecast(string forecastParameter);
     }
 }

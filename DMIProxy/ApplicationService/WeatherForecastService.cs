@@ -3,28 +3,28 @@ using DMIProxy.DomainService;
 
 namespace DMIProxy.ApplicationService
 {
-    public class WeatherForcastService(IWebScrapeService webScrapeService, IRequestCache requestCache) : IWeatherForcastService
+    public class WeatherForecastService(IWebScrapeService webScrapeService, IRequestCache requestCache) : IWeatherForecastService
     {
-        public async Task<ForcastMessageDTO> GetWeatherForcast(string stationId)
+        public async Task<ForecastMessageDTO> GetWeatherForecast(string stationId)
         {
-            if (requestCache.GetTextForcast(stationId, out ForcastMessageDTO? dto) && dto != null)
+            if (requestCache.GetTextForecast(stationId, out ForecastMessageDTO? dto) && dto != null)
             {
                 return dto;
             }
 
-            var forcast = await webScrapeService.GetWeatherForcast(stationId);
-            dto = new ForcastMessageDTO()
+            var forecast = await webScrapeService.GetWeatherForecast(stationId);
+            dto = new ForecastMessageDTO()
             {
-                Time = forcast.TimeStamp,
-                Headline = forcast.Headline,
-                Message = TrimForcastText(forcast.Forcast)
+                Time = forecast.TimeStamp,
+                Headline = forecast.Headline,
+                Message = TrimForecastText(forecast.Forecast)
             };
-            requestCache.SaveTextForcast(stationId, dto);
+            requestCache.SaveTextForecast(stationId, dto);
 
             return dto;
         }
 
-        private string TrimForcastText(string text)
+        private string TrimForecastText(string text)
         {
             if (text == null)
             {

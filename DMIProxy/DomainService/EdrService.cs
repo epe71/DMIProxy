@@ -27,9 +27,9 @@ namespace DMIProxy.DomainService
             };
         }
 
-        public async Task<HomeAssistantDTO> GetEdrForcast(string forcastParameter)
+        public async Task<HomeAssistantDTO> GetEdrForecast(string forecastParameter)
         {
-            var httpRequestMessage = await SetupRequestMessage(forcastParameter);
+            var httpRequestMessage = await SetupRequestMessage(forecastParameter);
 
             var response = await _httpClient.SendAsync(httpRequestMessage);
             response.EnsureSuccessStatusCode();
@@ -37,7 +37,7 @@ namespace DMIProxy.DomainService
 
             var dmiResult = await JsonSerializer.DeserializeAsync<JsonElement>(contentStream, _serializerOptions);
 
-            return ExtractForcastData(forcastParameter, dmiResult);
+            return ExtractForecastData(forecastParameter, dmiResult);
         }
 
 
@@ -71,27 +71,27 @@ namespace DMIProxy.DomainService
             return httpRequestMessage;
         }
 
-        private HomeAssistantDTO ExtractForcastData(string forcastParameter, JsonElement jsonElement)
+        private HomeAssistantDTO ExtractForecastData(string forecastParameter, JsonElement jsonElement)
         {
             var time = jsonElement.GetProperty("domain").GetProperty("axes").GetProperty("t").GetProperty("values").EnumerateArray().Select(x => x.GetDateTime()).ToArray();
-            var description = jsonElement.GetProperty("parameters").GetProperty(forcastParameter).GetProperty("description").GetProperty("en").GetString();
-            var values = jsonElement.GetProperty("ranges").GetProperty(forcastParameter).GetProperty("values").EnumerateArray().Select(x => x.GetDouble()).ToList();
+            var description = jsonElement.GetProperty("parameters").GetProperty(forecastParameter).GetProperty("description").GetProperty("en").GetString();
+            var values = jsonElement.GetProperty("ranges").GetProperty(forecastParameter).GetProperty("values").EnumerateArray().Select(x => x.GetDouble()).ToList();
 
-            var adjustedValues = AdjustData(forcastParameter, values);
+            var adjustedValues = AdjustData(forecastParameter, values);
             var transmittance = DataToPointDTOList(time, adjustedValues);
 
-            var forcastDto = new HomeAssistantDTO()
+            var forecastDto = new HomeAssistantDTO()
             {
                 data = transmittance,
-                description = description ?? forcastParameter
+                description = description ?? forecastParameter
             };
 
-            return forcastDto;
+            return forecastDto;
         }
 
-        private List<double> AdjustData(string forcastParameter, List<double> values)
+        private List<double> AdjustData(string forecastParameter, List<double> values)
         {
-            switch (forcastParameter)
+            switch (forecastParameter)
             {
                 case "temperature-2m":          return new AdjustList(values).Subtract(273.15f).Round(1).Run();
                 case "relative-humidity-2m":    return new AdjustList(values).Round(2).Run();

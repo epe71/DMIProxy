@@ -21,7 +21,7 @@ namespace DMIProxy.DomainService
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public async Task<TextForcast> GetWeatherForcast(string stationId)
+        public async Task<TextForecast> GetWeatherForecast(string stationId)
         {
             try
             {
@@ -36,24 +36,24 @@ namespace DMIProxy.DomainService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting weather forcast for station id {stationId}");
-                return new TextForcast();
+                _logger.LogError(ex, $"Error getting weather forecast for station id {stationId}");
+                return new TextForecast();
             }
         }
 
-        private TextForcast ParseJson(JsonElement regionalForecast)
+        private TextForecast ParseJson(JsonElement regionalForecast)
         {
             var date = regionalForecast.GetProperty("date").GetString();
             var valid = regionalForecast.GetProperty("valid").GetString() ?? string.Empty;
             var headline = regionalForecast.GetProperty("headline").GetString() ?? string.Empty;
             var forecast = regionalForecast.GetProperty("weatherForecast").GetString() ?? string.Empty;
 
-            return new TextForcast()
+            return new TextForecast()
             {
                 TimeStamp = _dateTimeProvider.Now,
                 Valid = valid,
                 Headline = headline,
-                Forcast = forecast
+                Forecast = forecast
             };
         }
     }

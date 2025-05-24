@@ -12,7 +12,7 @@ public class RequestCache(
     private const string RainCacheKey = "Rain-";
     private const string EdrCacheKey = "EDR-";
     private const string EdrKeysKey = "EdrKeys";
-    private const string TextForcastCacheKey = "TextForcast-";
+    private const string TextForecastCacheKey = "TextForecast-";
     private static readonly object _rainLock = new();
     private static readonly object _edrLock = new();
     private static readonly object _textLock = new();
@@ -32,28 +32,28 @@ public class RequestCache(
         SaveToCache(RainCacheKey + stationId, rainDTO, options, _rainLock);
     }
 
-    public bool GetEdrForcastDTO(string forcastParameter, out HomeAssistantDTO? forcastDto)
-        => TryGetFromCache(EdrCacheKey + forcastParameter, _edrLock, out forcastDto);
+    public bool GetEdrForecastDTO(string forecastParameter, out HomeAssistantDTO? forecastDto)
+        => TryGetFromCache(EdrCacheKey + forecastParameter, _edrLock, out forecastDto);
 
-    public void SaveEdrForcastDTO(string forcastParameter, HomeAssistantDTO forcastDTO)
+    public void SaveEdrForecastDTO(string forecastParameter, HomeAssistantDTO forecastDTO)
     {
         var options = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(TimeSpan.FromHours(4))
             .SetPriority(CacheItemPriority.Normal);
-        SaveToCache(EdrCacheKey + forcastParameter, forcastDTO, options, _edrLock);
-        SaveEdrKey(forcastParameter);
+        SaveToCache(EdrCacheKey + forecastParameter, forecastDTO, options, _edrLock);
+        SaveEdrKey(forecastParameter);
     }
 
-    public bool GetTextForcast(string stationId, out ForcastMessageDTO? dto)
-        => TryGetFromCache(TextForcastCacheKey + stationId, _textLock, out dto);
+    public bool GetTextForecast(string stationId, out ForecastMessageDTO? dto)
+        => TryGetFromCache(TextForecastCacheKey + stationId, _textLock, out dto);
 
-    public void SaveTextForcast(string stationId, ForcastMessageDTO dto)
+    public void SaveTextForecast(string stationId, ForecastMessageDTO dto)
     {
         var updateTime = new List<TimeOnly> { new(6, 0), new(17, 0) };
         var options = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(timeSpanCalculator.FixTime(updateTime))
             .SetPriority(CacheItemPriority.Normal);
-        SaveToCache(TextForcastCacheKey + stationId, dto, options, _textLock);
+        SaveToCache(TextForecastCacheKey + stationId, dto, options, _textLock);
     }
 
     public bool GetEdrKeys(out Dictionary<string, DateTime>? keys)
@@ -70,7 +70,6 @@ public class RequestCache(
             if (cache.TryGetValue(EdrKeysKey, out Dictionary<string, DateTime>? keys) && keys != null)
             {
                 keys[key] = dateTimeProvider.UtcNow;
-                cache.Remove(EdrKeysKey);
                 cache.Set(EdrKeysKey, keys, options);
             }
             else

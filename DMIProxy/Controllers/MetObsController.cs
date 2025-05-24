@@ -10,18 +10,18 @@ namespace DMIProxy.Controllers
         private readonly ILogger<MetObsController> _logger;
         private readonly IMetObsApplicationService _metObsApplicationService;
         private readonly IEdrApplicationService _edrApplicationService;
-        private readonly IWeatherForcastService _weatherForcastService;
+        private readonly IWeatherForecastService _weatherForecastService;
 
         public MetObsController(
             ILogger<MetObsController> logger,
             IMetObsApplicationService nordPoolApplicationService,
             IEdrApplicationService edrApplicationService,
-            IWeatherForcastService weatherForcastService)
+            IWeatherForecastService weatherForecastService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _metObsApplicationService = nordPoolApplicationService;
             _edrApplicationService = edrApplicationService;
-            _weatherForcastService = weatherForcastService;
+            _weatherForecastService = weatherForecastService;
         }
 
         /// <summary>
@@ -38,27 +38,27 @@ namespace DMIProxy.Controllers
         }
 
         /// <summary>
-        /// Get forcast from DMI Open Data service via EDR api
+        /// Get forecast from DMI Open Data service via EDR api
         /// </summary>
-        /// <param name="forcastParameter">The parameter to get the forecast for.</param>
+        /// <param name="forecastParameter">The parameter to get the forecast for.</param>
         /// <returns>A JSON result containing the forecast data i Home Assistant format.</returns>
-        [HttpGet("EDR/{forcastParameter}")]
-        public async Task<IActionResult> GetEdrForcast(string forcastParameter)
+        [HttpGet("EDR/{forecastParameter}")]
+        public async Task<IActionResult> GetEdrForecast(string forecastParameter)
         {
-            var forcastDTO = await _edrApplicationService.GetEdrForcast(forcastParameter);
-            return new JsonResult(forcastDTO);
+            var forecastDTO = await _edrApplicationService.GetEdrForecast(forecastParameter);
+            return new JsonResult(forecastDTO);
         }
 
         /// <summary>
-        /// Get the current weather forcast for Aarhus
+        /// Get the current weather forecast for Aarhus
         /// </summary>
-        /// <param name="stationId" example="2624652">The station id to get the weather forcast for</param>
-        /// <returns>A Danish text with the wheather forcast for today</returns>
-        [HttpGet("WeatherForcast/{stationId}")]
-        public async Task<IActionResult> GetWeatherForcast(string stationId)
+        /// <param name="stationId" example="2624652">The station id to get the weather forecast for</param>
+        /// <returns>A Danish text with the wheather forecast for today</returns>
+        [HttpGet("WeatherForecast/{stationId}")]
+        public async Task<IActionResult> GetWeatherForecast(string stationId)
         {
-            var forcastDTO = await _weatherForcastService.GetWeatherForcast(stationId);
-            return new JsonResult(forcastDTO);
+            var forecastDTO = await _weatherForecastService.GetWeatherForecast(stationId);
+            return new JsonResult(forecastDTO);
         }
     }
 }

@@ -3,7 +3,7 @@
 namespace DMIProxyTests
 {
     [TestClass]
-    public class ForcastDataCalculatorTests
+    public class ForecastDataCalculatorTests
     {
         [TestMethod]
         public void DivideTest()

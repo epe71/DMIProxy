@@ -74,15 +74,15 @@ namespace DMIProxyTests
         }
 
         [TestMethod]
-        public void SaveTextForcast_ShouldSaveAndRetrieve()
+        public void SaveTextForecast_ShouldSaveAndRetrieve()
         {
             // Arrange
             var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
-            var dto = new ForcastMessageDTO { Time = DateTime.UtcNow, Headline = "headline", Message = "message" };
+            var dto = new ForecastMessageDTO { Time = DateTime.UtcNow, Headline = "headline", Message = "message" };
 
             // Act
-            requestCache.SaveTextForcast("station1", dto);
-            requestCache.GetTextForcast("station1", out var cached);
+            requestCache.SaveTextForecast("station1", dto);
+            requestCache.GetTextForecast("station1", out var cached);
 
             // Assert
             Assert.IsNotNull(cached);
@@ -91,15 +91,15 @@ namespace DMIProxyTests
         }
 
         [TestMethod]
-        public void SaveEdrForcastDTO_ShouldSaveAndRetrieve()
+        public void SaveEdrForecastDTO_ShouldSaveAndRetrieve()
         {
             // Arrange
             var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
             var dto = new HomeAssistantDTO { data = new List<PointDTO>(), description = "desc" };
 
             // Act
-            requestCache.SaveEdrForcastDTO("param1", dto);
-            requestCache.GetEdrForcastDTO("param1", out var cached);
+            requestCache.SaveEdrForecastDTO("param1", dto);
+            requestCache.GetEdrForecastDTO("param1", out var cached);
 
             // Assert
             Assert.IsNotNull(cached);
@@ -137,6 +137,28 @@ namespace DMIProxyTests
             // Assert: There should be exactly 5 distinct keys
             Assert.IsNotNull(keys);
             Assert.AreEqual(5, keys.Count);
+        }
+
+        [TestMethod]
+        public void Concurrent_SaveAndGet_RainDTO_ShouldWorkCorrectly()
+        {
+            // Arrange
+            var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+
+            // Act
+            Parallel.For(0, 100, i =>
+            {
+                // Each thread saves a RainDTO with values based on iteration index.
+                var rainDTO = new RainDTO { Rain1h = i % 5, RainToday = i % 3 };
+                requestCache.SaveRainDTO("concurrent", rainDTO);
+            });
+            requestCache.GetRainDTO("concurrent", out var result);
+
+            // Assert
+            Assert.IsNotNull(result);
+            // Verify that the resulting values fall within the expected ranges.
+            Assert.IsTrue(result.Rain1h >= 0 && result.Rain1h <= 4);
+            Assert.IsTrue(result.RainToday >= 0 && result.RainToday <= 2);
         }
     }
 }

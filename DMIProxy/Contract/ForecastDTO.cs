@@ -1,6 +1,6 @@
 ﻿namespace DMIProxy.Contract
 {
-    public class ForcastDTO
+    public class ForecastDTO
     {
         public DateTime StartTime { get; init; }
         public List<double> Temperatur2m { get; init; }

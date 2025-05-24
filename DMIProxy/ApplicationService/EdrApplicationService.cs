@@ -16,18 +16,18 @@ namespace DMIProxy.ApplicationService
             _logger = logger;
         }
 
-        public async Task<HomeAssistantDTO> GetEdrForcast(string forcastParameter)
+        public async Task<HomeAssistantDTO> GetEdrForecast(string forecastParameter)
         {
-            if (!_requestCache.GetEdrForcastDTO(forcastParameter, out HomeAssistantDTO? forcastDto))
+            if (!_requestCache.GetEdrForecastDTO(forecastParameter, out HomeAssistantDTO? forecastDto))
             {
                 try
                 {
-                    forcastDto = await _service.GetEdrForcast(forcastParameter);
-                    if (forcastDto == null)
+                    forecastDto = await _service.GetEdrForecast(forecastParameter);
+                    if (forecastDto == null)
                     {
-                        throw new InvalidOperationException($"Failed to retrive forcast data: {forcastParameter}");
+                        throw new InvalidOperationException($"Failed to retrive forecast data: {forecastParameter}");
                     }
-                    _requestCache.SaveEdrForcastDTO(forcastParameter, forcastDto);
+                    _requestCache.SaveEdrForecastDTO(forecastParameter, forecastDto);
                 }
                 catch (Polly.CircuitBreaker.BrokenCircuitException ex)
                 {
@@ -35,7 +35,7 @@ namespace DMIProxy.ApplicationService
                     return new HomeAssistantDTO { description = ex.Message };
                 }
             }
-            return forcastDto ?? throw new InvalidOperationException($"Forcast data could not be retrieved: {forcastParameter}");
+            return forecastDto ?? throw new InvalidOperationException($"Forecast data could not be retrieved: {forecastParameter}");
         }
     }
 }
