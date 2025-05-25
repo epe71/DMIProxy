@@ -47,8 +47,11 @@ builder.Services.AddHttpClient("LongTimeOutClient", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(60);
 })
-.AddPolicyHandler(PollyConfiguration.GetRetryPolicy())
-.AddPolicyHandler(PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy());
+.AddPolicyHandler((sp, request) => {
+    var logger = sp.GetRequiredService<ILogger<PollyConfiguration>>();
+    return PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(logger: logger);
+})
+.AddPolicyHandler(PollyConfiguration.GetRetryPolicy());
 
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
                 .ReadFrom.Configuration(hostingContext.Configuration));
