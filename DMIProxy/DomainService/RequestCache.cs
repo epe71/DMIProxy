@@ -18,6 +18,8 @@ public class RequestCache(
     private static readonly object _textLock = new();
     private static readonly object _edrKeysLock = new();
 
+    public TimeSpan edrKeyTimeOut = new TimeSpan(5, 0, 0);
+
     public bool GetRainDTO(string stationId, out RainDTO? rainDto)
     => TryGetFromCache(RainCacheKey + stationId, _rainLock, out rainDto);
 
@@ -41,7 +43,7 @@ public class RequestCache(
             .SetAbsoluteExpiration(TimeSpan.FromHours(4))
             .SetPriority(CacheItemPriority.Normal);
         SaveToCache(EdrCacheKey + forecastParameter, forecastDTO, options, _edrLock);
-        SaveEdrKey(forecastParameter);
+        EdrKeyUpdated(forecastParameter);
     }
 
     public bool GetTextForecast(string stationId, out ForecastMessageDTO? dto)
@@ -56,13 +58,49 @@ public class RequestCache(
         SaveToCache(TextForecastCacheKey + stationId, dto, options, _textLock);
     }
 
-    public bool GetEdrKeys(out Dictionary<string, DateTime>? keys)
+    public bool GetAllEdrKeys(out Dictionary<string, DateTime>? keys)
     => TryGetFromCache(EdrKeysKey, _edrKeysLock, out keys);
 
-    public void SaveEdrKey(string key)
+    public string GetEdrKeysToUpdate(string key)
     {
-        var options = new MemoryCacheEntryOptions()
-         .SetSlidingExpiration(TimeSpan.FromHours(5))
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+            .SetSlidingExpiration(edrKeyTimeOut)
+            .SetPriority(CacheItemPriority.Normal);
+
+        // Helper to update the cache with the current keys dictionary
+        void UpdateCache(Dictionary<string, DateTime> edrKeys) =>
+            cache.Set(EdrKeysKey, edrKeys, cacheEntryOptions);
+
+        lock (_edrKeysLock)
+        {
+            if (!cache.TryGetValue(EdrKeysKey, out Dictionary<string, DateTime>? edrKeys) || edrKeys == null)
+            {
+                // Initialize the cache if it doesn't exist
+                UpdateCache(new Dictionary<string, DateTime>
+                {
+                    [key] = dateTimeProvider.UtcNow - edrKeyTimeOut
+                });
+                return string.Empty;
+            }
+
+            if (edrKeys.TryGetValue(key, out DateTime lastUpdated) && (dateTimeProvider.UtcNow - lastUpdated > edrKeyTimeOut))
+            {
+                // Extend all keys' expiration by 1 minute
+                foreach (var k in edrKeys.Keys.ToList())
+                    edrKeys[k] = edrKeys[k].AddMinutes(1);
+
+                UpdateCache(edrKeys);
+                return string.Join(", ", edrKeys.Keys);
+            }
+
+            return string.Empty;
+        }
+    }
+
+    public void EdrKeyUpdated(string key)
+    {
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+         .SetSlidingExpiration(edrKeyTimeOut)
          .SetPriority(CacheItemPriority.Normal);
 
         lock (_edrKeysLock)
@@ -70,11 +108,11 @@ public class RequestCache(
             if (cache.TryGetValue(EdrKeysKey, out Dictionary<string, DateTime>? keys) && keys != null)
             {
                 keys[key] = dateTimeProvider.UtcNow;
-                cache.Set(EdrKeysKey, keys, options);
+                cache.Set(EdrKeysKey, keys, cacheEntryOptions);
             }
             else
             {
-                cache.Set(EdrKeysKey, new Dictionary<string, DateTime> { { key, dateTimeProvider.UtcNow } }, options);
+                cache.Set(EdrKeysKey, new Dictionary<string, DateTime> { { key, dateTimeProvider.UtcNow } }, cacheEntryOptions);
             }
         }
     }

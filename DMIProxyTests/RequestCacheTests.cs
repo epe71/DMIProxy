@@ -39,9 +39,9 @@ namespace DMIProxyTests
             var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
 
             // Act
-            requestCache.SaveEdrKey("key1");
-            requestCache.SaveEdrKey("key2");
-            requestCache.GetEdrKeys(out var keys);
+            requestCache.EdrKeyUpdated("key1");
+            requestCache.EdrKeyUpdated("key2");
+            requestCache.GetAllEdrKeys(out var keys);
 
             // Assert
             Assert.IsNotNull(keys);
@@ -55,10 +55,10 @@ namespace DMIProxyTests
             var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
 
             // Act
-            requestCache.SaveEdrKey("key1");
+            requestCache.EdrKeyUpdated("key1");
             var firstTime = GetEdrKeyTime(requestCache, "key1");
             Task.Delay(10).Wait(); // ensure a small delay for update
-            requestCache.SaveEdrKey("key1");
+            requestCache.EdrKeyUpdated("key1");
             var secondTime = GetEdrKeyTime(requestCache, "key1");
 
             // Assert
@@ -69,7 +69,7 @@ namespace DMIProxyTests
 
         private DateTime GetEdrKeyTime(RequestCache cache, string key)
         {
-            cache.GetEdrKeys(out var keys);
+            cache.GetAllEdrKeys(out var keys);
             return keys != null && keys.TryGetValue(key, out var time) ? time : DateTime.MinValue;
         }
 
@@ -130,13 +130,70 @@ namespace DMIProxyTests
             Parallel.For(0, 50, i =>
             {
                 // Use a few repeating keys
-                requestCache.SaveEdrKey("concurrentKey" + (i % 5));
+                requestCache.EdrKeyUpdated("concurrentKey" + (i % 5));
             });
-            requestCache.GetEdrKeys(out var keys);
+            requestCache.GetAllEdrKeys(out var keys);
 
             // Assert: There should be exactly 5 distinct keys
             Assert.IsNotNull(keys);
             Assert.AreEqual(5, keys.Count);
+        }
+
+        [TestMethod]
+        public void GetEdrKeysToUpdate_FirstCallWithNewKey_ReturnsEmptyString()
+        {
+            // Arrange
+            var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+
+            string newKey = "test-key";
+
+            // Act
+            var result = requestCache.GetEdrKeysToUpdate(newKey);
+
+            // Assert
+            Assert.AreEqual(string.Empty, result);
+            requestCache.GetAllEdrKeys(out var keys);
+            Assert.IsTrue(keys.ContainsKey(newKey));
+            Assert.IsTrue(keys[newKey] < dateTimeProvider.Now - requestCache.edrKeyTimeOut);
+        }
+
+        [TestMethod]
+        public void GetEdrKeysToUpdate_SecondCallWithKey_ReturnsAllKeys()
+        {
+            // Arrange
+            var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+
+            string newKey = "test-key";
+            requestCache.GetEdrKeysToUpdate("Key1");
+            requestCache.GetEdrKeysToUpdate("Key2");
+
+            // Act
+            var result = requestCache.GetEdrKeysToUpdate("Key1");
+
+            // Assert
+            Assert.AreEqual("Key1, Key2", result);
+            requestCache.GetAllEdrKeys(out var keys);
+            Assert.IsTrue(keys.ContainsKey("Key1"));
+            Assert.IsTrue(keys["Key1"] < dateTimeProvider.Now - requestCache.edrKeyTimeOut);
+        }
+
+        [TestMethod]
+        public void GetEdrKeysToUpdate_SecondCallWithKeyAfterUpdate_ReturnsEmptyString()
+        {
+            // Arrange
+            var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+
+            requestCache.GetEdrKeysToUpdate("Key1");
+            requestCache.EdrKeyUpdated("Key1");
+
+            // Act
+            var result = requestCache.GetEdrKeysToUpdate("Key1");
+
+            // Assert
+            Assert.AreEqual(string.Empty, result);
+            requestCache.GetAllEdrKeys(out var keys);
+            Assert.IsTrue(keys.ContainsKey("Key1"));
+            Assert.IsTrue(keys["Key1"] > dateTimeProvider.Now - requestCache.edrKeyTimeOut);
         }
 
         [TestMethod]

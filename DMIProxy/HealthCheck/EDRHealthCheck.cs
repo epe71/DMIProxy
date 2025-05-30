@@ -10,7 +10,7 @@ public class EDRHealthCheck(IRequestCache requestCache, IDateTimeProvider dateTi
 
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        if (!_requestCache.GetEdrKeys(out Dictionary<string, DateTime>? keys) || keys == null)
+        if (!_requestCache.GetAllEdrKeys(out Dictionary<string, DateTime>? keys) || keys == null)
         {
             return Task.FromResult(HealthCheckResult.Unhealthy("No EDR keys in cache"));
         }
