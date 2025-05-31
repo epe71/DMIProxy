@@ -83,11 +83,20 @@ public class RequestCache(
                 return string.Empty;
             }
 
-            if (edrKeys.TryGetValue(key, out DateTime lastUpdated) && (dateTimeProvider.UtcNow - lastUpdated > edrKeyTimeOut))
+            var keyFound = edrKeys.TryGetValue(key, out DateTime lastUpdated);
+            if (!keyFound)
             {
-                // Extend all keys' expiration by 1 minute
+                // Add keys to list and nothing to update
+                edrKeys[key] = dateTimeProvider.UtcNow - edrKeyTimeOut;
+                UpdateCache(edrKeys);
+                return string.Empty;
+            }
+
+            if (keyFound && (dateTimeProvider.UtcNow - lastUpdated > edrKeyTimeOut))
+            {
+                // Keys need update, update them all and extend expiration by 2 minute
                 foreach (var k in edrKeys.Keys.ToList())
-                    edrKeys[k] = edrKeys[k].AddMinutes(1);
+                    edrKeys[k] = edrKeys[k].AddMinutes(2);
 
                 UpdateCache(edrKeys);
                 return string.Join(", ", edrKeys.Keys);

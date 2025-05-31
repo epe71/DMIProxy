@@ -163,7 +163,6 @@ namespace DMIProxyTests
             // Arrange
             var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
 
-            string newKey = "test-key";
             requestCache.GetEdrKeysToUpdate("Key1");
             requestCache.GetEdrKeysToUpdate("Key2");
 
