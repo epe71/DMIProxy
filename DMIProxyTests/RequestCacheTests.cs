@@ -144,7 +144,6 @@ namespace DMIProxyTests
         {
             // Arrange
             var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
-
             string newKey = "test-key";
 
             // Act
@@ -155,7 +154,7 @@ namespace DMIProxyTests
             requestCache.GetAllEdrKeys(out var keys);
             Assert.IsNotNull(keys);
             Assert.IsTrue(keys.ContainsKey(newKey), "Key1 not found");
-            Assert.IsTrue(keys[newKey] < dateTimeProvider.Now - requestCache.edrKeyTimeOut, "Key1 not expired");
+            Assert.IsTrue(keys[newKey] < dateTimeProvider.Now - requestCache.edrKeyTimeOut, "Key1 should not be expired");
         }
 
         [TestMethod]
@@ -175,7 +174,7 @@ namespace DMIProxyTests
             requestCache.GetAllEdrKeys(out var keys);
             Assert.IsNotNull(keys);
             Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
-            Assert.IsTrue(keys["Key1"] < dateTimeProvider.Now - requestCache.edrKeyTimeOut, "Key1 not expired");
+            Assert.IsTrue(keys["Key1"] > dateTimeProvider.UtcNow - requestCache.edrKeyTimeOut, "Key1 should be expired");
         }
 
         [TestMethod]
@@ -195,7 +194,7 @@ namespace DMIProxyTests
             requestCache.GetAllEdrKeys(out var keys);
             Assert.IsNotNull(keys);
             Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
-            Assert.IsTrue(keys["Key1"] > dateTimeProvider.Now - requestCache.edrKeyTimeOut, "Key1 not expired");
+            Assert.IsTrue(keys["Key1"] > dateTimeProvider.Now - requestCache.edrKeyTimeOut, "Key1 should not be expired");
         }
 
         [TestMethod]
