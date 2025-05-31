@@ -153,8 +153,9 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual(string.Empty, result);
             requestCache.GetAllEdrKeys(out var keys);
-            Assert.IsTrue(keys.ContainsKey(newKey));
-            Assert.IsTrue(keys[newKey] < dateTimeProvider.Now - requestCache.edrKeyTimeOut);
+            Assert.IsNotNull(keys);
+            Assert.IsTrue(keys.ContainsKey(newKey), "Key1 not found");
+            Assert.IsTrue(keys[newKey] < dateTimeProvider.Now - requestCache.edrKeyTimeOut, "Key1 not expired");
         }
 
         [TestMethod]
@@ -172,8 +173,9 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual("Key1, Key2", result);
             requestCache.GetAllEdrKeys(out var keys);
-            Assert.IsTrue(keys.ContainsKey("Key1"));
-            Assert.IsTrue(keys["Key1"] < dateTimeProvider.Now - requestCache.edrKeyTimeOut);
+            Assert.IsNotNull(keys);
+            Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
+            Assert.IsTrue(keys["Key1"] < dateTimeProvider.Now - requestCache.edrKeyTimeOut, "Key1 not expired");
         }
 
         [TestMethod]
@@ -191,8 +193,9 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual(string.Empty, result);
             requestCache.GetAllEdrKeys(out var keys);
-            Assert.IsTrue(keys.ContainsKey("Key1"));
-            Assert.IsTrue(keys["Key1"] > dateTimeProvider.Now - requestCache.edrKeyTimeOut);
+            Assert.IsNotNull(keys);
+            Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
+            Assert.IsTrue(keys["Key1"] > dateTimeProvider.Now - requestCache.edrKeyTimeOut, "Key1 not expired");
         }
 
         [TestMethod]
@@ -213,8 +216,8 @@ namespace DMIProxyTests
             // Assert
             Assert.IsNotNull(result);
             // Verify that the resulting values fall within the expected ranges.
-            Assert.IsTrue(result.Rain1h >= 0 && result.Rain1h <= 4);
-            Assert.IsTrue(result.RainToday >= 0 && result.RainToday <= 2);
+            Assert.IsTrue(result.Rain1h >= 0 && result.Rain1h <= 4, "Rain1h");
+            Assert.IsTrue(result.RainToday >= 0 && result.RainToday <= 2, "RainToday");
         }
     }
 }
