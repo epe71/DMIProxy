@@ -11,10 +11,9 @@ namespace DMIProxy.DomainService
 
         private string baseUrl = "https://dmigw.govcloud.dk/v1/forecastedr/collections/harmonie_dini_sf/position";
         private readonly ILogger<EdrService> _logger;
-
         private readonly JsonSerializerOptions _serializerOptions;
-
         private readonly HttpClient _httpClient;
+
         public EdrService(
             IHttpClientFactory httpClientFactory,
             ILogger<EdrService> logger)

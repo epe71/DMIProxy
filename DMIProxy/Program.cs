@@ -36,6 +36,7 @@ builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>(
 builder.Services.AddScoped<IMetObsService, MetObsService>();
 builder.Services.AddScoped<IEdrApplicationService, EdrApplicationService>();
 builder.Services.AddScoped<IEdrService, EdrService>();
+builder.Services.AddScoped<INtfyService, NtfyService>();
 builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
 builder.Services.AddScoped<IWebScrapeService, WebScrapeService>();
 builder.Services.AddScoped<IRequestCache, RequestCache>();

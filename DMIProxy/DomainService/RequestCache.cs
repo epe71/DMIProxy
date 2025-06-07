@@ -18,7 +18,7 @@ public class RequestCache(
     private static readonly object _textLock = new();
     private static readonly object _edrKeysLock = new();
 
-    public TimeSpan edrKeyTimeOut = new TimeSpan(5, 0, 0);
+    public TimeSpan edrKeyTimeOut = new TimeSpan(4, 0, 0);
 
     public bool GetRainDTO(string stationId, out RainDTO? rainDto)
     => TryGetFromCache(RainCacheKey + stationId, _rainLock, out rainDto);
@@ -64,7 +64,7 @@ public class RequestCache(
     public string GetEdrKeysToUpdate(string key)
     {
         var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(edrKeyTimeOut)
+            .SetSlidingExpiration(TimeSpan.FromHours(5))
             .SetPriority(CacheItemPriority.Normal);
 
         // Helper to update the cache with the current keys dictionary
