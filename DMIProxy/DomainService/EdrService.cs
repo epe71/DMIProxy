@@ -26,9 +26,10 @@ namespace DMIProxy.DomainService
             };
         }
 
-        public async Task<HomeAssistantDTO> GetEdrForecast(string forecastParameter)
+        public async Task<List<HomeAssistantDTO>> GetEdrForecast(List<string> forecastParameters)
         {
-            var httpRequestMessage = await SetupRequestMessage(forecastParameter);
+            var weatherParameters = string.Join(",", forecastParameters);
+            var httpRequestMessage = await SetupRequestMessage(weatherParameters);
 
             var response = await _httpClient.SendAsync(httpRequestMessage);
             response.EnsureSuccessStatusCode();
@@ -36,13 +37,20 @@ namespace DMIProxy.DomainService
 
             var dmiResult = await JsonSerializer.DeserializeAsync<JsonElement>(contentStream, _serializerOptions);
 
-            return ExtractForecastData(forecastParameter, dmiResult);
+            var allForcasts = new List<HomeAssistantDTO>();
+            foreach (var parameter in forecastParameters)
+            {
+                var forcast = ExtractForecastData(parameter, dmiResult);
+                allForcasts.Add(forcast);
+            }
+            return allForcasts;
         }
 
 
         private async Task<HttpRequestMessage> SetupRequestMessage(string weatherParameters)
         {
             var apiKey = Environment.GetEnvironmentVariable("DMI_EDR_API_KEY");
+            apiKey = "01bac0e9-1534-41e2-97f2-ae27b4616810";
             if (apiKey == null)
             {
                 _logger.LogError("No DMI_EDR_API_KEY set");
@@ -81,6 +89,7 @@ namespace DMIProxy.DomainService
 
             var forecastDto = new HomeAssistantDTO()
             {
+                name = forecastParameter,
                 data = transmittance,
                 description = description ?? forecastParameter
             };

@@ -46,7 +46,7 @@ builder.Services.AddScoped<ITimeSpanCalculator, TimeSpanCalculator>();
 builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
 builder.Services.AddHttpClient("LongTimeOutClient", client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(60);
+    client.Timeout = TimeSpan.FromSeconds(120);
 })
 .AddPolicyHandler((sp, request) => {
     var logger = sp.GetRequiredService<ILogger<PollyConfiguration>>();

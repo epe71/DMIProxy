@@ -61,7 +61,7 @@ public class RequestCache(
     public bool GetAllEdrKeys(out Dictionary<string, DateTime>? keys)
     => TryGetFromCache(EdrKeysKey, _edrKeysLock, out keys);
 
-    public string GetEdrKeysToUpdate(string key)
+    public List<string> GetEdrKeysToUpdate(string key)
     {
         var cacheEntryOptions = new MemoryCacheEntryOptions()
             .SetSlidingExpiration(TimeSpan.FromHours(5))
@@ -80,7 +80,7 @@ public class RequestCache(
                 {
                     [key] = dateTimeProvider.UtcNow - edrKeyTimeOut
                 });
-                return string.Empty;
+                return [];
             }
 
             var keyFound = edrKeys.TryGetValue(key, out DateTime lastUpdated);
@@ -89,20 +89,21 @@ public class RequestCache(
                 // Add keys to list and nothing to update
                 edrKeys[key] = dateTimeProvider.UtcNow - edrKeyTimeOut;
                 UpdateCache(edrKeys);
-                return string.Empty;
+                return [];
             }
 
             if (keyFound && (dateTimeProvider.UtcNow - lastUpdated > edrKeyTimeOut))
             {
-                // Keys need update, update them all and extend expiration by 2 minute
-                foreach (var k in edrKeys.Keys.ToList())
+                // Keys need update, update some and extend expiration by 2 minute
+                var keysToUpdate = edrKeys.OrderBy(k => k.Value).Take(10);
+                foreach (var k in keysToUpdate.Select(k => k.Key).ToList())
                     edrKeys[k] = edrKeys[k].AddMinutes(2);
 
                 UpdateCache(edrKeys);
-                return string.Join(", ", edrKeys.Keys);
+                return keysToUpdate.Select(k => k.Key).ToList();
             }
 
-            return string.Empty;
+            return [];
         }
     }
 

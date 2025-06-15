@@ -167,7 +167,7 @@ public class RequestCacheTests
         var result = requestCache.GetEdrKeysToUpdate(newKey);
 
         // Assert
-        Assert.AreEqual(string.Empty, result);
+        Assert.AreEqual(0, result.Count);
         requestCache.GetAllEdrKeys(out var keys);
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey(newKey), "Key1 not found");
@@ -186,13 +186,14 @@ public class RequestCacheTests
         var result = requestCache.GetEdrKeysToUpdate("Key1");
 
         // Assert
-        Assert.AreEqual("Key1, Key2", result);
+        Assert.AreEqual(2, result.Count);
         requestCache.GetAllEdrKeys(out var keys);
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
     }
 
     [TestMethod]
+
     public void GetEdrKeysToUpdate_AfterKeyExpired_ReturnsAllKeys()
     {
         // Arrange
@@ -208,7 +209,7 @@ public class RequestCacheTests
         var result = requestCache.GetEdrKeysToUpdate("Key1");
 
         // Assert
-        Assert.AreEqual("Key1", result);
+        Assert.AreEqual(1, result.Count);
         requestCache.GetAllEdrKeys(out var keys);
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
@@ -227,7 +228,7 @@ public class RequestCacheTests
         var result = requestCache.GetEdrKeysToUpdate("Key1");
 
         // Assert
-        Assert.AreEqual(string.Empty, result);
+        Assert.AreEqual(0, result.Count);
         requestCache.GetAllEdrKeys(out var keys);
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");

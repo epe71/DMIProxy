@@ -31,8 +31,8 @@ namespace DMIProxy.ApplicationService
             }
 
             // Determine if this key should be updated
-            string keysToUpdate = _requestCache.GetEdrKeysToUpdate(forecastParameter);
-            if (string.IsNullOrEmpty(keysToUpdate))
+            var keysToUpdate = _requestCache.GetEdrKeysToUpdate(forecastParameter);
+            if (keysToUpdate.Count == 0)
             {
                 _logger.LogInformation("Initialize cache, no update for: {ForecastParameter}", forecastParameter);
                 return new HomeAssistantDTO { description = "Starting service, no forecast parameter ready." };
@@ -40,17 +40,27 @@ namespace DMIProxy.ApplicationService
 
             try
             {
-                var forecastDto = await _service.GetEdrForecast(forecastParameter);
-                if (forecastDto == null)
+                var forecastDtos = await _service.GetEdrForecast(keysToUpdate);
+                if (forecastDtos == null || forecastDtos.Count == 0)
                 {
-                    string errorMsg = $"Failed to retrieve forecast data: {forecastParameter}";
+                    string errorMsg = $"Failed to retrieve forecast data: {string.Join(", ",keysToUpdate)}";
                     await _ntfyService.SendNotification(errorMsg);
                     throw new InvalidOperationException(errorMsg);
                 }
 
-                await _ntfyService.SendNotification($"Forecast data retrieved successfully for: {forecastParameter}");
-                _requestCache.SaveEdrForecastDTO(forecastParameter, forecastDto);
-                return forecastDto;
+                HomeAssistantDTO? forcastDto = null;
+                foreach (var dto in forecastDtos)
+                {
+                    if ( dto.name == forecastParameter)
+                    {
+                        forcastDto = dto;
+                    }
+                    _logger.LogInformation("Forecast data for {Parameter}: {Description}", forecastParameter, dto.description);
+                    _requestCache.SaveEdrForecastDTO(dto.name, dto);
+                }
+
+                await _ntfyService.SendNotification($"Forecast data retrieved successfully for: {string.Join(", ", keysToUpdate)}");
+                return forcastDto ?? throw new InvalidOperationException("Forcast data not saved in cache after update");
             }
             catch (Polly.CircuitBreaker.BrokenCircuitException ex)
             {

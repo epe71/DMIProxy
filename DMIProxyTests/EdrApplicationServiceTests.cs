@@ -58,7 +58,7 @@ public class EdrApplicationServiceTests
         // Simulate GetEdrKeysToUpdate returns empty string
         requestCacheMock
             .Setup(x => x.GetEdrKeysToUpdate(forecastParameter))
-            .Returns(string.Empty);
+            .Returns([]);
 
         var service = new EdrApplicationService(
             edrServiceMock.Object,
@@ -78,9 +78,9 @@ public class EdrApplicationServiceTests
     public async Task GetEdrForecast_WhenGetEdrKeysToUpdateReturnsParameter_CallsServiceAndReturnsResult()
     {
         // Arrange
-        var forecastParameter = "test-parameter";
-        HomeAssistantDTO? outForecast = null;
-        var fetchedForecast = new HomeAssistantDTO { description = "Fetched forecast" };
+        string forecastParameter = "test-parameter";
+        List<string> parameterList = [forecastParameter];
+        var fetchedForecast = new HomeAssistantDTO { description = "Fetched forecast", name = forecastParameter };
 
         var edrServiceMock = new Mock<IEdrService>();
         var ntfyServiceMock = new Mock<INtfyService>();
@@ -89,18 +89,19 @@ public class EdrApplicationServiceTests
 
         // Simulate cache miss
         requestCacheMock
-            .Setup(x => x.GetEdrForecastDTO(forecastParameter, out outForecast))
-            .Returns(false);
+            .SetupSequence(x => x.GetEdrForecastDTO(forecastParameter, out fetchedForecast))
+            .Returns(false)
+            .Returns(true);
 
         // Simulate GetEdrKeysToUpdate returns the parameter itself
         requestCacheMock
             .Setup(x => x.GetEdrKeysToUpdate(forecastParameter))
-            .Returns(forecastParameter);
+            .Returns([forecastParameter]);
 
         // Simulate service returns a forecast
         edrServiceMock
-            .Setup(x => x.GetEdrForecast(forecastParameter))
-            .ReturnsAsync(fetchedForecast);
+            .Setup(x => x.GetEdrForecast(parameterList))
+            .ReturnsAsync([fetchedForecast]);
 
         // Simulate notification service
         ntfyServiceMock
@@ -120,6 +121,7 @@ public class EdrApplicationServiceTests
         Assert.IsNotNull(result);
         Assert.AreEqual("Fetched forecast", result.description);
         requestCacheMock.Verify(x => x.SaveEdrForecastDTO(forecastParameter, fetchedForecast), Times.Once);
-        edrServiceMock.Verify(x => x.GetEdrForecast(forecastParameter), Times.Once);
+        requestCacheMock.Verify(x => x.GetEdrForecastDTO(forecastParameter, out fetchedForecast), Times.Exactly(2));
+        edrServiceMock.Verify(x => x.GetEdrForecast(parameterList), Times.Once);
     }
 }
