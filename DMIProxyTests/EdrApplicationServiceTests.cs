@@ -121,7 +121,7 @@ public class EdrApplicationServiceTests
         Assert.IsNotNull(result);
         Assert.AreEqual("Fetched forecast", result.description);
         requestCacheMock.Verify(x => x.SaveEdrForecastDTO(forecastParameter, fetchedForecast), Times.Once);
-        requestCacheMock.Verify(x => x.GetEdrForecastDTO(forecastParameter, out fetchedForecast), Times.Exactly(2));
+        requestCacheMock.Verify(x => x.GetEdrForecastDTO(forecastParameter, out fetchedForecast), Times.Once);
         edrServiceMock.Verify(x => x.GetEdrForecast(parameterList), Times.Once);
     }
 }
