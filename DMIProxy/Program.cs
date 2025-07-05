@@ -13,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -23,6 +24,7 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
+// Health checks
 builder.Services.AddHealthChecks()
     .AddCheck<RequestCacheHealthCheck>("Request_cache_check")
     .AddCheck<MetObsHealthCheck>("MetObs_data_check")
@@ -32,6 +34,7 @@ builder.Services.AddHealthChecks()
 
 builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
 
+// Application services
 builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>();
 builder.Services.AddScoped<IMetObsService, MetObsService>();
 builder.Services.AddScoped<IEdrApplicationService, EdrApplicationService>();
@@ -43,7 +46,10 @@ builder.Services.AddScoped<IRequestCache, RequestCache>();
 builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 builder.Services.AddScoped<ITimeSpanCalculator, TimeSpanCalculator>();
 
+// Memory cache
 builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
+
+// HttpClient configuration with Polly
 builder.Services.AddHttpClient("LongTimeOutClient", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(120);
@@ -54,6 +60,7 @@ builder.Services.AddHttpClient("LongTimeOutClient", client =>
 })
 .AddPolicyHandler(PollyConfiguration.GetRetryPolicy());
 
+// Serilog configuration
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
                 .ReadFrom.Configuration(hostingContext.Configuration));
 

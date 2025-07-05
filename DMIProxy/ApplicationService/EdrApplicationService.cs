@@ -59,7 +59,6 @@ namespace DMIProxy.ApplicationService
                     _requestCache.SaveEdrForecastDTO(dto.name, dto);
                 }
 
-                await _ntfyService.SendNotification($"Forecast data retrieved successfully for: {string.Join(", ", keysToUpdate)}");
                 return forcastDto ?? throw new InvalidOperationException("Forcast data not saved in cache after update");
             }
             catch (Polly.CircuitBreaker.BrokenCircuitException ex)
