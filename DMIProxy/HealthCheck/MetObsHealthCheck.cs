@@ -19,7 +19,7 @@ public class MetObsHealthCheck(IRequestCache requestCache, IDateTimeProvider dat
         _requestCache.GetRainDTO(stationId, out var rainDto);
         if (rainDto == null)
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("No MetObs data", null, data));
+            return Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, data));
         }
 
         data = new Dictionary<string, object>()
