@@ -51,7 +51,7 @@ public class RequestCache(
 
     public void SaveTextForecast(string stationId, ForecastMessageDTO dto)
     {
-        var updateTime = new List<TimeOnly> { new(6, 0), new(12, 0), new(17, 0) };
+        var updateTime = new List<TimeOnly> { new(6, 0), new(10, 0), new(18, 0) };
         var options = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(timeSpanCalculator.FixTime(updateTime))
             .SetPriority(CacheItemPriority.Normal);
