@@ -107,7 +107,7 @@ public class PollyPolicyTests
         Assert.AreEqual(simulatedHttpStatusCode, response2.Result.StatusCode, "Second request should fail.");
 
         // Circuit should now be open
-        Assert.ThrowsExceptionAsync<BrokenCircuitException>(async () =>
+        Assert.ThrowsExactlyAsync<BrokenCircuitException>(async () =>
         {
             await circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com"));
         });

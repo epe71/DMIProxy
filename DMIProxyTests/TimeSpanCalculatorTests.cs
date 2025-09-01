@@ -6,7 +6,7 @@ namespace DMIProxyTests
     [TestClass]
     public class TimeSpanCalculatorTests
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(0, 5)]
         [DataRow(6, 10)]
         [DataRow(12, 4)]
@@ -37,7 +37,7 @@ namespace DMIProxyTests
             Assert.AreEqual(40, result.Seconds);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(0, 3, 4, 2)]
         [DataRow(0, 33, 3, 32)]
         public void AtTheTopOfThehour(int hour, int minutes, int spanHour, int spanMinute)
