@@ -94,7 +94,7 @@ namespace DMIProxyTests
             var actualForecastDTO = jsonResult.Value as HomeAssistantDTO;
             Assert.IsNotNull(actualForecastDTO);
             Assert.AreEqual(expectedForecastDTO.description, actualForecastDTO.description);
-            Assert.AreEqual(expectedForecastDTO.data.Count, actualForecastDTO.data.Count);
+            Assert.HasCount(expectedForecastDTO.data.Count, actualForecastDTO.data);
         }
 
 

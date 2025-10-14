@@ -19,7 +19,7 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual(0.5, adjusted[0]);
             Assert.AreEqual(1, adjusted[1]);
-            Assert.AreEqual(values.Count, adjusted.Count);
+            Assert.HasCount(values.Count, adjusted);
         }
 
         [TestMethod]
@@ -36,7 +36,7 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual(3, adjusted[0]);
             Assert.AreEqual(6, adjusted[1]);
-            Assert.AreEqual(values.Count, adjusted.Count);
+            Assert.HasCount(values.Count, adjusted);
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual(-2, adjusted[0]);
             Assert.AreEqual(-1, adjusted[1]);
-            Assert.AreEqual(values.Count, adjusted.Count);
+            Assert.HasCount(values.Count, adjusted);
         }
 
         [TestMethod]
@@ -71,7 +71,7 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual(0.3, adjusted[0]);
             Assert.AreEqual(0.7, adjusted[1]);
-            Assert.AreEqual(values.Count, adjusted.Count);
+            Assert.HasCount(values.Count, adjusted);
         }
 
         [TestMethod]
@@ -88,7 +88,7 @@ namespace DMIProxyTests
             // Assert
             Assert.AreEqual(0, adjusted[0]);
             Assert.AreEqual(1, adjusted[1]);
-            Assert.AreEqual(values.Count, adjusted.Count);
+            Assert.HasCount(values.Count, adjusted);
         }
     }
 }

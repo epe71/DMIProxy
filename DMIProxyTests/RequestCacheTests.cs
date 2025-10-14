@@ -63,7 +63,7 @@ public class RequestCacheTests
 
         // Assert
         Assert.IsNotNull(keys);
-        Assert.AreEqual(2, keys.Count);
+        Assert.HasCount(2, keys);
     }
 
     [TestMethod]
@@ -80,8 +80,6 @@ public class RequestCacheTests
         var secondTime = GetEdrKeyTime(requestCache, "key1");
 
         // Assert
-        Assert.IsNotNull(firstTime);
-        Assert.IsNotNull(secondTime);
         Assert.IsTrue(secondTime > firstTime);
     }
 
@@ -153,7 +151,7 @@ public class RequestCacheTests
 
         // Assert: There should be exactly 5 distinct keys
         Assert.IsNotNull(keys);
-        Assert.AreEqual(5, keys.Count);
+        Assert.HasCount(5, keys);
     }
 
     [TestMethod]
@@ -167,7 +165,7 @@ public class RequestCacheTests
         var result = requestCache.GetEdrKeysToUpdate(newKey);
 
         // Assert
-        Assert.AreEqual(0, result.Count);
+        Assert.IsEmpty(result);
         requestCache.GetAllEdrKeys(out var keys);
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey(newKey), "Key1 not found");
@@ -186,7 +184,7 @@ public class RequestCacheTests
         var result = requestCache.GetEdrKeysToUpdate("Key1");
 
         // Assert
-        Assert.AreEqual(2, result.Count);
+        Assert.HasCount(2, result);
         requestCache.GetAllEdrKeys(out var keys);
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
@@ -209,7 +207,7 @@ public class RequestCacheTests
         var result = requestCache.GetEdrKeysToUpdate("Key1");
 
         // Assert
-        Assert.AreEqual(1, result.Count);
+        Assert.HasCount(1, result);
         requestCache.GetAllEdrKeys(out var keys);
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
@@ -228,7 +226,7 @@ public class RequestCacheTests
         var result = requestCache.GetEdrKeysToUpdate("Key1");
 
         // Assert
-        Assert.AreEqual(0, result.Count);
+        Assert.IsEmpty(result);
         requestCache.GetAllEdrKeys(out var keys);
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
