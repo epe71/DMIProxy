@@ -6,7 +6,7 @@ namespace DMIProxy.DomainService
 {
     public class MetObsService : IMetObsService
     {
-        private string baseUrl = "https://dmigw.govcloud.dk/v2/metObs/collections/observation/items";
+        private string baseUrl = "https://opendataapi.dmi.dk/v2/metObs/collections/observation/items";
         private readonly ILogger<MetObsService> _logger;
 
         private readonly JsonSerializerOptions _serializerOptions;
@@ -27,13 +27,6 @@ namespace DMIProxy.DomainService
 
         public async Task<DmiMetObsData> GetRain(string stationId)
         {
-            var apiKey = Environment.GetEnvironmentVariable("DMI_METOBS_API_KEY");
-            if (apiKey == null)
-            {
-                _logger.LogError("No DMI_METOBS_API_KEY set");
-                throw new ArgumentNullException(nameof(apiKey));
-            }
-
             var parameters = new Dictionary<string, string> { 
                 { "stationId", stationId }, 
                 { "period", "latest-month" }, 
@@ -48,7 +41,6 @@ namespace DMIProxy.DomainService
                 RequestUri = new Uri(baseUrl + "?" + query),
                 Headers = {
                     { HttpRequestHeader.Accept.ToString(), "application/json" },
-                    { "X-Gravitee-Api-Key", apiKey }
                 },
                 Content = encodedContent
             };

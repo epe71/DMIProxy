@@ -6,10 +6,11 @@ namespace DMIProxy.DomainService
 {
     public class EdrService : IEdrService
     {
-        // parameter list: https://confluence.govcloud.dk/pages/viewpage.action?pageId=110690581
+        // Release notes: https://www.dmi.dk/friedata/dokumentation/release-notes
+        // Parameter list: https://www.dmi.dk/friedata/dokumentation/data/weather-model-harmonie-edr-api-parameter-list
         // Status page: https://statuspage.freshping.io/25721-DMIOpenDatas
 
-        private string baseUrl = "https://dmigw.govcloud.dk/v1/forecastedr/collections/harmonie_dini_sf/position";
+        private string baseUrl = "https://opendataapi.dmi.dk/v1/forecastedr/collections/harmonie_dini_sf/position";
         private readonly ILogger<EdrService> _logger;
         private readonly JsonSerializerOptions _serializerOptions;
         private readonly HttpClient _httpClient;
@@ -49,14 +50,6 @@ namespace DMIProxy.DomainService
 
         private async Task<HttpRequestMessage> SetupRequestMessage(string weatherParameters)
         {
-            var apiKey = Environment.GetEnvironmentVariable("DMI_EDR_API_KEY");
-            apiKey = "01bac0e9-1534-41e2-97f2-ae27b4616810";
-            if (apiKey == null)
-            {
-                _logger.LogError("No DMI_EDR_API_KEY set");
-                throw new ArgumentNullException(nameof(apiKey));
-            }
-
             var parameters = new Dictionary<string, string> {
                 { "coords", "POINT(10.137 56.173)" },
                 { "csr", "csr84" },
@@ -71,7 +64,6 @@ namespace DMIProxy.DomainService
                 RequestUri = new Uri(baseUrl + "?" + query),
                 Headers = {
                     { HttpRequestHeader.Accept.ToString(), "application/json" },
-                    { "X-Gravitee-Api-Key", apiKey }
                 },
                 Content = encodedContent
             };
