@@ -39,7 +39,7 @@ public class MetObsHealthCheck(IRequestCache requestCache, IDateTimeProvider dat
             return Task.FromResult(HealthCheckResult.Degraded("MetObs data delayed", null, data));
         }
 
-        if (rainDto.NumberReturned < 28*24)
+        if (rainDto.NumberReturned < 27*24)
         {
             return Task.FromResult(HealthCheckResult.Unhealthy("To few MetObs data points", null, data));
         }

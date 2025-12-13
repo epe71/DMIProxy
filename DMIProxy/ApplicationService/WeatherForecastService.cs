@@ -3,7 +3,9 @@ using DMIProxy.DomainService;
 
 namespace DMIProxy.ApplicationService
 {
-    public class WeatherForecastService(IWebScrapeService webScrapeService, IRequestCache requestCache) : IWeatherForecastService
+    public class WeatherForecastService(
+        IWebScrapeService webScrapeService,
+        IRequestCache requestCache) : IWeatherForecastService
     {
         public async Task<ForecastMessageDTO> GetWeatherForecast(string stationId)
         {
@@ -31,7 +33,7 @@ namespace DMIProxy.ApplicationService
                 return string.Empty;
             }
 
-            text = text.Replace("Temp.", "Temperatur",StringComparison.InvariantCultureIgnoreCase);
+            text = text.Replace("Temp.", "Temperatur", StringComparison.InvariantCultureIgnoreCase);
 
             text = CutTextFrom(text, "I aften");
             text = CutTextFrom(text, "I nat");

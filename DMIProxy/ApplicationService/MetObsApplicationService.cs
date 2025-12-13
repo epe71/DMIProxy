@@ -4,22 +4,15 @@ using DMIProxy.DomainService;
 
 namespace DMIProxy.ApplicationService
 {
-    public class MetObsApplicationService : IMetObsApplicationService
+    public class MetObsApplicationService(
+        IMetObsService metObsService, 
+        IRequestCache requestCache) : IMetObsApplicationService
     {
-        private IMetObsService _service;
-        private IRequestCache _requestCache;
-
-        public MetObsApplicationService(IMetObsService metObsService, IRequestCache requestCache) 
-        {
-            _service = metObsService;
-            _requestCache = requestCache;
-        }
-
         public async Task<RainDTO> GetRain(string stationId)
         {
-            if (!_requestCache.GetRainDTO(stationId, out RainDTO? rainDto))
+            if (!requestCache.GetRainDTO(stationId, out RainDTO? rainDto))
             {
-                DmiMetObsData result = await _service.GetRain(stationId);
+                DmiMetObsData result = await metObsService.GetRain(stationId);
                 if (result == null)
                 {
                     // Handle the case where result is null
@@ -33,7 +26,7 @@ namespace DMIProxy.ApplicationService
                     TimeStamp = result.timeStamp,
                     NumberReturned = result.numberReturned
                 };
-                _requestCache.SaveRainDTO(stationId, rainDto);
+                requestCache.SaveRainDTO(stationId, rainDto);
             }
 
             return rainDto ?? throw new InvalidOperationException("Rain data could not be retrieved.");
