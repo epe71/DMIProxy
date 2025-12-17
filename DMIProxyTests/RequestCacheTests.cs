@@ -107,6 +107,36 @@ public class RequestCacheTests
     }
 
     [TestMethod]
+    public void SaveClimateData_ShouldSaveAndRetrieve() 
+    {
+        // Arrange
+        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var dto = new HomeAssistantDTO { data = new List<PointDTO>(), description = "desc" };
+        requestCache.SaveClimateDataDTO("station1", "param1", dto);
+
+        // Act
+        requestCache.GetClimateDataDTO("station1", "param1", out var cached);
+
+        // Assert
+        Assert.IsNotNull(cached);
+        Assert.AreEqual(dto.description, cached.description);
+    }
+
+    [TestMethod]
+    public void GetClimateData_ShouldReturnFalseIfNotFound()
+    {
+        // Arrange
+        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+
+        // Act
+        var found = requestCache.GetClimateDataDTO("stationX", "paramY", out var dto);
+
+        // Assert
+        Assert.IsFalse(found);
+        Assert.IsNull(dto);
+    }
+
+    [TestMethod]
     public void SaveEdrForecastDTO_ShouldSaveAndRetrieve()
     {
         // Arrange
@@ -191,7 +221,6 @@ public class RequestCacheTests
     }
 
     [TestMethod]
-
     public void GetEdrKeysToUpdate_AfterKeyExpired_ReturnsAllKeys()
     {
         // Arrange

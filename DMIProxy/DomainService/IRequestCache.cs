@@ -11,6 +11,9 @@ namespace DMIProxy.DomainService
         bool GetEdrForecastDTO(string forecastParameter, out HomeAssistantDTO? forecastDto);
         void SaveEdrForecastDTO(string forecastParameter, HomeAssistantDTO forecastDTO);
 
+        bool GetClimateDataDTO(string stationId, string parameterId, out HomeAssistantDTO? dto);
+        void SaveClimateDataDTO(string stationId, string parameterId, HomeAssistantDTO dto);
+
         bool GetTextForecast(string stationId, out ForecastMessageDTO? dto);
         void SaveTextForecast(string stationId, ForecastMessageDTO dto);
 

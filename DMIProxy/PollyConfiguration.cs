@@ -7,13 +7,13 @@ namespace DMIProxy;
 
 public class PollyConfiguration
 {
-    public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(int retries = 1, int BackoffTimeInMinutes = 3)
+    public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(int retries = 1, int BackoffTimeInSeconds = 180)
     {
-        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMinutes(BackoffTimeInMinutes), retryCount: retries);
+        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(BackoffTimeInSeconds), retryCount: retries);
 
         return HttpPolicyExtensions
             .HandleTransientHttpError() // Catch 5xx and timeout-errors
-            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
+            .OrResult(msg => msg.StatusCode == HttpStatusCode.RequestTimeout)
             .WaitAndRetryAsync(delay);
     }
 
@@ -27,7 +27,7 @@ public class PollyConfiguration
 
         return HttpPolicyExtensions
             .HandleTransientHttpError()
-            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            .OrResult(msg => msg.StatusCode == HttpStatusCode.TooManyRequests)
             .CircuitBreakerAsync(
                 handledEventsAllowedBeforeBreaking,
                 durationOfBreak.Value,

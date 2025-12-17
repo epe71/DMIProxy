@@ -7,6 +7,14 @@
         public string parameterId { get; set; }
         public string stationId { get; set; }
         public double value { get; set; }
+        public int noValuesInCalculation { get; set; }
+        public string timeResolution { get; set; }
+        public string qcStatus { get; set; }
+        public DateTime from { get; set; }
+        public DateTime to { get; set; }
+        public DateTime calculatedAt { get; set; }
+        public bool validity { get; set; }
+
 
         public bool ThisHour()
         {

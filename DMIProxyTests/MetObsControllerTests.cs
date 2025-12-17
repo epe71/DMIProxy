@@ -31,12 +31,14 @@ namespace DMIProxyTests
             var loggerMock = new Mock<ILogger<MetObsController>>();
             var edrServiceMock = new Mock<IEdrApplicationService>();
             var weatherForecastServiceMock = new Mock<IWeatherForecastService>();
+            var climateDataApplicationService = new Mock<IClimateDataApplicationService>();
 
             var controller = new MetObsController(
                 loggerMock.Object,
                 metObsServiceMock.Object,
                 edrServiceMock.Object,
-                weatherForecastServiceMock.Object);
+                weatherForecastServiceMock.Object,
+                climateDataApplicationService.Object);
 
             // Act
             var result = await controller.GetRain("06072");
@@ -77,12 +79,14 @@ namespace DMIProxyTests
             var loggerMock = new Mock<ILogger<MetObsController>>();
             var metObsServiceMock = new Mock<IMetObsApplicationService>();
             var weatherForecastServiceMock = new Mock<IWeatherForecastService>();
+            var climateDataApplicationService = new Mock<IClimateDataApplicationService>();
 
             var controller = new MetObsController(
                 loggerMock.Object,
                 metObsServiceMock.Object,
                 edrServiceMock.Object,
-                weatherForecastServiceMock.Object);
+                weatherForecastServiceMock.Object,
+                climateDataApplicationService.Object);
 
             // Act
             var result = await controller.GetEdrForecast("sampleParameter");
@@ -117,12 +121,14 @@ namespace DMIProxyTests
             var loggerMock = new Mock<ILogger<MetObsController>>();
             var metObsServiceMock = new Mock<IMetObsApplicationService>();
             var edrServiceMock = new Mock<IEdrApplicationService>();
+            var climateDataApplicationService = new Mock<IClimateDataApplicationService>();
 
             var controller = new MetObsController(
                 loggerMock.Object,
                 metObsServiceMock.Object,
                 edrServiceMock.Object,
-                weatherForecastServiceMock.Object);
+                weatherForecastServiceMock.Object, 
+                climateDataApplicationService.Object);
 
             // Act
             var result = await controller.GetWeatherForecast("station123");

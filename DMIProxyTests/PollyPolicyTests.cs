@@ -17,7 +17,7 @@ public class PollyPolicyTests
     public void RetryPolicy_ShouldRetry_OnStatusCode(HttpStatusCode simulatedHttpStatusCode)
     {
         // Arrange
-        IAsyncPolicy<HttpResponseMessage> retryPolicy = PollyConfiguration.GetRetryPolicy(2);
+        IAsyncPolicy<HttpResponseMessage> retryPolicy = PollyConfiguration.GetRetryPolicy(2, 3);
         int retryCount = 0;
 
         // Mock HTTP handler to simulate responses

@@ -13,10 +13,12 @@ public class RequestCache(
     private const string EdrCacheKey = "EDR-";
     private const string EdrKeysKey = "EdrKeys";
     private const string TextForecastCacheKey = "TextForecast-";
+    private const string ClimateDataCacheKey = "ClimateData-";
     private static readonly object _rainLock = new();
     private static readonly object _edrLock = new();
     private static readonly object _textLock = new();
     private static readonly object _edrKeysLock = new();
+    private static readonly object _climateDataLock = new();
 
     public TimeSpan edrKeyTimeOut = new TimeSpan(4, 0, 0);
 
@@ -44,6 +46,17 @@ public class RequestCache(
             .SetPriority(CacheItemPriority.Normal);
         SaveToCache(EdrCacheKey + forecastParameter, forecastDTO, options, _edrLock);
         EdrKeyUpdated(forecastParameter);
+    }
+
+    public bool GetClimateDataDTO(string stationId, string parameterId, out HomeAssistantDTO? dto)
+        => TryGetFromCache(ClimateDataCacheKey + stationId + parameterId, _climateDataLock, out dto);
+
+    public void SaveClimateDataDTO(string stationId, string parameterId, HomeAssistantDTO dto)
+    {
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(timeSpanCalculator.FixTime([new TimeOnly(1, 10)]))
+            .SetPriority(CacheItemPriority.Normal);
+        SaveToCache(ClimateDataCacheKey + stationId + parameterId, dto, options, _climateDataLock);
     }
 
     public bool GetTextForecast(string stationId, out ForecastMessageDTO? dto)
