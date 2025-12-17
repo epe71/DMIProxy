@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DMIProxy/DMIProxy.csproj" />
+  <Project Path="DMIProxyTests/DMIProxyTests.csproj" />
+</Solution>
