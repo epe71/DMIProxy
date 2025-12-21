@@ -30,7 +30,7 @@ namespace DMIProxy.DomainService
         {
             var parameters = new Dictionary<string, string> {
                 { "parameterId", parameterId.ToString() },
-                { "limit", "100" },
+                { "limit", "365" },
                 { "qcStatus", "manual" },
                 { "timeResolution", "day" }
             };
