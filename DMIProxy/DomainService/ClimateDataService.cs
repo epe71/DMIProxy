@@ -26,11 +26,11 @@ namespace DMIProxy.DomainService
             };
         }
 
-        public async Task<DmiMetObsData> GetParameterId(ParameterId parameterId)
+        public async Task<DmiMetObsData> GetParameterId(ParameterId parameterId, int limit)
         {
             var parameters = new Dictionary<string, string> {
                 { "parameterId", parameterId.ToString() },
-                { "limit", "365" },
+                { "limit", limit.ToString() },
                 { "qcStatus", "manual" },
                 { "timeResolution", "day" }
             };

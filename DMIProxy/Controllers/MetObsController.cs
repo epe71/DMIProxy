@@ -61,4 +61,17 @@ public class MetObsController(
         var heatingDegreeDaysDTO = await climateDataApplicationService.GetHeatingDegreeDays();
         return new JsonResult(heatingDegreeDaysDTO);
     }
+
+    /// <summary>
+    /// Retrieves the average heating degree days data for Denmark.
+    /// </summary>
+    /// <param name="numberOfYears" example="10">The number of years to use in average. Must be between 1 and 20 (inclusive)</param>
+    /// <returns>An <see cref="IActionResult"/> containing the heating degree days data for the specified station in JSON format.</returns>
+    [HttpGet("ClimateData/AverageHeatingDegreeDays/{numberOfYears:int}")]
+    public async Task<IActionResult> GetAverageHeatingDegreeDays([FromRoute][Range(1, 20)] int numberOfYears)
+    {
+        var heatingDegreeDaysDTO = await climateDataApplicationService.GetAverageHeatingDegreeDays(numberOfYears);
+        return new JsonResult(heatingDegreeDaysDTO);
+    }
+
 }

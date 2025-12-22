@@ -10,5 +10,5 @@ public interface IClimateDataService
         mean_temp
     }
 
-    public Task<DmiMetObsData> GetParameterId(ParameterId parameterId);
+    public Task<DmiMetObsData> GetParameterId(ParameterId parameterId, int limit);
 }

@@ -31,7 +31,7 @@ public class ClimateDataApplicationServiceTests
         };
         var climateDataServiceMock = new Mock<IClimateDataService>();
         climateDataServiceMock
-            .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17))
+            .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ReturnsAsync(expectedData);
         var requestCacheMock = new Mock<IRequestCache>();
         var loggerMock = new Mock<ILogger<ClimateDataApplicationService>>();

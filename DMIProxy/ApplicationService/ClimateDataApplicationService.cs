@@ -1,6 +1,7 @@
 ﻿using DMIProxy.BusinessEntity.MetObs;
 using DMIProxy.Contract;
 using DMIProxy.DomainService;
+using System.Globalization;
 using static DMIProxy.DomainService.IClimateDataService;
 
 namespace DMIProxy.ApplicationService;
@@ -11,6 +12,7 @@ public class ClimateDataApplicationService(
     ILogger<ClimateDataApplicationService> logger) : IClimateDataApplicationService
 {
     private const string cacheKeyHeatingDegreeDays = "HeatingDegreeDays";
+    private const string cacheKeyHeatingDegreeDaysAverage = "HeatingDegreeDaysAverage";
     private const string cacheKeyMeanTemp = "MeanTemp";
 
     public async Task<HomeAssistantDTO> GetHeatingDegreeDays()
@@ -24,7 +26,7 @@ public class ClimateDataApplicationService(
         DmiMetObsData observation;
         try
         {
-            observation = await climateDataService.GetParameterId(ParameterId.acc_heating_degree_days_17);
+            observation = await climateDataService.GetParameterId(ParameterId.acc_heating_degree_days_17, 365);
         }
         catch (Polly.CircuitBreaker.BrokenCircuitException ex)
         {
@@ -57,6 +59,52 @@ public class ClimateDataApplicationService(
         return homeAssistantDTO;
     }
 
+    public async Task<HomeAssistantDTO> GetAverageHeatingDegreeDays(int numberOfYears)
+    {
+        if (requestCache.GetClimateDataDTO("Denmark", cacheKeyHeatingDegreeDaysAverage, out HomeAssistantDTO? cachedValue))
+        {
+            return cachedValue ?? throw new InvalidOperationException($"ClimateData for heatingDegreesDaysAverage could not be retrieved.");
+        }
+
+        DmiMetObsData observation;
+        try
+        {
+            observation = await climateDataService.GetParameterId(ParameterId.acc_heating_degree_days_17, 365 * numberOfYears);
+        }
+        catch (Polly.CircuitBreaker.BrokenCircuitException ex)
+        {
+            logger.LogError("Polly Circuit Breaker error: {Message}", ex.Message);
+            return new HomeAssistantDTO { description = ex.Message };
+        }
+
+        if (observation.features.Count == 0)
+        {
+            logger.LogError("No climate data returned for parameter = heatingDegreesDaysAverage");
+            return new HomeAssistantDTO();
+        }
+
+        int thisYear = DateTime.Now.Year;
+        var dataPoints = observation.features.GroupBy(f => f.properties.from.DayOfYear)
+            .Select(g => new PointDTO
+            {
+                date = new DateTime(thisYear, 1, 1).AddDays(g.Key - 1).ToString("yyyy-MM-ddTHH:mm:ss"),
+                value = Math.Round(g.Average(f => f.properties.value), 1)
+            })
+            .OrderByDescending(x => x.date)
+            .ToList();
+
+        var homeAssistantDTO = new HomeAssistantDTO
+        {
+            name = $"{numberOfYears} year average of accumulated heating degree days with base 17°C",
+            description = $"Station id: {observation.features.First().properties.stationId}",
+            data = dataPoints
+        };
+
+        logger.LogInformation("New ClimateData (heating degrees days average) save in cache");
+        requestCache.SaveClimateDataDTO("Denmark", cacheKeyHeatingDegreeDaysAverage, homeAssistantDTO);
+        return homeAssistantDTO;
+    }
+
     public async Task<HomeAssistantDTO> GetMeanTemperature(string stationId)
     {
         // Try to get from cache first
@@ -68,7 +116,7 @@ public class ClimateDataApplicationService(
         DmiMetObsData observation;
         try
         { 
-            observation = await climateDataService.GetParameterId(ParameterId.mean_temp);
+            observation = await climateDataService.GetParameterId(ParameterId.mean_temp, 100);
         }
         catch (Polly.CircuitBreaker.BrokenCircuitException ex)
         {
