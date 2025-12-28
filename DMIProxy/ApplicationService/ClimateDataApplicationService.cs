@@ -1,7 +1,6 @@
 ﻿using DMIProxy.BusinessEntity.MetObs;
 using DMIProxy.Contract;
 using DMIProxy.DomainService;
-using System.Globalization;
 using static DMIProxy.DomainService.IClimateDataService;
 
 namespace DMIProxy.ApplicationService;
@@ -49,8 +48,8 @@ public class ClimateDataApplicationService(
             .ToList();
         var homeAssistantDTO = new HomeAssistantDTO
         {
-            name = "Accumulated heating degree days with base 17°C",
-            description = $"Station id: {observation.features.First().properties.stationId}",
+            name = "Accumulated heating degree days",
+            description = "Accumulated heating degree days with base 17°C for Denmark",
             data = dataPoints
         };
 
@@ -61,7 +60,8 @@ public class ClimateDataApplicationService(
 
     public async Task<HomeAssistantDTO> GetAverageHeatingDegreeDays(int numberOfYears)
     {
-        if (requestCache.GetClimateDataDTO("Denmark", cacheKeyHeatingDegreeDaysAverage, out HomeAssistantDTO? cachedValue))
+        var cacheKey = $"{cacheKeyHeatingDegreeDaysAverage}_{numberOfYears}";
+        if (requestCache.GetClimateDataDTO("Denmark", cacheKey, out HomeAssistantDTO? cachedValue))
         {
             return cachedValue ?? throw new InvalidOperationException($"ClimateData for heatingDegreesDaysAverage could not be retrieved.");
         }
@@ -93,15 +93,27 @@ public class ClimateDataApplicationService(
             .OrderByDescending(x => x.date)
             .ToList();
 
+        var calculator = new SimpleMovingAverage(k: 7);
+        var updatedDataPoints = new List<PointDTO>();
+        foreach (PointDTO point in dataPoints)
+        {
+            var sma = calculator.Update(point.value);
+            updatedDataPoints.Add(new PointDTO
+            {
+                date = point.date,
+                value = Math.Round(sma, 1)
+            });
+        }
+
         var homeAssistantDTO = new HomeAssistantDTO
         {
-            name = $"{numberOfYears} year average of accumulated heating degree days with base 17°C",
-            description = $"Station id: {observation.features.First().properties.stationId}",
-            data = dataPoints
+            name = "average accumulated heating degree days",
+            description = $"{numberOfYears} year average of accumulated heating degree days with base 17°C",
+            data = updatedDataPoints
         };
 
         logger.LogInformation("New ClimateData (heating degrees days average) save in cache");
-        requestCache.SaveClimateDataDTO("Denmark", cacheKeyHeatingDegreeDaysAverage, homeAssistantDTO);
+        requestCache.SaveClimateDataDTO("Denmark", cacheKey, homeAssistantDTO);
         return homeAssistantDTO;
     }
 
