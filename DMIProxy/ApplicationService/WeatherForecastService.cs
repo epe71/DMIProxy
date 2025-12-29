@@ -1,27 +1,32 @@
-﻿using DMIProxy.Contract;
+﻿using DMIProxy.BusinessEntity;
+using DMIProxy.Contract;
 using DMIProxy.DomainService;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace DMIProxy.ApplicationService
 {
     public class WeatherForecastService(
         IWebScrapeService webScrapeService,
-        IRequestCache requestCache) : IWeatherForecastService
+        ITimeSpanCalculator timeSpanCalculator,
+        IFusionCache cache) : IWeatherForecastService
     {
         public async Task<ForecastMessageDTO> GetWeatherForecast(string stationId)
         {
-            if (requestCache.GetTextForecast(stationId, out ForecastMessageDTO? dto) && dto != null)
-            {
-                return dto;
-            }
+            var updateTime = new List<TimeOnly> { new(6, 0), new(10, 0), new(18, 0) };
+            var expirationTime = timeSpanCalculator.FixTime(updateTime);
 
-            var forecast = await webScrapeService.GetWeatherForecast(stationId);
-            dto = new ForecastMessageDTO()
+            var forecast = await cache.GetOrSetAsync<TextForecast>(
+                $"TextForecast-{stationId}",
+                async (_, _) => await webScrapeService.GetWeatherForecast(stationId),
+                options => options.SetDuration(expirationTime)
+            );
+
+            var dto = new ForecastMessageDTO()
             {
                 Time = forecast.TimeStamp,
                 Headline = forecast.Headline,
                 Message = TrimForecastText(forecast.Forecast)
             };
-            requestCache.SaveTextForecast(stationId, dto);
 
             return dto;
         }

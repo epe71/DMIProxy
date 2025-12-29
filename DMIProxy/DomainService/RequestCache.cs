@@ -6,35 +6,15 @@ namespace DMIProxy.DomainService;
 
 public class RequestCache(
     IMemoryCache cache, 
-    ITimeSpanCalculator timeSpanCalculator, 
     IDateTimeProvider dateTimeProvider) : IRequestCache
 {
-    private const string RainCacheKey = "Rain-";
     private const string EdrCacheKey = "EDR-";
     private const string EdrKeysKey = "EdrKeys";
-    private const string TextForecastCacheKey = "TextForecast-";
-    private const string ClimateDataCacheKey = "ClimateData-";
-    private static readonly object _rainLock = new();
     private static readonly object _edrLock = new();
-    private static readonly object _textLock = new();
     private static readonly object _edrKeysLock = new();
-    private static readonly object _climateDataLock = new();
 
     public TimeSpan edrKeyTimeOut = new TimeSpan(4, 0, 0);
 
-    public bool GetRainDTO(string stationId, out RainDTO? rainDto)
-    => TryGetFromCache(RainCacheKey + stationId, _rainLock, out rainDto);
-
-    public void SaveRainDTO(string stationId, RainDTO rainDTO)
-    {
-        var nextUpdate = 3;
-        if (rainDTO.RainToday > 0) nextUpdate = 2;
-        if (rainDTO.Rain1h > 0) nextUpdate = 1;
-        var options = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(timeSpanCalculator.AtTheTopOfTheHour(nextUpdate))
-            .SetPriority(CacheItemPriority.Normal);
-        SaveToCache(RainCacheKey + stationId, rainDTO, options, _rainLock);
-    }
 
     public bool GetEdrForecastDTO(string forecastParameter, out HomeAssistantDTO? forecastDto)
         => TryGetFromCache(EdrCacheKey + forecastParameter, _edrLock, out forecastDto);
@@ -46,29 +26,6 @@ public class RequestCache(
             .SetPriority(CacheItemPriority.Normal);
         SaveToCache(EdrCacheKey + forecastParameter, forecastDTO, options, _edrLock);
         EdrKeyUpdated(forecastParameter);
-    }
-
-    public bool GetClimateDataDTO(string stationId, string parameterId, out HomeAssistantDTO? dto)
-        => TryGetFromCache(ClimateDataCacheKey + stationId + parameterId, _climateDataLock, out dto);
-
-    public void SaveClimateDataDTO(string stationId, string parameterId, HomeAssistantDTO dto)
-    {
-        var options = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(timeSpanCalculator.FixTime([new TimeOnly(1, 10)]))
-            .SetPriority(CacheItemPriority.Normal);
-        SaveToCache(ClimateDataCacheKey + stationId + parameterId, dto, options, _climateDataLock);
-    }
-
-    public bool GetTextForecast(string stationId, out ForecastMessageDTO? dto)
-        => TryGetFromCache(TextForecastCacheKey + stationId, _textLock, out dto);
-
-    public void SaveTextForecast(string stationId, ForecastMessageDTO dto)
-    {
-        var updateTime = new List<TimeOnly> { new(6, 0), new(10, 0), new(18, 0) };
-        var options = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(timeSpanCalculator.FixTime(updateTime))
-            .SetPriority(CacheItemPriority.Normal);
-        SaveToCache(TextForecastCacheKey + stationId, dto, options, _textLock);
     }
 
     public bool GetAllEdrKeys(out Dictionary<string, DateTime>? keys)

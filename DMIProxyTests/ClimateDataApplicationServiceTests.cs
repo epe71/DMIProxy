@@ -1,8 +1,10 @@
 ﻿using DMIProxy.ApplicationService;
 using DMIProxy.BusinessEntity.MetObs;
 using DMIProxy.DomainService;
+using DMIProxyTests.Builder;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace DMIProxyTests;
 
@@ -33,10 +35,11 @@ public class ClimateDataApplicationServiceTests
         climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ReturnsAsync(expectedData);
-        var requestCacheMock = new Mock<IRequestCache>();
+        var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
+        var fusionCache = new FusionCache(new FusionCacheOptions());
         var loggerMock = new Mock<ILogger<ClimateDataApplicationService>>();
 
-        var service = new ClimateDataApplicationService(climateDataServiceMock.Object, requestCacheMock.Object, loggerMock.Object);
+        var service = new ClimateDataApplicationService(climateDataServiceMock.Object, timeSpanCalculator, fusionCache, loggerMock.Object);
 
         // Act
         var result = await service.GetHeatingDegreeDays();

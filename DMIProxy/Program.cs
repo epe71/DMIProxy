@@ -7,6 +7,7 @@ using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using System.Reflection;
+using ZiggyCreatures.Caching.Fusion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,8 +30,10 @@ builder.Services.AddHealthChecks()
     .AddCheck<RequestCacheHealthCheck>("Request_cache_check")
     .AddCheck<MetObsHealthCheck>("MetObs_data_check")
     .AddCheck<EDRHealthCheck>("EDR_data_check")
+    .AddCheck<ClimateDataHealthCheck>("Climate_data_check")
+    .AddCheck<WeatherForcastHealthCheck>("Weather_forecast_check")
     .AddProcessAllocatedMemoryHealthCheck(60)
-    .AddPrivateMemoryHealthCheck(350000000);
+    .AddPrivateMemoryHealthCheck(360000000);
 
 builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
 
@@ -53,6 +56,30 @@ builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
 // Memory cache
 builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
+
+// Fusion cache
+builder.Services.AddFusionCache()
+    .WithOptions(options => {
+        options.FailSafeActivationLogLevel = LogLevel.Debug;
+        options.SerializationErrorsLogLevel = LogLevel.Warning;
+        options.DistributedCacheSyntheticTimeoutsLogLevel = LogLevel.Debug;
+        options.DistributedCacheErrorsLogLevel = LogLevel.Error;
+        options.FactorySyntheticTimeoutsLogLevel = LogLevel.Debug;
+        options.FactoryErrorsLogLevel = LogLevel.Error;
+    })
+    .WithDefaultEntryOptions(new FusionCacheEntryOptions {
+        Duration = TimeSpan.FromHours(20),
+
+        FactorySoftTimeout = TimeSpan.FromMilliseconds(300),
+        FactoryHardTimeout = TimeSpan.FromMilliseconds(1500),
+
+        IsFailSafeEnabled = true,
+        FailSafeMaxDuration = TimeSpan.FromHours(24),
+        FailSafeThrottleDuration = TimeSpan.FromSeconds(30),
+
+        EagerRefreshThreshold = 0.9f,
+        JitterMaxDuration = TimeSpan.FromSeconds(2)
+    });
 
 // HttpClient configuration with Polly
 builder.Services.AddHttpClient("LongTimeOutClient", client =>

@@ -1,13 +1,12 @@
 ﻿using DMIProxy.BusinessEntity;
-using DMIProxy.DomainService;
+using DMIProxy.Contract;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace DMIProxy.HealthCheck;
 
-public class MetObsHealthCheck(IRequestCache requestCache, IDateTimeProvider dateTimeProvider) : IHealthCheck
+public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimeProvider) : IHealthCheck
 {
-    private IRequestCache _requestCache = requestCache;
-
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         var stationId = "06072";
@@ -16,30 +15,30 @@ public class MetObsHealthCheck(IRequestCache requestCache, IDateTimeProvider dat
                 { "Station id", stationId }
             };
 
-        _requestCache.GetRainDTO(stationId, out var rainDto);
-        if (rainDto == null)
+        RainDTO cachedValue = cache.TryGet<RainDTO>($"Rain-{stationId}");
+        if (cachedValue == null)
         {
             return Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, data));
         }
 
         data = new Dictionary<string, object>()
             {
-                { "When was data last updated (zulu time zone)", rainDto.TimeStamp },
-                { "Number of mesaurement in response", rainDto.NumberReturned },
+                { "When was data last updated (zulu time zone)", cachedValue.TimeStamp },
+                { "Number of mesaurement in response", cachedValue.NumberReturned },
                 { "Station id", stationId }
             };
 
-        if (rainDto.TimeStamp < dateTimeProvider.UtcNow.AddDays(-1))
+        if (cachedValue.TimeStamp < dateTimeProvider.UtcNow.AddDays(-1))
         {
             return Task.FromResult(HealthCheckResult.Unhealthy("MetObs data is to old", null, data));
         }
 
-        if (rainDto.TimeStamp < dateTimeProvider.UtcNow.AddHours(-3))
+        if (cachedValue.TimeStamp < dateTimeProvider.UtcNow.AddHours(-3))
         {
             return Task.FromResult(HealthCheckResult.Degraded("MetObs data delayed", null, data));
         }
 
-        if (rainDto.NumberReturned < 27*24)
+        if (cachedValue.NumberReturned < 27*24)
         {
             return Task.FromResult(HealthCheckResult.Unhealthy("To few MetObs data points", null, data));
         }

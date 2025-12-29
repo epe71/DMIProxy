@@ -9,7 +9,7 @@ namespace DMIProxyTests;
 [TestClass]
 public class RequestCacheTests
 {
-    private RequestCache CreateRequestCache(out IMemoryCache memoryCache, out ITimeSpanCalculator timeSpanCalculator, out IDateTimeProvider dateTimeProvider)
+    private RequestCache CreateRequestCache(out IMemoryCache memoryCache, out IDateTimeProvider dateTimeProvider)
     {
         memoryCache = new MemoryCache(new MemoryCacheOptions());
         var dateTimes = new List<DateTime>
@@ -30,31 +30,14 @@ public class RequestCacheTests
         dateTimeProvider = new MockDateTimeProviderBuilder()
                 .WithUtcTimeSequnce(dateTimes)
                 .Build();
-        timeSpanCalculator = new TimeSpanCalculator(dateTimeProvider);
-        return new RequestCache(memoryCache, timeSpanCalculator, dateTimeProvider);
-    }
-
-    [TestMethod]
-    public void SaveRainDTO_ShouldSaveRainDTO()
-    {
-        // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
-        var rainDTO = new RainDTO { Rain1h = 1, RainToday = 2 };
-
-        // Act
-        requestCache.SaveRainDTO("1234", rainDTO);
-        requestCache.GetRainDTO("1234", out var cacheItem);
-
-        // Assert
-        Assert.AreEqual(rainDTO.Rain1h, cacheItem?.Rain1h);
-        Assert.AreEqual(rainDTO.RainToday, cacheItem?.RainToday);
+        return new RequestCache(memoryCache, dateTimeProvider);
     }
 
     [TestMethod]
     public void SaveEdrKeys_TwoDistinctKeys_ShouldStoreBoth()
     {
         // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
         requestCache.EdrKeyUpdated("key1");
         requestCache.EdrKeyUpdated("key2");
 
@@ -70,7 +53,7 @@ public class RequestCacheTests
     public void SaveEdrKeys_SameKeyTwice_ShouldUpdateKey()
     {
         // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
         requestCache.EdrKeyUpdated("key1");
         var firstTime = GetEdrKeyTime(requestCache, "key1");
         Task.Delay(10).Wait(); // ensure a small delay for update
@@ -90,57 +73,10 @@ public class RequestCacheTests
     }
 
     [TestMethod]
-    public void SaveTextForecast_ShouldSaveAndRetrieve()
-    {
-        // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
-        var dto = new ForecastMessageDTO { Time = DateTime.UtcNow, Headline = "headline", Message = "message" };
-        requestCache.SaveTextForecast("station1", dto);
-
-        // Act
-        requestCache.GetTextForecast("station1", out var cached);
-
-        // Assert
-        Assert.IsNotNull(cached);
-        Assert.AreEqual(dto.Headline, cached.Headline);
-        Assert.AreEqual(dto.Message, cached.Message);
-    }
-
-    [TestMethod]
-    public void SaveClimateData_ShouldSaveAndRetrieve() 
-    {
-        // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
-        var dto = new HomeAssistantDTO { data = new List<PointDTO>(), description = "desc" };
-        requestCache.SaveClimateDataDTO("station1", "param1", dto);
-
-        // Act
-        requestCache.GetClimateDataDTO("station1", "param1", out var cached);
-
-        // Assert
-        Assert.IsNotNull(cached);
-        Assert.AreEqual(dto.description, cached.description);
-    }
-
-    [TestMethod]
-    public void GetClimateData_ShouldReturnFalseIfNotFound()
-    {
-        // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
-
-        // Act
-        var found = requestCache.GetClimateDataDTO("stationX", "paramY", out var dto);
-
-        // Assert
-        Assert.IsFalse(found);
-        Assert.IsNull(dto);
-    }
-
-    [TestMethod]
     public void SaveEdrForecastDTO_ShouldSaveAndRetrieve()
     {
         // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
         var dto = new HomeAssistantDTO { data = new List<PointDTO>(), description = "desc" };
         requestCache.SaveEdrForecastDTO("param1", dto);
 
@@ -153,24 +89,10 @@ public class RequestCacheTests
     }
 
     [TestMethod]
-    public void GetRainDTO_ShouldReturnFalseIfNotFound()
-    {
-        // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
-
-        // Act
-        var found = requestCache.GetRainDTO("notfound", out var dto);
-
-        // Assert
-        Assert.IsFalse(found);
-        Assert.IsNull(dto);
-    }
-
-    [TestMethod]
     public void SaveEdrKeys_ConcurrentAccess_ShouldMaintainCorrectCount()
     {
         // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
 
         // Act
         Parallel.For(0, 50, i =>
@@ -188,7 +110,7 @@ public class RequestCacheTests
     public void GetEdrKeysToUpdate_FirstCallWithNewKey_ReturnsEmptyString()
     {
         // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
         string newKey = "test-key";
 
         // Act
@@ -205,7 +127,7 @@ public class RequestCacheTests
     public void GetEdrKeysToUpdate_SecondCallWithKey_ReturnsAllKeys()
     {
         // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
 
         requestCache.GetEdrKeysToUpdate("Key1");
         requestCache.GetEdrKeysToUpdate("Key2");
@@ -224,7 +146,7 @@ public class RequestCacheTests
     public void GetEdrKeysToUpdate_AfterKeyExpired_ReturnsAllKeys()
     {
         // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
 
         requestCache.EdrKeyUpdated("Key1");
         for (int i = 1; i <= 8; i++)
@@ -246,7 +168,7 @@ public class RequestCacheTests
     public void GetEdrKeysToUpdate_SecondCallWithKeyAfterUpdate_ReturnsEmptyString()
     {
         // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
+        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
 
         requestCache.GetEdrKeysToUpdate("Key1");
         requestCache.EdrKeyUpdated("Key1");
@@ -261,25 +183,4 @@ public class RequestCacheTests
         Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
     }
 
-    [TestMethod]
-    public void Concurrent_SaveAndGet_RainDTO_ShouldWorkCorrectly()
-    {
-        // Arrange
-        var requestCache = CreateRequestCache(out _, out _, out var dateTimeProvider);
-
-        // Act
-        Parallel.For(0, 100, i =>
-        {
-            // Each thread saves a RainDTO with values based on iteration index.
-            var rainDTO = new RainDTO { Rain1h = i % 5, RainToday = i % 3 };
-            requestCache.SaveRainDTO("concurrent", rainDTO);
-        });
-        requestCache.GetRainDTO("concurrent", out var result);
-
-        // Assert
-        Assert.IsNotNull(result);
-        // Verify that the resulting values fall within the expected ranges.
-        Assert.IsTrue(result.Rain1h >= 0 && result.Rain1h <= 4, "Rain1h");
-        Assert.IsTrue(result.RainToday >= 0 && result.RainToday <= 2, "RainToday");
-    }
 }

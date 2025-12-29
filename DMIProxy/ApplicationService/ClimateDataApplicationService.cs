@@ -1,13 +1,14 @@
-﻿using DMIProxy.BusinessEntity.MetObs;
-using DMIProxy.Contract;
+﻿using DMIProxy.Contract;
 using DMIProxy.DomainService;
+using ZiggyCreatures.Caching.Fusion;
 using static DMIProxy.DomainService.IClimateDataService;
 
 namespace DMIProxy.ApplicationService;
 
 public class ClimateDataApplicationService(
     IClimateDataService climateDataService,
-    IRequestCache requestCache,
+    ITimeSpanCalculator timeSpanCalculator,
+    IFusionCache cache,
     ILogger<ClimateDataApplicationService> logger) : IClimateDataApplicationService
 {
     private const string cacheKeyHeatingDegreeDays = "HeatingDegreeDays";
@@ -16,23 +17,19 @@ public class ClimateDataApplicationService(
 
     public async Task<HomeAssistantDTO> GetHeatingDegreeDays()
     {
-        // Try to get from cache first
-        if (requestCache.GetClimateDataDTO("Denmark", cacheKeyHeatingDegreeDays, out HomeAssistantDTO? cachedValue))
-        {
-            return cachedValue ?? throw new InvalidOperationException($"ClimateData for heatingDegreesDays could not be retrieved.");
-        }
+        var expirationTime = timeSpanCalculator.FixTime([new TimeOnly(12, 10)]);
+        var observation = await cache.GetOrSetAsync<HomeAssistantDTO>(
+            cacheKeyHeatingDegreeDays,
+            async (_, _) => await GetHeatingDegreeDays_NoCache(),
+            options => options.SetDuration(expirationTime)
+        );
 
-        DmiMetObsData observation;
-        try
-        {
-            observation = await climateDataService.GetParameterId(ParameterId.acc_heating_degree_days_17, 365);
-        }
-        catch (Polly.CircuitBreaker.BrokenCircuitException ex)
-        {
-            logger.LogError("Polly Circuit Breaker error: {Message}", ex.Message);
-            return new HomeAssistantDTO { description = ex.Message };
-        }
+        return observation;
+    }
 
+    private async Task<HomeAssistantDTO> GetHeatingDegreeDays_NoCache()
+    { 
+        var observation = await climateDataService.GetParameterId(ParameterId.acc_heating_degree_days_17, 365);
         if (observation.features.Count == 0)
         {
             logger.LogError("No climate data returned for parameter = heatingDegreesDays");
@@ -53,30 +50,23 @@ public class ClimateDataApplicationService(
             data = dataPoints
         };
 
-        logger.LogInformation("New ClimateData (heating degrees days) save in cache");
-        requestCache.SaveClimateDataDTO("Denmark", cacheKeyHeatingDegreeDays, homeAssistantDTO);
         return homeAssistantDTO;
     }
 
     public async Task<HomeAssistantDTO> GetAverageHeatingDegreeDays(int numberOfYears)
     {
         var cacheKey = $"{cacheKeyHeatingDegreeDaysAverage}_{numberOfYears}";
-        if (requestCache.GetClimateDataDTO("Denmark", cacheKey, out HomeAssistantDTO? cachedValue))
-        {
-            return cachedValue ?? throw new InvalidOperationException($"ClimateData for heatingDegreesDaysAverage could not be retrieved.");
-        }
+        var observation = await cache.GetOrSetAsync<HomeAssistantDTO>(
+           cacheKey,
+           async (_, _) => await GetAverageHeatingDegreeDays_NoCache(numberOfYears)
+        );
 
-        DmiMetObsData observation;
-        try
-        {
-            observation = await climateDataService.GetParameterId(ParameterId.acc_heating_degree_days_17, 365 * numberOfYears);
-        }
-        catch (Polly.CircuitBreaker.BrokenCircuitException ex)
-        {
-            logger.LogError("Polly Circuit Breaker error: {Message}", ex.Message);
-            return new HomeAssistantDTO { description = ex.Message };
-        }
+        return observation;
+    }
 
+    private async Task<HomeAssistantDTO> GetAverageHeatingDegreeDays_NoCache(int numberOfYears)
+    {
+        var observation = await climateDataService.GetParameterId(ParameterId.acc_heating_degree_days_17, 365 * numberOfYears);
         if (observation.features.Count == 0)
         {
             logger.LogError("No climate data returned for parameter = heatingDegreesDaysAverage");
@@ -112,30 +102,22 @@ public class ClimateDataApplicationService(
             data = updatedDataPoints
         };
 
-        logger.LogInformation("New ClimateData (heating degrees days average) save in cache");
-        requestCache.SaveClimateDataDTO("Denmark", cacheKey, homeAssistantDTO);
         return homeAssistantDTO;
     }
 
     public async Task<HomeAssistantDTO> GetMeanTemperature(string stationId)
     {
-        // Try to get from cache first
-        if (requestCache.GetClimateDataDTO(stationId, cacheKeyMeanTemp, out HomeAssistantDTO? cachedValue))
-        {
-            return cachedValue ?? throw new InvalidOperationException($"ClimateData for mean temperature could not be retrieved. StationId={stationId}");
-        }
+        var observation = await cache.GetOrSetAsync<HomeAssistantDTO>(
+            cacheKeyMeanTemp,
+            async (_, _) => await GetMeanTemperature_NoCache(stationId)
+        );
 
-        DmiMetObsData observation;
-        try
-        { 
-            observation = await climateDataService.GetParameterId(ParameterId.mean_temp, 100);
-        }
-        catch (Polly.CircuitBreaker.BrokenCircuitException ex)
-        {
-            logger.LogError("Polly Circuit Breaker error: {Message}", ex.Message);
-            return new HomeAssistantDTO { description = ex.Message };
-        }
+        return observation;
+    }
 
+    private async Task<HomeAssistantDTO> GetMeanTemperature_NoCache(string stationId)
+    { 
+        var observation = await climateDataService.GetParameterId(ParameterId.mean_temp, 100);
         if (observation.features.Count == 0)
         {
             logger.LogError("No climate data returned for station = {StationId} and parameter = meanTemperatur", stationId);
@@ -156,9 +138,6 @@ public class ClimateDataApplicationService(
             description = $"Station id: {observation.features.First().properties.stationId}",
             data = dataPoints
         };
-
-        logger.LogInformation("New ClimateData (mean temperatur) for station {StationId} save in cache", stationId);
-        requestCache.SaveClimateDataDTO(stationId, cacheKeyMeanTemp, homeAssistantDTO);
 
         return homeAssistantDTO;
     }
