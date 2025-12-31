@@ -27,7 +27,6 @@ builder.Services.AddSwaggerGen(c =>
 
 // Health checks
 builder.Services.AddHealthChecks()
-    .AddCheck<RequestCacheHealthCheck>("Request_cache_check")
     .AddCheck<MetObsHealthCheck>("MetObs_data_check")
     .AddCheck<EDRHealthCheck>("EDR_data_check")
     .AddCheck<ClimateDataHealthCheck>("Climate_data_check")
@@ -71,7 +70,7 @@ builder.Services.AddFusionCache()
         Duration = TimeSpan.FromHours(20),
 
         FactorySoftTimeout = TimeSpan.FromMilliseconds(300),
-        FactoryHardTimeout = TimeSpan.FromMilliseconds(1500),
+        FactoryHardTimeout = TimeSpan.FromMinutes(3),
 
         IsFailSafeEnabled = true,
         FailSafeMaxDuration = TimeSpan.FromHours(24),

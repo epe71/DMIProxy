@@ -8,25 +8,10 @@ public class RequestCache(
     IMemoryCache cache, 
     IDateTimeProvider dateTimeProvider) : IRequestCache
 {
-    private const string EdrCacheKey = "EDR-";
     private const string EdrKeysKey = "EdrKeys";
-    private static readonly object _edrLock = new();
     private static readonly object _edrKeysLock = new();
 
     public TimeSpan edrKeyTimeOut = new TimeSpan(4, 0, 0);
-
-
-    public bool GetEdrForecastDTO(string forecastParameter, out HomeAssistantDTO? forecastDto)
-        => TryGetFromCache(EdrCacheKey + forecastParameter, _edrLock, out forecastDto);
-
-    public void SaveEdrForecastDTO(string forecastParameter, HomeAssistantDTO forecastDTO)
-    {
-        var options = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(TimeSpan.FromHours(4))
-            .SetPriority(CacheItemPriority.Normal);
-        SaveToCache(EdrCacheKey + forecastParameter, forecastDTO, options, _edrLock);
-        EdrKeyUpdated(forecastParameter);
-    }
 
     public bool GetAllEdrKeys(out Dictionary<string, DateTime>? keys)
     => TryGetFromCache(EdrKeysKey, _edrKeysLock, out keys);

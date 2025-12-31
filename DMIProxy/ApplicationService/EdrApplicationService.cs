@@ -1,60 +1,51 @@
 ﻿using DMIProxy.Contract;
 using DMIProxy.DomainService;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace DMIProxy.ApplicationService
 {
     public class EdrApplicationService(
         IEdrService edrService,
         INtfyService ntfyService,
-        IRequestCache requestCache,
+        IFusionCache cache,
         ILogger<EdrApplicationService> logger) : IEdrApplicationService
     {
-
         public async Task<HomeAssistantDTO> GetEdrForecast(string forecastParameter)
         {
-            // Try to get from cache first
-            if (requestCache.GetEdrForecastDTO(forecastParameter, out HomeAssistantDTO? cachedForecast))
+            var rainDto = await cache.GetOrSetAsync<HomeAssistantDTO>(
+                $"EDR-{forecastParameter}",
+                async (_, _) => await GetEdrForecast_NoCache(forecastParameter),
+                new HomeAssistantDTO() { name = forecastParameter, description = "No data ready right now" },
+                options => options.SetDuration(TimeSpan.FromHours(4))
+                .SetFailSafe(true, TimeSpan.FromHours(6), TimeSpan.FromSeconds(60))
+                .SetFactoryTimeouts(TimeSpan.FromSeconds(1))
+
+            );
+
+            return rainDto;
+        }
+
+        private async Task<HomeAssistantDTO> GetEdrForecast_NoCache(string forecastParameter)
+        { 
+            var forecastDtos = await edrService.GetEdrForecast([forecastParameter]);
+            if (forecastDtos == null || forecastDtos.Count == 0)
             {
-                return cachedForecast ?? throw new InvalidOperationException($"Forecast data could not be retrieved: {forecastParameter}");
+                string errorMsg = $"Failed to retrieve forecast data: {forecastParameter}";
+                await ntfyService.SendNotification(errorMsg);
+                throw new InvalidOperationException(errorMsg);
             }
 
-            // Determine if this key should be updated
-            var keysToUpdate = requestCache.GetEdrKeysToUpdate(forecastParameter);
-            if (keysToUpdate.Count == 0)
+            HomeAssistantDTO? forcastDto = null;
+            foreach (var dto in forecastDtos)
             {
-                logger.LogInformation("Initialize cache, no update for: {ForecastParameter}", forecastParameter);
-                return new HomeAssistantDTO { description = "Starting service, no forecast parameter ready." };
-            }
-
-            try
-            {
-                var forecastDtos = await edrService.GetEdrForecast(keysToUpdate);
-                if (forecastDtos == null || forecastDtos.Count == 0)
+                if (dto.name == forecastParameter)
                 {
-                    string errorMsg = $"Failed to retrieve forecast data: {string.Join(", ", keysToUpdate)}";
-                    await ntfyService.SendNotification(errorMsg);
-                    throw new InvalidOperationException(errorMsg);
+                    forcastDto = dto;
                 }
-
-                HomeAssistantDTO? forcastDto = null;
-                foreach (var dto in forecastDtos)
-                {
-                    if (dto.name == forecastParameter)
-                    {
-                        forcastDto = dto;
-                    }
-                    logger.LogInformation("Forecast data for {Parameter}: {Description}", forecastParameter, dto.description);
-                    requestCache.SaveEdrForecastDTO(dto.name, dto);
-                }
-
-                return forcastDto ?? throw new InvalidOperationException("Forcast data not saved in cache after update");
+                logger.LogInformation("Forecast data for {Parameter}: {Description}", forecastParameter, dto.description);
             }
-            catch (Polly.CircuitBreaker.BrokenCircuitException ex)
-            {
-                await ntfyService.SendNotification($"Polly Circuit Breaker error: {ex.Message}");
-                logger.LogError("Polly Circuit Breaker error: {Message}", ex.Message);
-                return new HomeAssistantDTO { description = ex.Message };
-            }
+
+            return forcastDto ?? throw new InvalidOperationException("Forcast data not saved in cache after update");
         }
     }
 }

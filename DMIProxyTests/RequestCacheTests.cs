@@ -1,5 +1,4 @@
 ﻿using DMIProxy.BusinessEntity;
-using DMIProxy.Contract;
 using DMIProxy.DomainService;
 using DMIProxyTests.Builder;
 using Microsoft.Extensions.Caching.Memory;
@@ -70,22 +69,6 @@ public class RequestCacheTests
     {
         cache.GetAllEdrKeys(out var keys);
         return keys != null && keys.TryGetValue(key, out var time) ? time : DateTime.MinValue;
-    }
-
-    [TestMethod]
-    public void SaveEdrForecastDTO_ShouldSaveAndRetrieve()
-    {
-        // Arrange
-        var requestCache = CreateRequestCache(out _, out var dateTimeProvider);
-        var dto = new HomeAssistantDTO { data = new List<PointDTO>(), description = "desc" };
-        requestCache.SaveEdrForecastDTO("param1", dto);
-
-        // Act
-        requestCache.GetEdrForecastDTO("param1", out var cached);
-
-        // Assert
-        Assert.IsNotNull(cached);
-        Assert.AreEqual(dto.description, cached.description);
     }
 
     [TestMethod]
@@ -182,5 +165,4 @@ public class RequestCacheTests
         Assert.IsNotNull(keys);
         Assert.IsTrue(keys.ContainsKey("Key1"), "Key1 not found");
     }
-
 }
