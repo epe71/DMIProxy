@@ -6,6 +6,7 @@ using DMIProxy.HealthCheck;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
+using SerilogTracing;
 using System.Reflection;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -53,9 +54,6 @@ builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
 
 builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
-// Memory cache
-builder.Services.AddMemoryCache(option => { option.TrackStatistics = true; });
-
 // Fusion cache
 builder.Services.AddFusionCache()
     .WithOptions(options => {
@@ -91,11 +89,19 @@ builder.Services.AddHttpClient("LongTimeOutClient", client =>
 })
 .AddPolicyHandler(PollyConfiguration.GetRetryPolicy());
 
-// Serilog configuration
+// Serilog configuration with trace enrichment
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
-                .ReadFrom.Configuration(hostingContext.Configuration));
+                .ReadFrom.Configuration(hostingContext.Configuration)
+                .Enrich.FromLogContext());
 
 var app = builder.Build();
+
+// SerilogTracing configuration - captures traces as structured logs
+using var listener = new ActivityListenerConfiguration()
+    .Instrument.AspNetCoreRequests()
+    .Instrument.HttpClientRequests()
+    .Instrument.WithDefaultInstrumentation(true)
+    .TraceToSharedLogger();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
