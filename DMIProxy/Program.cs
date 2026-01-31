@@ -43,7 +43,6 @@ builder.Services.AddScoped<IEdrService, EdrService>();
 builder.Services.AddScoped<IMetObsService, MetObsService>();
 builder.Services.AddScoped<INtfyService, NtfyService>();
 builder.Services.AddScoped<IWebScrapeService, WebScrapeService>();
-builder.Services.AddScoped<IRequestCache, RequestCache>();
 builder.Services.AddScoped<ITimeSpanCalculator, TimeSpanCalculator>();
 
 // Application services
@@ -97,11 +96,11 @@ builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfigura
 var app = builder.Build();
 
 // SerilogTracing configuration - captures traces as structured logs
-using var listener = new ActivityListenerConfiguration()
-    .Instrument.AspNetCoreRequests()
-    .Instrument.HttpClientRequests()
-    .Instrument.WithDefaultInstrumentation(true)
-    .TraceToSharedLogger();
+//using var listener = new ActivityListenerConfiguration()
+//    .Instrument.AspNetCoreRequests()
+//    .Instrument.HttpClientRequests()
+//    .Instrument.WithDefaultInstrumentation(true)
+//    .TraceToSharedLogger();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
