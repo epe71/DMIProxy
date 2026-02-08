@@ -1,14 +1,15 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 
 WORKDIR /app
-RUN apk add --no-cache curl
+RUN apt-get update
+RUN apt-get --yes install curl
 ENV TZ="Europe/Copenhagen"
 EXPOSE 8080
 EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY ["DMIProxy/DMIProxy.csproj", "DMIProxy/"]
 RUN dotnet restore "DMIProxy/DMIProxy.csproj"
