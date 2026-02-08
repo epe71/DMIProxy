@@ -3,11 +3,12 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 
 WORKDIR /app
-RUN apt-get update
-RUN apt-get --yes install curl
+RUN apt-get update && apt-get install -y curl && apt-get clean && rm -rf /var/lib/apt/lists/*
 ENV TZ="Europe/Copenhagen"
 EXPOSE 8080
 EXPOSE 8081
+
+RUN useradd -m -u 1003 appuser
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
@@ -23,6 +24,9 @@ RUN dotnet publish "DMIProxy.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+USER appuser
+
 HEALTHCHECK --interval=60s --timeout=5s --retries=3 CMD curl --fail http://localhost:8080/healthcheck || exit 1
 
 ENTRYPOINT ["dotnet", "DMIProxy.dll"]
