@@ -45,8 +45,7 @@ public class MetObsController(
     /// <param name="stationId" example="2624652">The station id to get the weather forecast for</param>
     /// <returns>A Danish text with the wheather forecast for today</returns>
     [HttpGet("WeatherForecast/{stationId}")]
-    public async Task<IActionResult> GetWeatherForecast([RegularExpression(@"^\d{7}$
-")] string stationId)
+    public async Task<IActionResult> GetWeatherForecast([RegularExpression(@"^\d{7}$")] string stationId)
     {
         var forecastDTO = await weatherForecastService.GetWeatherForecast(stationId);
         return new JsonResult(forecastDTO);
