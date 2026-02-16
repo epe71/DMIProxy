@@ -9,6 +9,8 @@ public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimePro
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var stationId = "06072";
         var data = new Dictionary<string, object>()
             {

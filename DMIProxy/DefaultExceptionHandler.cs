@@ -14,6 +14,8 @@ namespace DMIProxy
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _logger.LogError(exception, "An unexpected error occurred");
 
             await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
@@ -23,7 +25,7 @@ namespace DMIProxy
                 Title = "An unexpected error occurred",
                 Detail = exception.Message,
                 Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}"
-            });
+            }, cancellationToken);
 
             return true;
         }

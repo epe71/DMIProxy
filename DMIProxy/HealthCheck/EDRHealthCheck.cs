@@ -8,6 +8,8 @@ public class EDRHealthCheck(IFusionCache cache) : IHealthCheck
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var cachedValue = cache.TryGet<HomeAssistantDTO>("EDR-wind-speed");
         if (cachedValue.HasValue == false)
         {

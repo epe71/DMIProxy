@@ -10,6 +10,8 @@ public class WeatherForcastHealthCheck(IFusionCache cache) : IHealthCheck
 
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         TextForecast cachedValue = cache.TryGet<TextForecast>($"TextForecast-{DefaultStationId}");
         if (cachedValue == null)
         {

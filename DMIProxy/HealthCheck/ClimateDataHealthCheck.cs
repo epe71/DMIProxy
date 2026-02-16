@@ -8,6 +8,8 @@ public class ClimateDataHealthCheck(IFusionCache cache) : IHealthCheck
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         HomeAssistantDTO cachedValue = cache.TryGet<HomeAssistantDTO>("HeatingDegreeDays");
         if (cachedValue == null)
         {
