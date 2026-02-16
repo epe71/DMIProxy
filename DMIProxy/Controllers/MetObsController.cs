@@ -17,8 +17,8 @@ public class MetObsController(
     /// <summary>
     /// Get rain mesaurement from the last hour, day and month
     /// </summary>
-    /// <param name="stationId" example="06072">id of the station to get information for</param>
-    /// <returns></returns>
+    /// <param name="stationId" example="06072">id of the station to get information for. List of stations: https://www.dmi.dk/friedata/dokumentation/data/meteorological-observation-data-stations</param>
+    /// <returns>An <see cref="IActionResult"/> containing rain statistics (1 hour, day, month) in JSON format.</returns>
     [HttpGet("Rain/{stationId}/")]
     public async Task<IActionResult> GetRain([RegularExpression(@"^\d{5}$")] string stationId)
     {
@@ -30,8 +30,8 @@ public class MetObsController(
     /// <summary>
     /// Get forecast from DMI Open Data service via EDR api
     /// </summary>
-    /// <param name="forecastParameter" example="total-precipitation">The parameter to get the forecast for.</param>
-    /// <returns>A JSON result containing the forecast data i Home Assistant format.</returns>
+    /// <param name="forecastParameter" example="total-precipitation">The parameter to get the forecast for. It is hardcode for the harmonie_dini_sf model and for city of Aarhus</param>
+    /// <returns>An <see cref="IActionResult"/> containing the forecast data i Home Assistant format.</returns>
     [HttpGet("EDR/{forecastParameter}")]
     public async Task<IActionResult> GetEdrForecast([RegularExpression(@"^[a-z0-9-]+$")] string forecastParameter)
     {
@@ -43,7 +43,7 @@ public class MetObsController(
     /// Get the current weather forecast for Aarhus
     /// </summary>
     /// <param name="stationId" example="2624652">The station id to get the weather forecast for</param>
-    /// <returns>A Danish text with the wheather forecast for today</returns>
+    /// <returns>An <see cref="IActionResult"/> with a danish text with the wheather forecast for today</returns>
     [HttpGet("WeatherForecast/{stationId}")]
     public async Task<IActionResult> GetWeatherForecast([RegularExpression(@"^\d{7}$")] string stationId)
     {

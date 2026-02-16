@@ -18,9 +18,11 @@ A .NET 10 ASP.NET Core API service that acts as a proxy for Danish Meteorologica
 
 ### MetObs Controller
 
-- GET /MetObs/Rain/{stationId} - Get rain statistics (1 hour, day, month)
-- GET /MetObs/EDR/{forecastParameter} - Get EDR forecasts
-- GET /MetObs/WeatherForecast/{stationId} - Get weather forecast text
+- GET /MetObs/Rain/{stationId} - Get rain statistics (1 hour, day, month). List of stationId - https://www.dmi.dk/friedata/dokumentation/data/meteorological-observation-data-stations
+- GET /MetObs/EDR/{forecastParameter} - Get EDR forecasts for Aarhus. Supported parameters: temperature-2m, relative-humidity-2m, wind-speed, pressure-sealevel, wind-dir, fraction-of-cloud-cover, cloud-transmittance, total-precipitation, global-radiation-flux
+- GET /MetObs/WeatherForecast/{stationId} - Get weather forecast text. StationId can be 2618425 (Copenhagen), 2624652 (Aarhus), 2615876 (Odense), 2624886 (Aalborg), 2622447 (Esbjerg)
+- GET /MetObs/ClimateData/HeatingDegreeDays - Get heating degree days data for Denmark
+- GET /MetObs/ClimateData/AverageHeatingDegreeDays/{numberOfYears} - Get average heating degree days data (1-20 years)
 
 ## Health Checks
 
