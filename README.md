@@ -1,6 +1,9 @@
 # DMIProxy
 
-A .NET 10 ASP.NET Core API service that acts as a proxy for Danish Meteorological Institute (DMI) weather data. DMIProxy aggregates weather data from multiple sources including DMI's MetObs API, EDR (Environmental Data Retrieval) API, and web scraping, providing unified endpoints for weather observations, forecasts, and climate data.
+A service that is built for Home Assistant to access Danish Meteorological Institute (DMI) weather data and get data returned in a Home Assistant frendlly 
+format. DMIProxy aggregates weather data from multiple sources including DMI's MetObs API, EDR (Environmental Data Retrieval) API, etc., providing 
+unified endpoints for weather observations, forecasts, and climate data. The data are cached using FusionCache for optimized performance and reliability.
+The service includes comprehensive health checks and is documented with Swagger for easy integration and testing.
 
 ## Features
 
@@ -37,23 +40,63 @@ The service includes health checks for:
 
 ### Docker
 
-`bash
-docker build -t dmiproxy .
-docker run -p 8080:8080 dmiproxy
-`
-
-### Local Development
-
-`bash
-dotnet build
-dotnet run --project DMIProxy/DMIProxy.csproj
+`docker run -p 8080:8080 epe71/dmiproxy
 `
 
 Navigate to http://localhost:8080/swagger for the API documentation.
 
+## Home Assistant Integration
+To integrate DMIProxy with Home Assistant, you can use the RESTful Sensor platform. Below is an example configuration for Home Assistant:
+```yaml
+sensor:
+    - platform: rest
+      resource: http://localhost:8080/MetObs/Rain/06072
+      unique_id: dmi_MetObs_Rain_06072
+      method: GET
+      name: DmiAarhus_rain
+      verify_ssl: false
+      value_template: "OK"
+      json_attributes:
+        - rain1h
+        - rainToday
+        - rainThisMonth
+      headers:
+        User-Agent: Home Assistant
+        Accept: 'application/json'
+    
+    - platform: rest
+      resource: http://localhost:8080/MetObs/EDR/temperature-2m
+      unique_id: dmi_MetObs_EDR_temperatur-2m
+      method: GET
+      name: DmiAarhus_EDR_temperatur-2m
+      verify_ssl: false
+      value_template: "OK"
+      json_attributes:
+        - data
+        - description
+      headers:
+        User-Agent: Home Assistant
+        Accept: 'application/json'
+    
+    - platform: rest
+      resource: http://localhost:8080/MetObs/WeatherForecast/2624652
+      unique_id: dmi_MetObs_WeaterForecast_2624652
+      method: GET
+      name: DmiAarhus_textForecast
+      verify_ssl: false
+      value_template: "OK"
+      json_attributes:
+        - time
+        - headline
+        - message
+      headers:
+        User-Agent: Home Assistant
+        Accept: 'application/json'
+```
+
 ## Environment
 
-The application uses Copenhagen timezone (Europe/Copenhagen) and is containerized for cloud deployment with proper health monitoring.
+The application uses Copenhagen timezone (Europe/Copenhagen).
 
 ## License
 
