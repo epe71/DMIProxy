@@ -32,7 +32,12 @@ jobs:
       run: dotnet build --configuration Release
 
     - name: Run tests
-      run: dotnet test --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
+      run: dotnet test --configuration Release --logger "trx;LogFileName=test_results.trx" --collect:"XPlat Code Coverage" --results-directory TestResults
+
+    - name: Find coverage file
+      run: |
+        echo "Coverage files:"
+        find . -type f -name "coverage.cobertura.xml" -print || true
 
     - name: Publish Test Results
       if: always()
@@ -49,3 +54,17 @@ jobs:
         name: Test Results
         path: test_results.trx
         reporter: dotnet-trx
+
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          **/TestResults/**/coverage.cobertura.xml
+
+    - name: Upload to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: |
+          **/TestResults/**/coverage.cobertura.xml
+        fail_ci_if_error: false
