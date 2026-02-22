@@ -3,7 +3,7 @@ using DMIProxy.DomainService;
 using DMIProxyTests.Builder;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace DMIProxyTests;
+namespace DMIProxyTests.DomainService;
 
 [TestClass]
 public class RequestCacheTests

@@ -1,7 +1,7 @@
 ﻿using DMIProxy.DomainService;
 using DMIProxyTests.Builder;
 
-namespace DMIProxyTests
+namespace DMIProxyTests.DomainService
 {
     [TestClass]
     public class TimeSpanCalculatorTests

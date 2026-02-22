@@ -1,6 +1,6 @@
 ﻿using DMIProxy.DomainService;
 
-namespace DMIProxyTests
+namespace DMIProxyTests.DomainService
 {
     [TestClass]
     public class ForecastDataCalculatorTests

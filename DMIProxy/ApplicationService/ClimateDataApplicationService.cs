@@ -55,6 +55,11 @@ public class ClimateDataApplicationService(
 
     public async Task<HomeAssistantDTO> GetAverageHeatingDegreeDays(int numberOfYears)
     {
+        if (numberOfYears < 1 || numberOfYears > 20)
+        {
+            throw new ArgumentOutOfRangeException(nameof(numberOfYears), "numberOfYears must be between 1 and 20 (inclusive).");
+        }
+
         var cacheKey = $"{cacheKeyHeatingDegreeDaysAverage}_{numberOfYears}";
         var observation = await cache.GetOrSetAsync<HomeAssistantDTO>(
            cacheKey,

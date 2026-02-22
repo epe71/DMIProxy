@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace DMIProxyTests
+namespace DMIProxyTests.Controllers
 {
     [TestClass]
     public class MetObsControllerTests

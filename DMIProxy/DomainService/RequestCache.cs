@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using DMIProxy.Contract;
-using DMIProxy.BusinessEntity;
+﻿using DMIProxy.BusinessEntity;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DMIProxy.DomainService;
 
