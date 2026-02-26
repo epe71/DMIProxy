@@ -41,7 +41,6 @@ builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
 builder.Services.AddScoped<IClimateDataService, ClimateDataService>();
 builder.Services.AddScoped<IEdrService, EdrService>();
 builder.Services.AddScoped<IMetObsService, MetObsService>();
-builder.Services.AddScoped<INtfyService, NtfyService>();
 builder.Services.AddScoped<IWebScrapeService, WebScrapeService>();
 builder.Services.AddScoped<ITimeSpanCalculator, TimeSpanCalculator>();
 

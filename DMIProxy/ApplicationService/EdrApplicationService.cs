@@ -6,7 +6,6 @@ namespace DMIProxy.ApplicationService
 {
     public class EdrApplicationService(
         IEdrService edrService,
-        INtfyService ntfyService,
         IFusionCache cache,
         ILogger<EdrApplicationService> logger) : IEdrApplicationService
     {
@@ -31,7 +30,6 @@ namespace DMIProxy.ApplicationService
             if (forecastDtos == null || forecastDtos.Count == 0)
             {
                 string errorMsg = $"Failed to retrieve forecast data: {forecastParameter}";
-                await ntfyService.SendNotification(errorMsg);
                 throw new InvalidOperationException(errorMsg);
             }
 
