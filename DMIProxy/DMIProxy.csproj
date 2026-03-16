@@ -30,7 +30,7 @@
     <PackageReference Include="SerilogTracing" Version="2.3.1" />
     <PackageReference Include="SerilogTracing.Instrumentation.AspNetCore" Version="2.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
-    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.5.0" />
+    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.6.0" />
   </ItemGroup>
 
 </Project>
