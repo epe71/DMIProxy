@@ -1,50 +1,6 @@
 # Copilot Instructions – .NET Project Rules
 You are working in a C#/.NET solution.
 
-General rules:
-
-* Follow clean architecture principles.
-* Prefer async/await.
-* Use dependency injection.
-* Avoid static services.
-* Follow existing folder structure.
-* Use consistent naming conventions.
-* Use interfaces for services and repositories.
-* Use DTOs for data transfer between layers.
-* Use logging and exception handling best practices.
-* Write unit tests for new code and ensure existing tests pass when refactoring.
-* Use configuration files for settings and secrets, not hardcoded values.
-* Use cancellation tokens for long-running operations and API endpoints.
-* Use appropriate HTTP status codes in API responses.
-* Use Swagger annotations for API documentation.
-* Use IDateTimeProvider for time-based operations to allow for testing.
-* Use controllers and not minimal API.
-* Validate inputs.
-
-When refactoring:
-
-* Suggest multi-file changes.
-* Keep namespaces consistent.
-* Avoid breaking public contracts.
-
-
-## Architecture
-
-The project follows clean architecture principles with clear separation of concerns:
-
-- **Controllers**: MetObsController - REST API endpoints
-- **Application Services**: Business logic orchestration layer
-  - ClimateDataApplicationService
-  - EdrApplicationService
-  - MetObsApplicationService
-  - WeatherForecastService
-- **Domain Services**: External integrations and utilities
-  - ClimateDataService, EdrService, MetObsService
-  - WebScrapeService, NtfyService
-  - TimeSpanCalculator, RequestCache
-- **DTOs**: Contract objects for request/response models
-- **Business Entities**: Core domain models
-
 ## Technology Stack
 
 - **.NET**: 10.0
@@ -72,4 +28,19 @@ DMIProxy/
 
 ## Testing
 
-* See [TEST_STRUCTURE.md](TEST_STRUCTURE.md) for test organization and patterns.
+### Test Data Builders (`Builders/`)
+Reusable test fixtures following the builder pattern:
+- **MockDateTimeProviderBuilder**: Creates mocked `IDateTimeProvider` instances for time-dependent tests
+  - Supports single `DateTime` setup with `WithDateTime()`
+  - Supports time sequence with `WithUtcTimeSequnce()`
+  - Used across multiple test classes for consistent time mocking
+
+### Testing Best Practices Observed
+
+#### Test Naming Convention
+Test method names are descriptive and action-focused:
+- Format: `{MethodName}_Description_ExpectedBehavior` or `{MethodName}_ShouldBehavior`
+
+#### Arrange-Act-Assert (AAA) Pattern
+All tests follow the **Arrange-Act-Assert** structure for clear and consistent organization:
+
