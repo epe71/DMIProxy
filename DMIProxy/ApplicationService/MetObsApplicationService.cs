@@ -19,6 +19,8 @@ public class MetObsApplicationService(
             options => options.SetDuration(expirationTime)
         );
 
+        await cache.SetAsync("RainCache:StationId", stationId, options => options.SetDurationMin(10));
+
         return rainDto ?? throw new InvalidOperationException("Rain data could not be retrieved.");
     }
 

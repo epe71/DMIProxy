@@ -11,7 +11,12 @@ public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimePro
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var stationId = "06072";
+        var stationId = cache.TryGet<string>("RainCache:StationId");
+        if (!stationId.HasValue)
+        {
+            return Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, null));
+        }
+
         var data = new Dictionary<string, object>()
             {
                 { "Station id", stationId }
