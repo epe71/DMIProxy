@@ -35,14 +35,14 @@ namespace DMIProxy.DomainService
 
         public async Task<List<HomeAssistantDTO>> GetEdrForecast(List<string> forecastParameters)
         {
-            var weatherParameters = string.Join(",", forecastParameters);
-            var httpRequestMessage = await SetupRequestMessage(weatherParameters);
+            var query = BuildQuery(forecastParameters);
+            var requestUri = $"{baseUrl}?{query}";
 
-            var response = await _httpClient.SendAsync(httpRequestMessage);
+            using var response = await _httpClient.GetAsync(requestUri);
             response.EnsureSuccessStatusCode();
-            await using var contentStream = await response.Content.ReadAsStreamAsync();
 
-            var dmiResult = await JsonSerializer.DeserializeAsync<JsonElement>(contentStream, _serializerOptions);
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            var dmiResult = await JsonSerializer.DeserializeAsync<JsonElement>(stream, _serializerOptions);
 
             var allForcasts = new List<HomeAssistantDTO>();
             foreach (var parameter in forecastParameters)
@@ -53,27 +53,17 @@ namespace DMIProxy.DomainService
             return allForcasts;
         }
 
-
-        private async Task<HttpRequestMessage> SetupRequestMessage(string weatherParameters)
+        private static string BuildQuery(List<string> forecastParameters)
         {
+            var weatherParameters = string.Join(",", forecastParameters);
             var parameters = new Dictionary<string, string> {
                 { "coords", "POINT(10.137 56.173)" },
                 { "csr", "csr84" },
                 { "parameter-name", weatherParameters }
             };
-            var encodedContent = new FormUrlEncodedContent(parameters);
-            string query = await ParamsToStringAsync(parameters);
 
-            var httpRequestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri(baseUrl + "?" + query),
-                Headers = {
-                    { HttpRequestHeader.Accept.ToString(), "application/json" },
-                },
-                Content = encodedContent
-            };
-            return httpRequestMessage;
+            return string.Join("&", parameters.Select(p =>
+                $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
         }
 
         private HomeAssistantDTO ExtractForecastData(string forecastParameter, JsonElement jsonElement)

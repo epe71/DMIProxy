@@ -33,45 +33,44 @@ namespace DMIProxy.DomainService
 
         public async Task<DmiMetObsData> GetParameterId(ParameterId parameterId, int limit)
         {
-            var parameters = new Dictionary<string, string> {
+            var query = BuildQuery(parameterId, limit);
+            var requestUri = $"{baseUrl}?{query}";
+
+            using var response = await _httpClient.GetAsync(requestUri);
+            response.EnsureSuccessStatusCode();
+
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            var result = await DeserializeResponseAsync(stream);
+
+            _logger.LogDebug($"DMI ClimateData recived");
+
+            return result;
+        }
+
+        private static string BuildQuery(ParameterId parameterId, int limit)
+        {
+            var parameters = new Dictionary<string, string>
+            {
                 { "parameterId", parameterId.ToString() },
                 { "limit", limit.ToString() },
                 { "qcStatus", "manual" },
                 { "timeResolution", "day" }
             };
-            var encodedContent = new FormUrlEncodedContent(parameters);
-            var query = await ParamsToStringAsync(parameters);
 
-            var httpRequestMessage = new HttpRequestMessage
+            return string.Join("&", parameters.Select(p =>
+                $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
+        }
+
+        private async Task<DmiMetObsData> DeserializeResponseAsync(Stream stream)
+        {
+            var result = await JsonSerializer.DeserializeAsync<DmiMetObsData>(stream, _serializerOptions);
+            if (result == null)
             {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri(baseUrl + "?" + query),
-                Headers = {
-                    { HttpRequestHeader.Accept.ToString(), "application/json" },
-                },
-                Content = encodedContent
-            };
-
-            var response = await _httpClient.SendAsync(httpRequestMessage);
-            response.EnsureSuccessStatusCode();
-            await using var contentStream = await response.Content.ReadAsStreamAsync();
-
-            _logger.LogDebug($"DMI ClimateData recived");
-
-            DmiMetObsData? dmiResult = await JsonSerializer.DeserializeAsync<DmiMetObsData>(contentStream, _serializerOptions);
-            if (dmiResult == null)
-            {
-                _logger.LogError("No response from DMI-ClimateData");
+                _logger.LogError("No response from DMI ClimateData");
                 throw new SystemException("No response from DMI-ClimateData");
             }
-            return dmiResult;
-        }
 
-        private static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
-        {
-            using (HttpContent content = new FormUrlEncodedContent(urlParams))
-                return await content.ReadAsStringAsync();
+            return result;
         }
-
     }
 }

@@ -27,43 +27,43 @@ namespace DMIProxy.DomainService
 
         public async Task<DmiMetObsData> GetRain(string stationId)
         {
-            var parameters = new Dictionary<string, string> { 
-                { "stationId", stationId }, 
-                { "period", "latest-month" }, 
-                { "parameterId", "precip_past1h" } 
-            };
-            var encodedContent = new FormUrlEncodedContent(parameters);
-            var query = await ParamsToStringAsync(parameters);
+            var query = BuildQuery(stationId);
+            var requestUri = $"{baseUrl}?{query}";
 
-            var httpRequestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri(baseUrl + "?" + query),
-                Headers = {
-                    { HttpRequestHeader.Accept.ToString(), "application/json" },
-                },
-                Content = encodedContent
-            };
-
-            var response = await _httpClient.SendAsync(httpRequestMessage);
+            using var response = await _httpClient.GetAsync(requestUri);
             response.EnsureSuccessStatusCode();
-            await using var contentStream = await response.Content.ReadAsStreamAsync();
 
-            _logger.LogDebug($"DMI MetObs data recived for {stationId}");
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            var result = await DeserializeResponseAsync(stream, stationId);
 
-            DmiMetObsData? dmiResult = await JsonSerializer.DeserializeAsync<DmiMetObsData>(contentStream, _serializerOptions);
-            if (dmiResult == null)
-            {
-                _logger.LogError("No response from DMI-MetObs");
-                throw new SystemException("No response from DMI-MetObs");
-            }
-            return dmiResult;
+            _logger.LogDebug("DMI MetObs data received for {StationId}", stationId);
+
+            return result;
         }
 
-        private static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
+        private static string BuildQuery(string stationId)
         {
-            using (HttpContent content = new FormUrlEncodedContent(urlParams))
-                return await content.ReadAsStringAsync();
+            var parameters = new Dictionary<string, string>
+            {
+                ["stationId"] = stationId,
+                ["period"] = "latest-month",
+                ["parameterId"] = "precip_past1h"
+            };
+
+            return string.Join("&", parameters.Select(p =>
+                $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
+        }
+
+        private async Task<DmiMetObsData> DeserializeResponseAsync(Stream stream, string stationId)
+        {
+            var result = await JsonSerializer.DeserializeAsync<DmiMetObsData>(stream, _serializerOptions);
+            if (result == null)
+            {
+                _logger.LogError("No response from DMI-MetObs for {StationId}", stationId);
+                throw new SystemException("No response from DMI-MetObs");
+            }
+
+            return result;
         }
     }
 }
