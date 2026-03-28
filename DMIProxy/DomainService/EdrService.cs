@@ -4,11 +4,17 @@ using System.Text.Json;
 
 namespace DMIProxy.DomainService
 {
+    /// <summary>
+    /// Service for retrieving EDR forecast data from DMI's Open Data API.
+    /// </summary>
     public class EdrService : IEdrService
     {
-        // Release notes: https://www.dmi.dk/friedata/dokumentation/release-notes
-        // Parameter list: https://www.dmi.dk/friedata/dokumentation/data/weather-model-harmonie-edr-api-parameter-list
-        // Status page: https://statuspage.freshping.io/25721-DMIOpenDatas
+        /// <summary>
+        /// DMI documentation for EDR API: [Release notes](https://www.dmi.dk/friedata/dokumentation/release-notes)
+        /// [Parameter
+        /// list](https://www.dmi.dk/friedata/dokumentation/data/weather-model-harmonie-edr-api-parameter-list) [Status
+        /// page](https://statuspage.freshping.io/25721-DMIOpenDatas)
+        /// </summary>
 
         private string baseUrl = "https://opendataapi.dmi.dk/v1/forecastedr/collections/harmonie_dini_sf/position";
         private readonly ILogger<EdrService> _logger;

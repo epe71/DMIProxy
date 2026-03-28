@@ -5,6 +5,11 @@ using static DMIProxy.DomainService.IClimateDataService;
 
 namespace DMIProxy.DomainService
 {
+    /// <summary>
+    /// Service for retrieving climate data from DMI's Open Data API. This service is responsible for making HTTP
+    /// requests to the API, handling responses, and deserializing the data into usable objects. It provides methods to
+    /// retrieve specific climate parameters based on parameter IDs and limits. 
+    /// </summary>
     public class ClimateDataService : IClimateDataService
     {
         private string baseUrl = "https://opendataapi.dmi.dk/v2/climateData/collections/countryValue/items";

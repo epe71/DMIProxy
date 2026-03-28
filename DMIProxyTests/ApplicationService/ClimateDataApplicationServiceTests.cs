@@ -298,7 +298,7 @@ public class ClimateDataApplicationServiceTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("No climate data returned for parameter = heatingDegreesDays")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("No climate data returned for parameter = heatingDegreesDays")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -447,7 +447,7 @@ public class ClimateDataApplicationServiceTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("No climate data returned for station =")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("No climate data returned for station =")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);

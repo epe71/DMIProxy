@@ -4,6 +4,13 @@ using ZiggyCreatures.Caching.Fusion;
 
 namespace DMIProxy.ApplicationService
 {
+    /// <summary>
+    /// Service for retrieving EDR forecast data and caching it for efficient access. The service uses an underlying
+    /// IEdrService to fetch the forecast data and an IFusionCache to store the results, reducing the need for frequent
+    /// calls to the external service. The cache is configured with a duration of 4 hours and includes fail-safe options
+    /// to ensure that stale data can be served if the external service is temporarily unavailable. Logging is included
+    /// to track the retrieval and caching of forecast data.
+    /// </summary>
     public class EdrApplicationService(
         IEdrService edrService,
         IFusionCache cache,
