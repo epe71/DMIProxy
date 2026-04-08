@@ -20,5 +20,4 @@ public class WeatherForcastHealthCheck(IFusionCache cache) : IHealthCheck
 
         return Task.FromResult(HealthCheckResult.Healthy("All good", null));
     }
-
 }

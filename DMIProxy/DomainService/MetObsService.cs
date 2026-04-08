@@ -1,5 +1,4 @@
 ﻿using DMIProxy.BusinessEntity.MetObs;
-using System.Net;
 using System.Text.Json;
 
 namespace DMIProxy.DomainService

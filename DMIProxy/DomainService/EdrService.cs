@@ -1,5 +1,4 @@
 ﻿using DMIProxy.Contract;
-using System.Net;
 using System.Text.Json;
 
 namespace DMIProxy.DomainService
@@ -116,12 +115,6 @@ namespace DMIProxy.DomainService
             }
 
             return transmittance;
-        }
-
-        private static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
-        {
-            using (HttpContent content = new FormUrlEncodedContent(urlParams))
-                return await content.ReadAsStringAsync();
         }
     }
 }

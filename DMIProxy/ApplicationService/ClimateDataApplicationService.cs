@@ -28,7 +28,7 @@ public class ClimateDataApplicationService(
     }
 
     private async Task<HomeAssistantDTO> GetHeatingDegreeDays_NoCache()
-    { 
+    {
         var observation = await climateDataService.GetParameterId(ParameterId.acc_heating_degree_days_17, 365);
         if (observation.features.Count == 0)
         {
@@ -121,7 +121,7 @@ public class ClimateDataApplicationService(
     }
 
     private async Task<HomeAssistantDTO> GetMeanTemperature_NoCache(string stationId)
-    { 
+    {
         var observation = await climateDataService.GetParameterId(ParameterId.mean_temp, 100);
         if (observation.features.Count == 0)
         {

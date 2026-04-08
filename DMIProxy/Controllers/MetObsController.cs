@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations;
 namespace DMIProxy.Controllers;
 
 /// <summary>
-/// Controller for retrieving meteorological observation data, weather forecasts and climate data from DMI Open Data service. 
-/// The controller provides endpoints for fetching rain measurements, EDR forecasts, weather forecasts, and heating degree days data. 
+/// Controller for retrieving meteorological observation data, weather forecasts and climate data from DMI Open Data service.
+/// The controller provides endpoints for fetching rain measurements, EDR forecasts, weather forecasts, and heating degree days data.
 /// </summary>
 [ApiController]
 [Route("[controller]")]
@@ -19,7 +19,7 @@ public class MetObsController(
 {
 
     /// <summary>
-    /// Get rain mesaurement from the last hour, day and month for a given [stationId](https://www.dmi.dk/friedata/dokumentation/data/meteorological-observation-data-stations) 
+    /// Get rain mesaurement from the last hour, day and month for a given [stationId](https://www.dmi.dk/friedata/dokumentation/data/meteorological-observation-data-stations)
     /// from DMI Open Data service via Meteorological Observation API.
     /// </summary>
     /// <param name="stationId" example="06072">
@@ -90,5 +90,4 @@ public class MetObsController(
         var heatingDegreeDaysDTO = await climateDataApplicationService.GetAverageHeatingDegreeDays(numberOfYears);
         return new JsonResult(heatingDegreeDaysDTO);
     }
-
 }
