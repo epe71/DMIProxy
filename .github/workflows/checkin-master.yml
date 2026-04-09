@@ -18,10 +18,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '10.0.x'
 
@@ -41,14 +41,14 @@ jobs:
 
     - name: Publish Test Results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: test-results
         path: TestResults/test_results.trx
 
     - name: Publish Test Report
       if: always()
-      uses: dorny/test-reporter@v2
+      uses: dorny/test-reporter@v3
       with:
         artifact: test-results
         name: Test Results
@@ -56,14 +56,14 @@ jobs:
         reporter: dotnet-trx
 
     - name: Upload coverage artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: coverage-reports
         path: |
           **/TestResults/**/coverage.cobertura.xml
 
     - name: Upload to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v6
       with:
         files: |
           **/TestResults/**/coverage.cobertura.xml
