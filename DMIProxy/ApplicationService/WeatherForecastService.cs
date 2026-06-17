@@ -50,6 +50,7 @@ namespace DMIProxy.ApplicationService
             text = CutTextFrom(text, "Fredag");
             text = CutTextFrom(text, "Lørdag");
             text = CutTextFrom(text, "Søndag");
+            text = CutTextFrom(text, "I løbet af aftenen");
 
             return text;
         }
