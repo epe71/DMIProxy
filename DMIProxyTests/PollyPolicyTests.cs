@@ -27,7 +27,7 @@ public class PollyPolicyTests
             .SetupSequence<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(simulatedHttpStatusCode)) // Retry 
+            .ReturnsAsync(new HttpResponseMessage(simulatedHttpStatusCode)) // Retry
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK)); // Success
 
         var httpClient = new HttpClient(handlerMock.Object);

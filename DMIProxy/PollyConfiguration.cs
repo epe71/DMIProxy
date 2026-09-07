@@ -27,6 +27,7 @@ public class PollyConfiguration
 
         return HttpPolicyExtensions
             .HandleTransientHttpError()
+            .Or<HttpRequestException>()
             .OrResult(msg => msg.StatusCode == HttpStatusCode.TooManyRequests)
             .CircuitBreakerAsync(
                 handledEventsAllowedBeforeBreaking,
@@ -64,6 +65,7 @@ public class PollyConfiguration
 
         var circuitBreaker = HttpPolicyExtensions
             .HandleTransientHttpError()
+            .Or<HttpRequestException>()
             .OrResult(msg => msg.StatusCode == HttpStatusCode.TooManyRequests)
             .CircuitBreakerAsync(
                 handledEventsAllowedBeforeBreaking,

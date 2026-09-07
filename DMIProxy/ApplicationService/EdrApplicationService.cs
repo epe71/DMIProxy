@@ -32,7 +32,7 @@ namespace DMIProxy.ApplicationService
         }
 
         private async Task<HomeAssistantDTO> GetEdrForecast_NoCache(string forecastParameter)
-        { 
+        {
             var forecastDtos = await edrService.GetEdrForecast([forecastParameter]);
             if (forecastDtos == null || forecastDtos.Count == 0)
             {
