@@ -19,7 +19,7 @@ public class MetObsController(
 {
 
     /// <summary>
-    /// Get rain mesaurement from the last hour, day and month for a given [stationId](https://www.dmi.dk/friedata/dokumentation/data/meteorological-observation-data-stations)
+    /// Get rain measurement from the last hour, day and month for a given [stationId](https://www.dmi.dk/friedata/dokumentation/data/meteorological-observation-data-stations)
     /// from DMI Open Data service via Meteorological Observation API.
     /// </summary>
     /// <param name="stationId" example="06072">
@@ -40,9 +40,9 @@ public class MetObsController(
     /// Get forecast from DMI Open Data service via EDR api
     /// </summary>
     /// <param name="forecastParameter" example="total-precipitation">
-    /// The parameter to get the forecast for. It is hardcode for the harmonie_dini_sf model and for city of Aarhus
+    /// The parameter to get the forecast for. It is hardcoded for the harmonie_dini_sf model and the city of Aarhus.
     /// </param>
-    /// <returns>An <see cref="IActionResult"/> containing the forecast data i Home Assistant format.</returns>
+    /// <returns>An <see cref="IActionResult"/> containing the forecast data in Home Assistant format.</returns>
     [HttpGet("EDR/{forecastParameter}")]
     public async Task<IActionResult> GetEdrForecast([RegularExpression(@"^[a-z0-9-]+$")] string forecastParameter)
     {
@@ -51,10 +51,10 @@ public class MetObsController(
     }
 
     /// <summary>
-    /// Get the current weather forecast for Aarhus
+    /// Get the current weather forecast for a station e.g. Aarhus
     /// </summary>
     /// <param name="stationId" example="2624652">The station id to get the weather forecast for</param>
-    /// <returns>An <see cref="IActionResult"/> with a danish text with the wheather forecast for today</returns>
+    /// <returns>An <see cref="IActionResult"/> with a Danish text weather forecast for today.</returns>
     [HttpGet("WeatherForecast/{stationId}")]
     public async Task<IActionResult> GetWeatherForecast([RegularExpression(@"^\d{7}$")] string stationId)
     {
@@ -66,7 +66,7 @@ public class MetObsController(
     /// Retrieves the heating degree days data for Denmark.
     /// </summary>
     /// <returns>
-    /// An <see cref="IActionResult"/> containing the heating degree days data for the specified station in JSON format.
+    /// An <see cref="IActionResult"/> containing the heating degree days data in JSON format.
     /// </returns>
     [HttpGet("ClimateData/HeatingDegreeDays")]
     public async Task<IActionResult> GetHeatingDegreeDays()
@@ -82,7 +82,7 @@ public class MetObsController(
     /// The number of years to use in average. Must be between 1 and 20 (inclusive)
     /// </param>
     /// <returns>
-    /// An <see cref="IActionResult"/> containing the heating degree days data for the specified station in JSON format.
+    /// An <see cref="IActionResult"/> containing the heating degree days data in JSON format.
     /// </returns>
     [HttpGet("ClimateData/AverageHeatingDegreeDays/{numberOfYears:int}")]
     public async Task<IActionResult> GetAverageHeatingDegreeDays([FromRoute][Range(1, 20)] int numberOfYears)
