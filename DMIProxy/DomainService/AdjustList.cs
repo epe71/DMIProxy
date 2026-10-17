@@ -4,8 +4,8 @@
     {
         private List<double> _numbers;
 
-        public AdjustList(List<double> values) 
-        { 
+        public AdjustList(List<double> values)
+        {
             _numbers = values;
         }
 

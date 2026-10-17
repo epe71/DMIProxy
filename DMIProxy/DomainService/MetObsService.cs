@@ -13,7 +13,7 @@ namespace DMIProxy.DomainService
         private readonly HttpClient _httpClient;
 
         public MetObsService(
-            IHttpClientFactory httpClientFactory, 
+            IHttpClientFactory httpClientFactory,
             ILogger<MetObsService> logger)
         {
             _httpClient = httpClientFactory.CreateClient("LongTimeOutClient");
@@ -30,7 +30,7 @@ namespace DMIProxy.DomainService
             var requestUri = $"{baseUrl}?{query}";
 
             using var response = await _httpClient.GetAsync(requestUri);
-            response.EnsureSuccessStatusCode();
+            _ = response.EnsureSuccessStatusCode();
 
             await using var stream = await response.Content.ReadAsStreamAsync();
             var result = await DeserializeResponseAsync(stream, stationId);
@@ -59,7 +59,7 @@ namespace DMIProxy.DomainService
             if (result == null)
             {
                 _logger.LogError("No response from DMI-MetObs for {StationId}", stationId);
-                throw new SystemException("No response from DMI-MetObs");
+                throw new InvalidDataException("No response from DMI-MetObs");
             }
 
             return result;

@@ -1,4 +1,5 @@
 ﻿using DMIProxy.BusinessEntity.MetObs;
+using System.Globalization;
 using System.Text.Json;
 using static DMIProxy.DomainService.IClimateDataService;
 
@@ -36,7 +37,7 @@ namespace DMIProxy.DomainService
             var requestUri = $"{baseUrl}?{query}";
 
             using var response = await _httpClient.GetAsync(requestUri);
-            response.EnsureSuccessStatusCode();
+            _ = response.EnsureSuccessStatusCode();
 
             await using var stream = await response.Content.ReadAsStreamAsync();
             var result = await DeserializeResponseAsync(stream);
@@ -51,7 +52,7 @@ namespace DMIProxy.DomainService
             var parameters = new Dictionary<string, string>
             {
                 { "parameterId", parameterId.ToString() },
-                { "limit", limit.ToString() },
+                { "limit", limit.ToString(CultureInfo.InvariantCulture) },
                 { "qcStatus", "manual" },
                 { "timeResolution", "day" }
             };
@@ -66,7 +67,7 @@ namespace DMIProxy.DomainService
             if (result == null)
             {
                 _logger.LogError("No response from DMI ClimateData");
-                throw new SystemException("No response from DMI-ClimateData");
+                throw new InvalidDataException("No response from DMI-ClimateData");
             }
 
             return result;

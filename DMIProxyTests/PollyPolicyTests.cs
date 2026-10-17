@@ -21,14 +21,16 @@ public class PollyPolicyTests
         int retryCount = 0;
 
         // Mock HTTP handler to simulate responses
+        var httpResponseRetry = new HttpResponseMessage(simulatedHttpStatusCode);
+        var httpResponseSuccess = new HttpResponseMessage(HttpStatusCode.OK);
         var handlerMock = new Mock<HttpMessageHandler>();
-        handlerMock
+        _ = handlerMock
             .Protected() // Access protected members
             .SetupSequence<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(simulatedHttpStatusCode)) // Retry
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK)); // Success
+            .ReturnsAsync(httpResponseRetry)
+            .ReturnsAsync(httpResponseSuccess);
 
         var httpClient = new HttpClient(handlerMock.Object);
 
@@ -42,6 +44,9 @@ public class PollyPolicyTests
         // Assert
         Assert.AreEqual(HttpStatusCode.OK, result.Result.StatusCode, "The final response should be OK.");
         Assert.AreEqual(2, retryCount, "First call should fail then retry once before succeeding.");
+        httpClient.Dispose();
+        httpResponseRetry.Dispose();
+        httpResponseSuccess.Dispose();
     }
 
     [TestMethod]
@@ -54,13 +59,14 @@ public class PollyPolicyTests
         int retryCount = 0;
 
         // Mock HTTP handler to simulate responses
+        var httpResponse = new HttpResponseMessage(simulatedHttpStatusCode);
         var handlerMock = new Mock<HttpMessageHandler>();
-        handlerMock
+        _ = handlerMock
             .Protected() // Access protected members
             .Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(simulatedHttpStatusCode));
+            .ReturnsAsync(httpResponse);
 
         var httpClient = new HttpClient(handlerMock.Object);
 
@@ -73,6 +79,8 @@ public class PollyPolicyTests
         // Assert
         Assert.AreEqual(simulatedHttpStatusCode, result1.Result.StatusCode, "The final response should be OK.");
         Assert.AreEqual(1, retryCount, "The policy should retry once before succeeding.");
+        httpClient.Dispose();
+        httpResponse.Dispose();
     }
 
     [TestMethod]
@@ -87,13 +95,14 @@ public class PollyPolicyTests
         IAsyncPolicy<HttpResponseMessage> circuitBreakerPolicy = PollyConfiguration.GetCircuitBreakerPolicy(2);
 
         // Mock HTTP handler to simulate responses
+        var httpResponse = new HttpResponseMessage(simulatedHttpStatusCode);
         var handlerMock = new Mock<HttpMessageHandler>();
-        handlerMock
+        _ = handlerMock
             .Protected() // Access protected members
             .Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(simulatedHttpStatusCode));
+            .ReturnsAsync(httpResponse);
 
         var httpClient = new HttpClient(handlerMock.Object);
 
@@ -107,9 +116,11 @@ public class PollyPolicyTests
         Assert.AreEqual(simulatedHttpStatusCode, response2.Result.StatusCode, "Second request should fail.");
 
         // Circuit should now be open
-        Assert.ThrowsExactlyAsync<BrokenCircuitException>(async () =>
+        _ = Assert.ThrowsExactlyAsync<BrokenCircuitException>(async () =>
         {
-            await circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com"));
+            _ = await circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com"));
         });
+        httpResponse.Dispose();
+        httpClient.Dispose();
     }
 }

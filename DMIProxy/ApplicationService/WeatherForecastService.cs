@@ -31,7 +31,7 @@ namespace DMIProxy.ApplicationService
             return dto;
         }
 
-        private string TrimForecastText(string text)
+        private static string TrimForecastText(string text)
         {
             if (text == null)
             {
@@ -55,11 +55,11 @@ namespace DMIProxy.ApplicationService
             return text;
         }
 
-        private string CutTextFrom(string text, string cutAfter)
+        private static string CutTextFrom(string text, string cutAfter)
         {
-            if (text.IndexOf(cutAfter) > 0)
+            if (text.IndexOf(cutAfter, StringComparison.OrdinalIgnoreCase) > 0)
             {
-                text = text.Substring(0, text.IndexOf(cutAfter));
+                text = text.Substring(0, text.IndexOf(cutAfter, StringComparison.OrdinalIgnoreCase));
             }
             return text;
         }

@@ -1,5 +1,6 @@
 ﻿using DMIProxy.Contract;
 using DMIProxy.DomainService;
+using System.Globalization;
 using ZiggyCreatures.Caching.Fusion;
 using static DMIProxy.DomainService.IClimateDataService;
 
@@ -39,7 +40,7 @@ public class ClimateDataApplicationService(
         var dataPoints = observation.features
             .Select(f => new PointDTO
             {
-                date = f.properties.from.ToString("yyyy-MM-ddTHH:mm:ss"),
+                date = f.properties.from.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
                 value = f.properties.value
             })
             .ToList();
@@ -82,7 +83,7 @@ public class ClimateDataApplicationService(
         var dataPoints = observation.features.GroupBy(f => f.properties.from.DayOfYear)
             .Select(g => new PointDTO
             {
-                date = new DateTime(thisYear, 1, 1).AddDays(g.Key - 1).ToString("yyyy-MM-ddTHH:mm:ss"),
+                date = new DateTime(thisYear, 1, 1).AddDays(g.Key - 1).ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
                 value = Math.Round(g.Average(f => f.properties.value), 1)
             })
             .OrderByDescending(x => x.date)
@@ -133,7 +134,7 @@ public class ClimateDataApplicationService(
             .Where(f => f.properties.validity == true)
             .Select(f => new PointDTO
             {
-                date = f.properties.from.ToString("yyyy-MM-ddTHH:mm:ss"),
+                date = f.properties.from.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
                 value = f.properties.value
             })
             .ToList();

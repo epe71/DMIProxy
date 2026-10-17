@@ -1,8 +1,13 @@
-﻿namespace DMIProxy.BusinessEntity.MetObs
+﻿using System.Text.Json.Serialization;
+
+namespace DMIProxy.BusinessEntity.MetObs
 {
     public class Geometry
     {
-        public string type { get; set; }
-        public List<double> coordinates { get; set; }
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("coordinates")]
+        public List<double> Coordinates { get; set; }
     }
 }

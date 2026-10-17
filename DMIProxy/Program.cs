@@ -6,7 +6,6 @@ using DMIProxy.HealthCheck;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
-using SerilogTracing;
 using System.Reflection;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -54,7 +53,8 @@ builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
 // Fusion cache
 builder.Services.AddFusionCache()
-    .WithOptions(options => {
+    .WithOptions(options =>
+    {
         options.FailSafeActivationLogLevel = LogLevel.Debug;
         options.SerializationErrorsLogLevel = LogLevel.Warning;
         options.DistributedCacheSyntheticTimeoutsLogLevel = LogLevel.Debug;
@@ -62,7 +62,8 @@ builder.Services.AddFusionCache()
         options.FactorySyntheticTimeoutsLogLevel = LogLevel.Debug;
         options.FactoryErrorsLogLevel = LogLevel.Error;
     })
-    .WithDefaultEntryOptions(new FusionCacheEntryOptions {
+    .WithDefaultEntryOptions(new FusionCacheEntryOptions
+    {
         Duration = TimeSpan.FromHours(20),
 
         FactorySoftTimeout = TimeSpan.FromMilliseconds(300),
@@ -81,7 +82,8 @@ builder.Services.AddHttpClient("LongTimeOutClient", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(120);
 })
-.AddPolicyHandler((sp, request) => {
+.AddPolicyHandler((sp, request) =>
+{
     var logger = sp.GetRequiredService<ILogger<PollyConfiguration>>();
     return PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(logger: logger);
 })

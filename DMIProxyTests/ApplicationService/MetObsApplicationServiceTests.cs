@@ -32,7 +32,7 @@ public class MetObsApplicationServiceTests
             },
             numberReturned = 1
         };
-        
+
         var expectedRainDto = new RainDTO()
         {
             Rain1h = metObsData.Rain1h(),
@@ -43,10 +43,10 @@ public class MetObsApplicationServiceTests
         };
 
         var metObsServiceMock = new Mock<IMetObsService>();
-        metObsServiceMock.Setup(s => s.GetRain(stationId)).ReturnsAsync(metObsData);
+        _ = metObsServiceMock.Setup(s => s.GetRain(stationId)).ReturnsAsync(metObsData);
 
         var timeSpanCalculatorMock = new Mock<ITimeSpanCalculator>();
-        timeSpanCalculatorMock.Setup(t => t.AtTheTopOfTheHour(3)).Returns(TimeSpan.FromHours(3));
+        _ = timeSpanCalculatorMock.Setup(t => t.AtTheTopOfTheHour(3)).Returns(TimeSpan.FromHours(3));
 
         var nullCache = new NullFusionCache(new FusionCacheOptions());
         var service = new MetObsApplicationService(metObsServiceMock.Object, timeSpanCalculatorMock.Object, nullCache);
@@ -60,6 +60,7 @@ public class MetObsApplicationServiceTests
         Assert.AreEqual(expectedRainDto.RainThisMonth, result.RainThisMonth);
         Assert.AreEqual(expectedRainDto.TimeStamp, result.TimeStamp);
         Assert.AreEqual(expectedRainDto.NumberReturned, result.NumberReturned);
+        nullCache.Dispose();
     }
 
     [TestMethod]
@@ -67,10 +68,10 @@ public class MetObsApplicationServiceTests
     {
         // Arrange
         var stationId = "12345";
-        
+
         var metObsServiceMock = new Mock<IMetObsService>();
         var timeSpanCalculatorMock = new Mock<ITimeSpanCalculator>();
-        timeSpanCalculatorMock.Setup(t => t.AtTheTopOfTheHour(3)).Returns(TimeSpan.FromHours(3));
+        _ = timeSpanCalculatorMock.Setup(t => t.AtTheTopOfTheHour(3)).Returns(TimeSpan.FromHours(3));
 
         var nullCache = new NullFusionCache(new FusionCacheOptions());
         var service = new MetObsApplicationService(metObsServiceMock.Object, timeSpanCalculatorMock.Object, nullCache);
@@ -80,5 +81,6 @@ public class MetObsApplicationServiceTests
             async () => await service.GetRain(stationId)
         );
         Assert.AreEqual("Failed to retrieve rain data.", exception.Message);
+        nullCache.Dispose();
     }
 }

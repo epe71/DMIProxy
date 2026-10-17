@@ -9,12 +9,11 @@ public class TimeSpanCalculator(IDateTimeProvider dateTimeProvider) : ITimeSpanC
     /// </summary>
     /// <param name="hours">the number of hour to skip</param>
     /// <returns></returns>
-    public TimeSpan 
-        AtTheTopOfTheHour(int hours)
+    public TimeSpan AtTheTopOfTheHour(int hours)
     {
         var now = dateTimeProvider.Now;
         var minutesToTopOfTheHour = 5 + 60 - now.Minute;
-        int minutesToExpire = (hours - 1) * 60 + minutesToTopOfTheHour;
+        int minutesToExpire = ((hours - 1) * 60) + minutesToTopOfTheHour;
         return TimeSpan.FromMinutes(minutesToExpire);
     }
 
@@ -31,7 +30,7 @@ public class TimeSpanCalculator(IDateTimeProvider dateTimeProvider) : ITimeSpanC
         return expirationTime - now;
     }
 
-    private DateTime NextExpirationTime(DateTime now, List<TimeOnly> updateTime)
+    private static DateTime NextExpirationTime(DateTime now, List<TimeOnly> updateTime)
     {
         var today = DateOnly.FromDateTime(now);
         foreach (var t in updateTime)

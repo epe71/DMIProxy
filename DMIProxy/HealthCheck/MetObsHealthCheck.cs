@@ -45,7 +45,7 @@ public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimePro
             return Task.FromResult(HealthCheckResult.Degraded("MetObs data delayed", null, data));
         }
 
-        if (cachedValue.NumberReturned < 27*24)
+        if (cachedValue.NumberReturned < 27 * 24)
         {
             return Task.FromResult(HealthCheckResult.Unhealthy("To few MetObs data points", null, data));
         }
