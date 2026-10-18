@@ -36,7 +36,7 @@ namespace DMIProxy.DomainService
             var requestUri = $"{baseUrl}?{query}";
 
             using var response = await _httpClient.GetAsync(requestUri);
-            _ = response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
 
             await using var stream = await response.Content.ReadAsStreamAsync();
             var dmiResult = await JsonSerializer.DeserializeAsync<JsonElement>(stream, _serializerOptions);

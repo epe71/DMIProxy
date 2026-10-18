@@ -24,7 +24,7 @@ public class PollyPolicyTests
         var httpResponseRetry = new HttpResponseMessage(simulatedHttpStatusCode);
         var httpResponseSuccess = new HttpResponseMessage(HttpStatusCode.OK);
         var handlerMock = new Mock<HttpMessageHandler>();
-        _ = handlerMock
+        handlerMock
             .Protected() // Access protected members
             .SetupSequence<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -61,7 +61,7 @@ public class PollyPolicyTests
         // Mock HTTP handler to simulate responses
         var httpResponse = new HttpResponseMessage(simulatedHttpStatusCode);
         var handlerMock = new Mock<HttpMessageHandler>();
-        _ = handlerMock
+        handlerMock
             .Protected() // Access protected members
             .Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -97,7 +97,7 @@ public class PollyPolicyTests
         // Mock HTTP handler to simulate responses
         var httpResponse = new HttpResponseMessage(simulatedHttpStatusCode);
         var handlerMock = new Mock<HttpMessageHandler>();
-        _ = handlerMock
+        handlerMock
             .Protected() // Access protected members
             .Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -116,9 +116,9 @@ public class PollyPolicyTests
         Assert.AreEqual(simulatedHttpStatusCode, response2.Result.StatusCode, "Second request should fail.");
 
         // Circuit should now be open
-        _ = Assert.ThrowsExactlyAsync<BrokenCircuitException>(async () =>
+        Assert.ThrowsExactlyAsync<BrokenCircuitException>(async () =>
         {
-            _ = await circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com"));
+            await circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com"));
         });
         httpResponse.Dispose();
         httpClient.Dispose();

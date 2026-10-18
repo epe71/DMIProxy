@@ -21,10 +21,10 @@ public class WeatherForecastServiceTests
             Forecast = "Temp. 20°C. I aften bliver det klart."
         };
         var webScrapeServiceMock = new Mock<IWebScrapeService>();
-        _ = webScrapeServiceMock.Setup(s => s.GetWeatherForecast(stationId)).ReturnsAsync(forecast);
+        webScrapeServiceMock.Setup(s => s.GetWeatherForecast(stationId)).ReturnsAsync(forecast);
 
         var timeSpanCalculatorMock = new Mock<ITimeSpanCalculator>();
-        _ = timeSpanCalculatorMock.Setup(t => t.FixTime(It.IsAny<List<TimeOnly>>())).Returns(TimeSpan.FromHours(1));
+        timeSpanCalculatorMock.Setup(t => t.FixTime(It.IsAny<List<TimeOnly>>())).Returns(TimeSpan.FromHours(1));
 
         var nullCache = new NullFusionCache(new FusionCacheOptions());
 

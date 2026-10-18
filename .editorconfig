@@ -329,9 +329,6 @@ dotnet_diagnostic.IDE0060.severity = error
 # IDE0059 - Remove unnecessary value assignment
 dotnet_diagnostic.IDE0059.severity = warning
 
-# IDE0058 - Remove unnecessary expression statement
-dotnet_diagnostic.IDE0058.severity = warning
-
 # CA1816 - Call GC.SuppressFinalize
 dotnet_diagnostic.CA1816.severity = warning
 

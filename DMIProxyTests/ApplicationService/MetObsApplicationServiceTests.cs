@@ -43,10 +43,10 @@ public class MetObsApplicationServiceTests
         };
 
         var metObsServiceMock = new Mock<IMetObsService>();
-        _ = metObsServiceMock.Setup(s => s.GetRain(stationId)).ReturnsAsync(metObsData);
+        metObsServiceMock.Setup(s => s.GetRain(stationId)).ReturnsAsync(metObsData);
 
         var timeSpanCalculatorMock = new Mock<ITimeSpanCalculator>();
-        _ = timeSpanCalculatorMock.Setup(t => t.AtTheTopOfTheHour(3)).Returns(TimeSpan.FromHours(3));
+        timeSpanCalculatorMock.Setup(t => t.AtTheTopOfTheHour(3)).Returns(TimeSpan.FromHours(3));
 
         var nullCache = new NullFusionCache(new FusionCacheOptions());
         var service = new MetObsApplicationService(metObsServiceMock.Object, timeSpanCalculatorMock.Object, nullCache);
@@ -71,7 +71,7 @@ public class MetObsApplicationServiceTests
 
         var metObsServiceMock = new Mock<IMetObsService>();
         var timeSpanCalculatorMock = new Mock<ITimeSpanCalculator>();
-        _ = timeSpanCalculatorMock.Setup(t => t.AtTheTopOfTheHour(3)).Returns(TimeSpan.FromHours(3));
+        timeSpanCalculatorMock.Setup(t => t.AtTheTopOfTheHour(3)).Returns(TimeSpan.FromHours(3));
 
         var nullCache = new NullFusionCache(new FusionCacheOptions());
         var service = new MetObsApplicationService(metObsServiceMock.Object, timeSpanCalculatorMock.Object, nullCache);

@@ -33,7 +33,7 @@ public class ClimateDataApplicationServiceTests
             },
         };
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ReturnsAsync(expectedData);
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -72,7 +72,7 @@ public class ClimateDataApplicationServiceTests
         };
 
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ReturnsAsync(observation);
 
@@ -122,7 +122,7 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var observation = new DmiMetObsData { features = new List<Feature>() };
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ReturnsAsync(observation);
 
@@ -157,7 +157,7 @@ public class ClimateDataApplicationServiceTests
         var observation = new DmiMetObsData { features = features };
 
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ReturnsAsync(observation);
 
@@ -204,7 +204,7 @@ public class ClimateDataApplicationServiceTests
         var observation = new DmiMetObsData { features = features };
 
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ReturnsAsync(observation);
 
@@ -230,7 +230,7 @@ public class ClimateDataApplicationServiceTests
     {
         // Arrange
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ThrowsAsync(new InvalidOperationException("Service failure"));
 
@@ -241,7 +241,7 @@ public class ClimateDataApplicationServiceTests
         var service = new ClimateDataApplicationService(climateDataServiceMock.Object, timeSpanCalculator, fusionCache, loggerMock.Object);
 
         // Act & Assert
-        _ = await Assert.ThrowsAsync<InvalidOperationException>(async () => await service.GetAverageHeatingDegreeDays(1));
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await service.GetAverageHeatingDegreeDays(1));
         fusionCache.Dispose();
     }
 
@@ -251,7 +251,7 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var climateDataServiceMock = new Mock<IClimateDataService>();
         // Domain service will throw if the requested limit is invalid (e.g., non-positive)
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.Is<int>(n => n <= 0)))
             .ThrowsAsync(new ArgumentOutOfRangeException("limit"));
 
@@ -262,7 +262,7 @@ public class ClimateDataApplicationServiceTests
         var service = new ClimateDataApplicationService(climateDataServiceMock.Object, timeSpanCalculator, fusionCache, loggerMock.Object);
 
         // Act & Assert: passing 0 years should lead to ArgumentOutOfRangeException from the domain service
-        _ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await service.GetAverageHeatingDegreeDays(0));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await service.GetAverageHeatingDegreeDays(0));
         fusionCache.Dispose();
     }
 
@@ -272,7 +272,7 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var climateDataServiceMock = new Mock<IClimateDataService>();
         // Domain service will throw if the requested limit is invalid (e.g., greater than 20)
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.Is<int>(n => n > 20)))
             .ThrowsAsync(new ArgumentOutOfRangeException("limit"));
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -281,7 +281,7 @@ public class ClimateDataApplicationServiceTests
         var service = new ClimateDataApplicationService(climateDataServiceMock.Object, timeSpanCalculator, fusionCache, loggerMock.Object);
 
         // Act & Assert: passing 21 years should lead to ArgumentOutOfRangeException from the domain service
-        _ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await service.GetAverageHeatingDegreeDays(21));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await service.GetAverageHeatingDegreeDays(21));
         fusionCache.Dispose();
     }
 
@@ -291,7 +291,7 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var observation = new DmiMetObsData { features = new List<Feature>() };
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
             .ReturnsAsync(observation);
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -335,7 +335,7 @@ public class ClimateDataApplicationServiceTests
             },
         };
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.mean_temp, It.IsAny<int>()))
             .ReturnsAsync(expectedData);
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -359,7 +359,7 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var observation = new DmiMetObsData { features = new List<Feature>() };
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.mean_temp, It.IsAny<int>()))
             .ReturnsAsync(observation);
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -385,7 +385,7 @@ public class ClimateDataApplicationServiceTests
     {
         // Arrange
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.mean_temp, It.IsAny<int>()))
             .ThrowsAsync(new InvalidOperationException("Service failure"));
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -395,7 +395,7 @@ public class ClimateDataApplicationServiceTests
         var stationId = "06039";
 
         // Act & Assert
-        _ = await Assert.ThrowsAsync<InvalidOperationException>(async () => await service.GetMeanTemperature(stationId));
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await service.GetMeanTemperature(stationId));
         fusionCache.Dispose();
     }
 
@@ -420,7 +420,7 @@ public class ClimateDataApplicationServiceTests
             },
         };
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.mean_temp, It.IsAny<int>()))
             .ReturnsAsync(expectedData);
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -446,7 +446,7 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var observation = new DmiMetObsData { features = new List<Feature>() };
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.mean_temp, It.IsAny<int>()))
             .ReturnsAsync(observation);
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -475,7 +475,7 @@ public class ClimateDataApplicationServiceTests
     {
         // Arrange
         var climateDataServiceMock = new Mock<IClimateDataService>();
-        _ = climateDataServiceMock
+        climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.mean_temp, It.IsAny<int>()))
             .ThrowsAsync(new ArgumentException("Invalid station ID"));
         var timeSpanCalculator = new TimeSpanCalculator(new MockDateTimeProviderBuilder().Build());
@@ -485,7 +485,7 @@ public class ClimateDataApplicationServiceTests
         var invalidStationId = "invalid";
 
         // Act & Assert
-        _ = await Assert.ThrowsAsync<ArgumentException>(async () => await service.GetMeanTemperature(invalidStationId));
+        await Assert.ThrowsAsync<ArgumentException>(async () => await service.GetMeanTemperature(invalidStationId));
         fusionCache.Dispose();
     }
 }
