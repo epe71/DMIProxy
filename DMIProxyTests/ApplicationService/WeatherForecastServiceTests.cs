@@ -1,10 +1,11 @@
-﻿using DMIProxy.BusinessEntity;
+﻿using DMIProxy.ApplicationService;
+using DMIProxy.BusinessEntity;
 using DMIProxy.DomainService;
 using Moq;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.NullObjects;
 
-namespace DMIProxy.ApplicationService.UnitTests;
+namespace DMIProxyTests.ApplicationService;
 
 [TestClass]
 public class WeatherForecastServiceTests

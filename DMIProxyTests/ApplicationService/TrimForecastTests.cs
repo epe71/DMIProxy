@@ -1,4 +1,6 @@
-namespace DMIProxy.ApplicationService.UnitTests;
+using DMIProxy.ApplicationService;
+
+namespace DMIProxyTests.ApplicationService;
 
 [TestClass]
 public class TrimForecastTests

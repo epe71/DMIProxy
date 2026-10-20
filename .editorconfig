@@ -348,6 +348,9 @@ dotnet_diagnostic.CA1812.severity = warning
 # IDE0161 - Use file-scoped namespace (cleaner code)
 dotnet_diagnostic.IDE0161.severity = suggestion
 
+# IDE0130 - Namespace does not match folder structure
+dotnet_diagnostic.IDE0130.severity = warning
+
 # IDE0051 - Remove unused private members
 dotnet_diagnostic.IDE0051.severity = error
 

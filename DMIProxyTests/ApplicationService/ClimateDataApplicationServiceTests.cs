@@ -18,8 +18,8 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var expectedData = new DmiMetObsData
         {
-            features = new List<Feature>
-            {
+            features =
+            [
                 new Feature
                 {
                     properties = new Properties
@@ -30,7 +30,7 @@ public class ClimateDataApplicationServiceTests
                         value = 1.0,
                     }
                 }
-            },
+            ],
         };
         var climateDataServiceMock = new Mock<IClimateDataService>();
         climateDataServiceMock
@@ -60,10 +60,10 @@ public class ClimateDataApplicationServiceTests
         // Prepare features spanning two years for two day-of-year groups
         var features = new List<Feature>
         {
-            new Feature { properties = new Properties { from = new DateTime(2023,1,1), value = 10 } },
-            new Feature { properties = new Properties { from = new DateTime(2024,1,1), value = 14 } },
-            new Feature { properties = new Properties { from = new DateTime(2023,1,2), value = 20 } },
-            new Feature { properties = new Properties { from = new DateTime(2024,1,2), value = 22 } }
+            new() { properties = new Properties { from = new DateTime(2023,1,1), value = 10 } },
+            new() { properties = new Properties { from = new DateTime(2024,1,1), value = 14 } },
+            new() { properties = new Properties { from = new DateTime(2023,1,2), value = 20 } },
+            new() { properties = new Properties { from = new DateTime(2024,1,2), value = 22 } }
         };
 
         var observation = new DmiMetObsData
@@ -91,7 +91,7 @@ public class ClimateDataApplicationServiceTests
         Assert.IsTrue(result.description.Contains($"{numberOfYears} year average", StringComparison.OrdinalIgnoreCase));
 
         // There should be two grouped days (day 1 and day 2)
-        Assert.AreEqual(2, result.data.Count);
+        Assert.HasCount(2, result.data);
 
         // Compute expected grouped averages
         var thisYear = DateTime.Now.Year;
@@ -120,7 +120,7 @@ public class ClimateDataApplicationServiceTests
     public async Task GetAverageHeatingDegreeDays_EmptyFeatures_ReturnsEmptyDTO()
     {
         // Arrange
-        var observation = new DmiMetObsData { features = new List<Feature>() };
+        var observation = new DmiMetObsData { features = [] };
         var climateDataServiceMock = new Mock<IClimateDataService>();
         climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
@@ -151,8 +151,8 @@ public class ClimateDataApplicationServiceTests
         var numberOfYears = 1;
         var features = new List<Feature>
         {
-            new Feature { properties = new Properties { from = new DateTime(2023,1,1), value = 5 } },
-            new Feature { properties = new Properties { from = new DateTime(2023,1,2), value = 7 } }
+            new() { properties = new Properties { from = new DateTime(2023,1,1), value = 5 } },
+            new() { properties = new Properties { from = new DateTime(2023,1,2), value = 7 } }
         };
         var observation = new DmiMetObsData { features = features };
 
@@ -172,7 +172,7 @@ public class ClimateDataApplicationServiceTests
 
         // Assert
         Assert.IsNotNull(result);
-        Assert.AreEqual(2, result.data.Count);
+        Assert.HasCount(2, result.data);
 
         var thisYear = DateTime.Now.Year;
         var day1Date = new DateTime(thisYear, 1, 1).ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
@@ -199,7 +199,7 @@ public class ClimateDataApplicationServiceTests
         var numberOfYears = 1;
         var features = new List<Feature>
         {
-            new Feature { properties = new Properties { from = DateTime.Now, value = 3 } }
+            new() { properties = new Properties { from = DateTime.Now, value = 3 } }
         };
         var observation = new DmiMetObsData { features = features };
 
@@ -289,7 +289,7 @@ public class ClimateDataApplicationServiceTests
     public async Task GetAverageHeatingDegreeDays_EmptyFeatures_LogsError()
     {
         // Arrange
-        var observation = new DmiMetObsData { features = new List<Feature>() };
+        var observation = new DmiMetObsData { features = [] };
         var climateDataServiceMock = new Mock<IClimateDataService>();
         climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.acc_heating_degree_days_17, It.IsAny<int>()))
@@ -320,8 +320,8 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var expectedData = new DmiMetObsData
         {
-            features = new List<Feature>
-            {
+            features =
+            [
                 new Feature
                 {
                     properties = new Properties
@@ -332,7 +332,7 @@ public class ClimateDataApplicationServiceTests
                         value = 15.0,
                     }
                 }
-            },
+            ],
         };
         var climateDataServiceMock = new Mock<IClimateDataService>();
         climateDataServiceMock
@@ -357,7 +357,7 @@ public class ClimateDataApplicationServiceTests
     public async Task GetMeanTemperature_EmptyFeatures_ReturnsEmptyDTO()
     {
         // Arrange
-        var observation = new DmiMetObsData { features = new List<Feature>() };
+        var observation = new DmiMetObsData { features = [] };
         var climateDataServiceMock = new Mock<IClimateDataService>();
         climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.mean_temp, It.IsAny<int>()))
@@ -405,8 +405,8 @@ public class ClimateDataApplicationServiceTests
         // Arrange
         var expectedData = new DmiMetObsData
         {
-            features = new List<Feature>
-            {
+            features =
+            [
                 new Feature
                 {
                     properties = new Properties
@@ -417,7 +417,7 @@ public class ClimateDataApplicationServiceTests
                         value = 15.0,
                     }
                 }
-            },
+            ],
         };
         var climateDataServiceMock = new Mock<IClimateDataService>();
         climateDataServiceMock
@@ -444,7 +444,7 @@ public class ClimateDataApplicationServiceTests
     public async Task GetMeanTemperature_EmptyFeatures_LogsError()
     {
         // Arrange
-        var observation = new DmiMetObsData { features = new List<Feature>() };
+        var observation = new DmiMetObsData { features = [] };
         var climateDataServiceMock = new Mock<IClimateDataService>();
         climateDataServiceMock
             .Setup(s => s.GetParameterId(IClimateDataService.ParameterId.mean_temp, It.IsAny<int>()))

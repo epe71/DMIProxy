@@ -36,7 +36,7 @@ public class TrimForecast
                 var precedingText = text.AsSpan(0, index).TrimEnd();
                 if (precedingText.Length > 0 && ".!?".Contains(precedingText[^1], StringComparison.OrdinalIgnoreCase))
                 {
-                    return text.Substring(0, index).TrimEnd();
+                    return text[..index].TrimEnd();
                 }
             }
 

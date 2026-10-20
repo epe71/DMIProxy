@@ -11,7 +11,6 @@ namespace DMIProxy.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class MetObsController(
-        ILogger<MetObsController> logger,
         IMetObsApplicationService metObsApplicationService,
         IEdrApplicationService edrApplicationService,
         IWeatherForecastService weatherForecastService,
@@ -32,7 +31,6 @@ public class MetObsController(
     public async Task<IActionResult> GetRain([RegularExpression(@"^\d{5}$")] string stationId)
     {
         var statisticsDTO = await metObsApplicationService.GetRain(stationId);
-        logger.LogDebug($"Rain this month {statisticsDTO.RainThisMonth} at {stationId}");
         return new JsonResult(statisticsDTO);
     }
 
