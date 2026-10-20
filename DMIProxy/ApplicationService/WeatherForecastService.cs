@@ -25,43 +25,10 @@ namespace DMIProxy.ApplicationService
             {
                 Time = forecast.TimeStamp,
                 Headline = forecast.Headline,
-                Message = TrimForecastText(forecast.Forecast)
+                Message = TrimForecast.TrimText(forecast.Forecast)
             };
 
             return dto;
-        }
-
-        private static string TrimForecastText(string text)
-        {
-            if (text == null)
-            {
-                return string.Empty;
-            }
-
-            text = text.Replace("Temp.", "Temperatur", StringComparison.InvariantCultureIgnoreCase);
-
-            text = CutTextFrom(text, "I aften");
-            text = CutTextFrom(text, "I nat");
-            text = CutTextFrom(text, "I morgen");
-            text = CutTextFrom(text, "Mandag");
-            text = CutTextFrom(text, "Tirsdag");
-            text = CutTextFrom(text, "Onsdag");
-            text = CutTextFrom(text, "Torsdag");
-            text = CutTextFrom(text, "Fredag");
-            text = CutTextFrom(text, "Lørdag");
-            text = CutTextFrom(text, "Søndag");
-            text = CutTextFrom(text, "I løbet af aftenen");
-
-            return text;
-        }
-
-        private static string CutTextFrom(string text, string cutAfter)
-        {
-            if (text.IndexOf(cutAfter, StringComparison.OrdinalIgnoreCase) > 0)
-            {
-                text = text.Substring(0, text.IndexOf(cutAfter, StringComparison.OrdinalIgnoreCase));
-            }
-            return text;
         }
     }
 }

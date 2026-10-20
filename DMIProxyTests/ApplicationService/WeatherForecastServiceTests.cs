@@ -36,7 +36,7 @@ public class WeatherForecastServiceTests
         // Assert
         Assert.AreEqual(forecast.TimeStamp, result.Time);
         Assert.AreEqual(forecast.Headline, result.Headline);
-        Assert.AreEqual("Temperatur 20°C. ", result.Message);
+        Assert.AreEqual("Temperatur 20°C.", result.Message);
         nullCache.Dispose();
     }
 }
