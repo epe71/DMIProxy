@@ -30,7 +30,7 @@ public class DateTimeProviderTests
 
         // Assert
         Assert.AreEqual(DateTimeKind.Utc, providerValue.Kind, "UtcNow must return a DateTime with Kind == Utc.");
-        Assert.IsTrue(deltaMs <= toleranceMilliseconds,
+        Assert.IsLessThanOrEqualTo(toleranceMilliseconds, deltaMs,
             $"UtcNow difference to System.DateTime.UtcNow was {deltaMs}ms which exceeds tolerance {toleranceMilliseconds}ms.");
     }
 
@@ -87,12 +87,12 @@ public class DateTimeProviderTests
 
         // 3) providerNow should be close to DateTime.Now within tolerance
         double diffMillisLocal = Math.Abs((providerNow - systemNow).TotalMilliseconds);
-        Assert.IsTrue(diffMillisLocal <= toleranceMillis,
+        Assert.IsLessThanOrEqualTo(toleranceMillis, diffMillisLocal,
             $"Provider.Now differs from DateTime.Now by {diffMillisLocal}ms which exceeds tolerance {toleranceMillis}ms.");
 
         // 4) providerNow.ToUniversalTime() should be close to DateTime.UtcNow within tolerance
         double diffMillisUtc = Math.Abs((providerNowUtc - systemUtcNow).TotalMilliseconds);
-        Assert.IsTrue(diffMillisUtc <= toleranceMillis,
+        Assert.IsLessThanOrEqualTo(toleranceMillis, diffMillisUtc,
             $"Provider.Now.ToUniversalTime() differs from DateTime.UtcNow by {diffMillisUtc}ms which exceeds tolerance {toleranceMillis}ms.");
     }
 }

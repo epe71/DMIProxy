@@ -38,7 +38,7 @@ public class PollyPolicyTests
         var result = retryPolicy.ExecuteAsync(async () =>
         {
             retryCount++;
-            return await httpClient.GetAsync("http://example.com");
+            return await httpClient.GetAsync("http://example.com", TestContext.CancellationToken);
         });
 
         // Assert
@@ -74,7 +74,7 @@ public class PollyPolicyTests
         var result1 = retryPolicy.ExecuteAsync(async () =>
         {
             retryCount++;
-            return await httpClient.GetAsync("http://example.com");
+            return await httpClient.GetAsync("http://example.com", TestContext.CancellationToken);
         });
         // Assert
         Assert.AreEqual(simulatedHttpStatusCode, result1.Result.StatusCode, "The final response should be OK.");
@@ -108,19 +108,21 @@ public class PollyPolicyTests
 
         // Act & Assert
         // First failure
-        var response1 = circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com"));
+        var response1 = circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com", TestContext.CancellationToken));
         Assert.AreEqual(simulatedHttpStatusCode, response1.Result.StatusCode, "First request should fail.");
 
         // Second failure
-        var response2 = circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com"));
+        var response2 = circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com", TestContext.CancellationToken));
         Assert.AreEqual(simulatedHttpStatusCode, response2.Result.StatusCode, "Second request should fail.");
 
         // Circuit should now be open
         Assert.ThrowsExactlyAsync<BrokenCircuitException>(async () =>
         {
-            await circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com"));
+            await circuitBreakerPolicy.ExecuteAsync(() => httpClient.GetAsync("http://example.com", TestContext.CancellationToken));
         });
         httpResponse.Dispose();
         httpClient.Dispose();
     }
+
+    public TestContext TestContext { get; set; }
 }

@@ -104,9 +104,9 @@ dotnet_style_allow_statement_immediately_after_block_experimental = true
 #### C# Coding Conventions ####
 
 # var preferences
-csharp_style_var_elsewhere = false
-csharp_style_var_for_built_in_types = false
-csharp_style_var_when_type_is_apparent = false
+csharp_style_var_elsewhere = true
+csharp_style_var_for_built_in_types = true
+csharp_style_var_when_type_is_apparent = true
 
 # Expression-bodied members
 csharp_style_expression_bodied_accessors = true
@@ -343,6 +343,9 @@ dotnet_diagnostic.CA1811.severity = warning
 # CA1812 - Avoid uninstantiated internal classes
 dotnet_diagnostic.CA1812.severity = warning
 
+# CA1873 - Avoid potentially expensive logging
+dotnet_diagnostic.CA1873.severity = none
+
 #### Unused Variables & Properties ####
 
 # IDE0161 - Use file-scoped namespace (cleaner code)
@@ -357,7 +360,7 @@ dotnet_diagnostic.IDE0051.severity = error
 # IDE0052 - Remove unread private members
 dotnet_diagnostic.IDE0052.severity = error
 
-# Naming violations
+# IDE1006 - Naming violations
 dotnet_diagnostic.IDE1006.severity = warning
 
 #### Security & Reliability Rules ####
@@ -400,6 +403,9 @@ dotnet_diagnostic.CA1311.severity = warning
 
 # CA1401 - P/Invokes should not be visible
 dotnet_diagnostic.CA1401.severity = warning
+
+# CA1515 - Consider making public types internal
+dotnet_diagnostic.CA1515.severity = none
 
 # CA1707 - Identifiers should not contain underscores (except private fields)
 dotnet_diagnostic.CA1707.severity = silent
@@ -487,6 +493,9 @@ dotnet_diagnostic.CA2242.severity = error
 
 # CA2243 - Attribute string literals should parse correctly
 dotnet_diagnostic.CA2243.severity = error
+
+# CA2263 - Prefer generic overload when type is known
+dotnet_diagnostic.CA2263.severity = warning
 
 # CA2300 - Do not use insecure deserializer
 dotnet_diagnostic.CA2300.severity = error
@@ -719,22 +728,8 @@ csharp_style_allow_embedded_statements_on_same_line_experimental = true
 # Suppress insecure random warning (OK for test data, not cryptographic)
 dotnet_diagnostic.CA5394.severity = silent
 
+# Use proper 'Assert' methods
+dotnet_diagnostic.MSTEST0037.severity = warning
 
-#### Benchmark File Rules ####
-# Apply to benchmark files (*Benchmark.cs, BenchmarkSuite*.cs, etc.)
-
-[*Benchmark.cs]
-[BenchmarkSuite*/*]
-
-# Suppress insecure random warning (OK for benchmark data, not cryptographic)
-dotnet_diagnostic.CA5394.severity = silent
-
-# More permissive var usage in benchmarks
-csharp_style_var_when_type_is_apparent = true
-csharp_style_var_for_built_in_types = true
-csharp_style_var_elsewhere = true
-
-# Allow concise benchmark code
-csharp_style_expression_bodied_methods = true
-csharp_style_expression_bodied_properties = true
-
+# Flow TestContext cancellation token
+dotnet_diagnostic.MSTEST0049.severity = warning
