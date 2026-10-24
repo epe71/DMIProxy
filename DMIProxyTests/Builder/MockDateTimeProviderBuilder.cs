@@ -6,7 +6,7 @@ namespace DMIProxyTests.Builder;
 public class MockDateTimeProviderBuilder
 {
     private DateTime _date;
-    private Mock<IDateTimeProvider> mockDateTime;
+    private readonly Mock<IDateTimeProvider> mockDateTime;
 
     public MockDateTimeProviderBuilder()
     {
@@ -29,6 +29,8 @@ public class MockDateTimeProviderBuilder
 
     public MockDateTimeProviderBuilder WithUtcTimeSequnce(List<DateTime> dateTimes)
     {
+        ArgumentNullException.ThrowIfNull(dateTimes);
+
         var sequence = mockDateTime.SetupSequence(d => d.UtcNow);
         foreach (var dateTime in dateTimes)
         {

@@ -10,7 +10,7 @@ public class EDRHealthCheck(IFusionCache cache) : IHealthCheck
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var cachedValue = cache.TryGet<HomeAssistantDTO>("EDR-wind-speed");
+        var cachedValue = cache.TryGet<HomeAssistantDTO>("EDR-wind-speed", token: cancellationToken);
         if (cachedValue.HasValue == false)
         {
             var data = new Dictionary<string, object>

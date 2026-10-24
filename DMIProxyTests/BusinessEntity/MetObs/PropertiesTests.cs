@@ -43,16 +43,7 @@ public class PropertiesTests
                 observed = observedValue
             };
 
-            bool actual;
-            try
-            {
-                actual = sut.ThisHour();
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Case '{caseName}' threw an unexpected exception: {ex}");
-                return; // unreachable but keeps flow clear
-            }
+            bool actual = sut.ThisHour();
 
             // Assert
             Assert.AreEqual(expected, actual, $"Case '{caseName}' expected {expected} but was {actual}. Observed={observedValue:o}, ReferenceNow={referenceNow:o}");

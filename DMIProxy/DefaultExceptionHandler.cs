@@ -2,32 +2,27 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace DMIProxy
+namespace DMIProxy;
+
+public class DefaultExceptionHandler(ILogger<DefaultExceptionHandler> logger) : IExceptionHandler
 {
-    public class DefaultExceptionHandler : IExceptionHandler
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        private readonly ILogger<DefaultExceptionHandler> _logger;
-        public DefaultExceptionHandler(ILogger<DefaultExceptionHandler> logger)
+        ArgumentNullException.ThrowIfNull(httpContext);
+        ArgumentNullException.ThrowIfNull(exception);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        logger.LogError(exception, "An unexpected error occurred");
+
+        await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
         {
-            _logger = logger;
-        }
+            Status = (int)HttpStatusCode.InternalServerError,
+            Type = exception.GetType().Name,
+            Title = "An unexpected error occurred",
+            Detail = exception.Message,
+            Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}"
+        }, cancellationToken);
 
-        public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            _logger.LogError(exception, "An unexpected error occurred");
-
-            await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
-            {
-                Status = (int)HttpStatusCode.InternalServerError,
-                Type = exception.GetType().Name,
-                Title = "An unexpected error occurred",
-                Detail = exception.Message,
-                Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}"
-            }, cancellationToken);
-
-            return true;
-        }
+        return true;
     }
 }

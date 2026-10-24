@@ -11,7 +11,7 @@ public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimePro
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var stationId = cache.TryGet<string>("RainCache:StationId");
+        var stationId = cache.TryGet<string>("RainCache:StationId", token: cancellationToken);
         if (!stationId.HasValue)
         {
             return Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, null));
@@ -22,7 +22,7 @@ public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimePro
                 { "Station id", stationId }
             };
 
-        RainDTO cachedValue = cache.TryGet<RainDTO>($"Rain-{stationId}");
+        RainDTO cachedValue = cache.TryGet<RainDTO>($"Rain-{stationId}", token: cancellationToken);
         if (cachedValue == null)
         {
             return Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, data));

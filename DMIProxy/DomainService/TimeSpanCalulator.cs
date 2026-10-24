@@ -24,6 +24,8 @@ public class TimeSpanCalculator(IDateTimeProvider dateTimeProvider) : ITimeSpanC
     /// <returns></returns>
     public TimeSpan FixTime(List<TimeOnly> updateTime)
     {
+        ArgumentNullException.ThrowIfNull(updateTime);
+
         var now = dateTimeProvider.Now;
         var expirationTime = NextExpirationTime(now, updateTime);
 

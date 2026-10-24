@@ -12,7 +12,7 @@ public class WeatherForcastHealthCheck(IFusionCache cache) : IHealthCheck
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        TextForecast cachedValue = cache.TryGet<TextForecast>($"TextForecast-{DefaultStationId}");
+        TextForecast cachedValue = cache.TryGet<TextForecast>($"TextForecast-{DefaultStationId}", token: cancellationToken);
         if (cachedValue == null)
         {
             return Task.FromResult(HealthCheckResult.Degraded($"No Weather Forcast for station: {DefaultStationId}", null, null));

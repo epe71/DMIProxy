@@ -41,7 +41,6 @@ dotnet_code_quality_unused_parameters = all
 dotnet_diagnostic.IDE0005.severity = error
 dotnet_diagnostic.IDE0055.severity = error
 dotnet_diagnostic.IDE0160.severity = error
-dotnet_diagnostic.IDE0001.severity = error
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false
@@ -268,6 +267,11 @@ dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
 #### Code Quality Rules ####
 
+# Reliability and API contracts
+dotnet_diagnostic.CA1031.severity = warning
+dotnet_diagnostic.CA1062.severity = warning
+dotnet_diagnostic.CA2016.severity = warning
+
 # Async/await preferences (important for .NET)
 csharp_style_prefer_simple_using_statement = true
 csharp_style_prefer_method_group_conversion = true
@@ -328,9 +332,6 @@ dotnet_diagnostic.IDE0060.severity = error
 
 # IDE0059 - Remove unnecessary value assignment
 dotnet_diagnostic.IDE0059.severity = warning
-
-# CA1816 - Call GC.SuppressFinalize
-dotnet_diagnostic.CA1816.severity = warning
 
 #### Unused Methods Detection ####
 
@@ -424,6 +425,9 @@ dotnet_diagnostic.CA1816.severity = error
 
 # CA1820 - Test for empty strings using string length
 dotnet_diagnostic.CA1820.severity = warning
+
+# CA1851 - Possible multiple enumerations of IEnumerable
+dotnet_diagnostic.CA1851.severity = warning
 
 # CA2000 - Dispose objects before losing scope
 dotnet_diagnostic.CA2000.severity = error

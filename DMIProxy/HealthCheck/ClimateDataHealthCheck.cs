@@ -10,7 +10,7 @@ public class ClimateDataHealthCheck(IFusionCache cache) : IHealthCheck
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        HomeAssistantDTO cachedValue = cache.TryGet<HomeAssistantDTO>("HeatingDegreeDays");
+        HomeAssistantDTO cachedValue = cache.TryGet<HomeAssistantDTO>("HeatingDegreeDays", token: cancellationToken);
         if (cachedValue == null)
         {
             return Task.FromResult(HealthCheckResult.Degraded("No Climate Data: HeatingDegreeDays", null, null));
