@@ -5,6 +5,7 @@ using DMIProxy.DomainService;
 using DMIProxy.HealthCheck;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Polly;
 using Serilog;
 using System.Reflection;
 using ZiggyCreatures.Caching.Fusion;
@@ -77,17 +78,33 @@ builder.Services.AddFusionCache()
         JitterMaxDuration = TimeSpan.FromSeconds(2)
     });
 
-// HttpClient configuration with Polly
+// Share the DMI rate limiter and circuit breaker across all DMI requests in this process.
+builder.Services.AddSingleton<IAsyncPolicy<HttpResponseMessage>>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<PollyConfiguration>>();
+    return PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(logger: logger);
+});
+
+// DMI clients share one process-wide rate limiter and circuit breaker.
+builder.Services.AddHttpClient("DmiClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(120);
+})
+.AddHttpMessageHandler<DmiLocalRateLimitLoggingHandler>()
+.AddPolicyHandler(PollyConfiguration.GetRetryPolicy())
+.AddPolicyHandler((sp, request) => sp.GetRequiredService<IAsyncPolicy<HttpResponseMessage>>())
+.AddHttpMessageHandler<DmiHttpLoggingHandler>();
+
+// Non-DMI requests (currently weather text scraping) keep their timeout and retry behavior,
+// without consuming the DMI rate-limit budget.
 builder.Services.AddHttpClient("LongTimeOutClient", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(120);
 })
-.AddPolicyHandler((sp, request) =>
-{
-    var logger = sp.GetRequiredService<ILogger<PollyConfiguration>>();
-    return PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(logger: logger);
-})
 .AddPolicyHandler(PollyConfiguration.GetRetryPolicy());
+
+builder.Services.AddTransient<DmiLocalRateLimitLoggingHandler>();
+builder.Services.AddTransient<DmiHttpLoggingHandler>();
 
 // Serilog configuration with trace enrichment
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration

@@ -25,7 +25,7 @@ public class EdrService : IEdrService
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
 
-        _httpClient = httpClientFactory.CreateClient("LongTimeOutClient");
+        _httpClient = httpClientFactory.CreateClient("DmiClient");
         _serializerOptions = new()
         {
             PropertyNameCaseInsensitive = true,
@@ -40,7 +40,7 @@ public class EdrService : IEdrService
         var requestUri = $"{baseUrl}?{query}";
 
         using var response = await _httpClient.GetAsync(requestUri);
-        response.EnsureSuccessStatusCode();
+        response.EnsureDmiSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync();
         var dmiResult = await JsonSerializer.DeserializeAsync<JsonElement>(stream, _serializerOptions);

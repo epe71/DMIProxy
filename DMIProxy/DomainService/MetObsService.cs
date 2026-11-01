@@ -19,7 +19,7 @@ public class MetObsService : IMetObsService
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         ArgumentNullException.ThrowIfNull(logger);
 
-        _httpClient = httpClientFactory.CreateClient("LongTimeOutClient");
+        _httpClient = httpClientFactory.CreateClient("DmiClient");
         _logger = logger;
         _serializerOptions = new()
         {
@@ -33,7 +33,7 @@ public class MetObsService : IMetObsService
         var requestUri = $"{baseUrl}?{query}";
 
         using var response = await _httpClient.GetAsync(requestUri);
-        response.EnsureSuccessStatusCode();
+        response.EnsureDmiSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync();
         var result = await DeserializeResponseAsync(stream, stationId);

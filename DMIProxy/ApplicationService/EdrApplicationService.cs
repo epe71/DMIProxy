@@ -22,8 +22,8 @@ namespace DMIProxy.ApplicationService
                 $"EDR-{forecastParameter}",
                 async (_, _) => await GetEdrForecast_NoCache(forecastParameter),
                 new HomeAssistantDTO() { name = forecastParameter, description = "No data ready right now" },
-                options => options.SetDuration(TimeSpan.FromHours(4))
-                .SetFailSafe(true, TimeSpan.FromHours(6), TimeSpan.FromSeconds(60))
+                options => options.SetDuration(TimeSpan.FromHours(6))
+                .SetFailSafe(true, TimeSpan.FromHours(12), TimeSpan.FromMinutes(2))
                 .SetFactoryTimeouts(TimeSpan.FromSeconds(1))
 
             );

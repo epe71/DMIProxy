@@ -14,6 +14,7 @@ public class PollyConfiguration
         return HttpPolicyExtensions
             .HandleTransientHttpError() // Catch 5xx and timeout-errors
             .OrResult(msg => msg.StatusCode == HttpStatusCode.RequestTimeout)
+            // Do not retry 429 responses; the shared circuit breaker and FusionCache fail-safe handle them.
             .WaitAndRetryAsync(delay);
     }
 
