@@ -1,4 +1,4 @@
-﻿using DMIProxy.Contract;
+using DMIProxy.ApplicationService;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -10,16 +10,29 @@ public class EDRHealthCheck(IFusionCache cache) : IHealthCheck
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var cachedValue = cache.TryGet<HomeAssistantDTO>("EDR-wind-speed", token: cancellationToken);
-        if (cachedValue.HasValue == false)
+        var cachedValue = cache.TryGet<List<int>>(EdrStatusHistory.CacheKey, token: cancellationToken);
+        var history = cachedValue.HasValue ? cachedValue.Value : null;
+        var data = new Dictionary<string, object>
         {
-            var data = new Dictionary<string, object>
-            {
-                { "EDR-wind-speed is not in cache", false }
-            };
-            return Task.FromResult(HealthCheckResult.Unhealthy("No EDR keys in cache", null, data));
+            { "EDR status history", history ?? [] }
+        };
+
+        // Any status other than 200 or 429 is a failure, even if the history is incomplete.
+        if (history is not null && history.Any(status => status != 200 && status != 429))
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy("EDR returned a failing status", null, data));
         }
 
-        return Task.FromResult(HealthCheckResult.Healthy("All good", null));
+        if (history is null || history.Count < EdrStatusHistory.Capacity)
+        {
+            return Task.FromResult(HealthCheckResult.Degraded("EDR status history is missing or incomplete", null, data));
+        }
+
+        if (history.Contains(429))
+        {
+            return Task.FromResult(HealthCheckResult.Degraded("EDR returned HTTP 429", null, data));
+        }
+
+        return Task.FromResult(HealthCheckResult.Healthy("All good", data));
     }
 }

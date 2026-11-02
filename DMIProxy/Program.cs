@@ -47,6 +47,7 @@ builder.Services.AddScoped<ITimeSpanCalculator, TimeSpanCalculator>();
 // Application services
 builder.Services.AddScoped<IClimateDataApplicationService, ClimateDataApplicationService>();
 builder.Services.AddScoped<IEdrApplicationService, EdrApplicationService>();
+builder.Services.AddSingleton<EdrStatusHistory>();
 builder.Services.AddScoped<IMetObsApplicationService, MetObsApplicationService>();
 builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
 

@@ -32,7 +32,7 @@ public class EdrService : IEdrService
         };
     }
 
-    public async Task<List<HomeAssistantDTO>> GetEdrForecast(List<string> forecastParameters)
+    public async Task<EdrForecastResult> GetEdrForecast(List<string> forecastParameters)
     {
         ArgumentNullException.ThrowIfNull(forecastParameters);
 
@@ -40,6 +40,7 @@ public class EdrService : IEdrService
         var requestUri = $"{baseUrl}?{query}";
 
         using var response = await _httpClient.GetAsync(requestUri);
+        var statusCode = response.StatusCode;
         response.EnsureDmiSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync();
@@ -51,7 +52,7 @@ public class EdrService : IEdrService
             var forcast = ExtractForecastData(parameter, dmiResult);
             allForcasts.Add(forcast);
         }
-        return allForcasts;
+        return new EdrForecastResult(statusCode, allForcasts);
     }
 
     private static string BuildQuery(List<string> forecastParameters)
