@@ -37,8 +37,8 @@ public class MetObsApplicationService(
             Rain1h = result.Rain1h(),
             RainToday = result.RainToday(),
             RainThisMonth = result.RainThisMonth(),
-            TimeStamp = result.timeStamp,
-            NumberReturned = result.numberReturned
+            TimeStamp = result.TimeStamp,
+            NumberReturned = result.NumberReturned
         };
 
         return rainDto;

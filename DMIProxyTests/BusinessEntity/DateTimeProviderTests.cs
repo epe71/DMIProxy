@@ -1,4 +1,6 @@
-﻿namespace DMIProxy.BusinessEntity.UnitTests;
+﻿using DMIProxy.BusinessEntity;
+
+namespace DMIProxyTests.BusinessEntity;
 
 /// <summary>
 /// Tests for DateTimeProvider.
@@ -83,7 +85,7 @@ public class DateTimeProviderTests
         Assert.AreEqual(DateTimeKind.Local, providerNow.Kind, "Now should have DateTimeKind.Local.");
 
         // 2) Should not be default(min) or default(max)
-        Assert.AreNotEqual(default(DateTime), providerNow, "Now should not be default(DateTime).");
+        Assert.AreNotEqual(default, providerNow, "Now should not be default(DateTime).");
 
         // 3) providerNow should be close to DateTime.Now within tolerance
         double diffMillisLocal = Math.Abs((providerNow - systemNow).TotalMilliseconds);

@@ -1,7 +1,8 @@
-﻿namespace DMIProxy.DomainService
+﻿using System.Collections.ObjectModel;
+
+namespace DMIProxy.DomainService;
+
+public interface IEdrService
 {
-    public interface IEdrService
-    {
-        Task<EdrForecastResult> GetEdrForecast(List<string> forecastParameters);
-    }
+    Task<EdrForecastResult> GetEdrForecast(Collection<string> forecastParameters);
 }

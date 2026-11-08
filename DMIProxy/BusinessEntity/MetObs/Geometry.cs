@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 
 namespace DMIProxy.BusinessEntity.MetObs;
 
@@ -8,5 +9,5 @@ public class Geometry
     public string Type { get; init; }
 
     [JsonPropertyName("coordinates")]
-    public List<double> Coordinates { get; init; }
+    public Collection<double> Coordinates { get; init; }
 }

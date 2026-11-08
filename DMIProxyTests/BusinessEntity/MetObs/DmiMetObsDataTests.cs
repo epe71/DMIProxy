@@ -1,4 +1,7 @@
-﻿namespace DMIProxy.BusinessEntity.MetObs.UnitTests;
+﻿using DMIProxy.BusinessEntity.MetObs;
+using System.Collections.ObjectModel;
+
+namespace DMIProxyTests.BusinessEntity.MetObs;
 
 [TestClass]
 public class DmiMetObsDataTests
@@ -14,7 +17,7 @@ public class DmiMetObsDataTests
         // Arrange
         var data = new DmiMetObsData
         {
-            features = new List<Feature>()
+            Features = []
         };
 
         // Act
@@ -34,21 +37,20 @@ public class DmiMetObsDataTests
     {
         // Arrange
         var yesterdayObserved = DateTime.Today.AddDays(-1).AddHours(12); // safely yesterday
-        var features = new List<Feature>
+        var features = new Collection<Feature>
         {
-            new Feature
-            {
-                properties = new Properties
+            new() {
+                Properties = new Properties
                 {
-                    observed = yesterdayObserved,
-                    parameterId = "precip_past1h",
-                    value = 5.0
+                    Observed = yesterdayObserved,
+                    ParameterId = "precip_past1h",
+                    Value = 5.0
                 }
             }
         };
         var data = new DmiMetObsData
         {
-            features = features
+            Features = features
         };
 
         // Act
@@ -68,30 +70,28 @@ public class DmiMetObsDataTests
     {
         // Arrange
         var now = DateTime.Now;
-        var features = new List<Feature>
+        var features = new Collection<Feature>
         {
-            new Feature
-            {
-                properties = new Properties
+            new() {
+                Properties = new Properties
                 {
-                    observed = now,
-                    parameterId = "precip_past1h",
-                    value = 1.5
+                    Observed = now,
+                    ParameterId = "precip_past1h",
+                    Value = 1.5
                 }
             },
-            new Feature
-            {
-                properties = new Properties
+            new() {
+                Properties = new Properties
                 {
-                    observed = now,
-                    parameterId = "precip_past1h",
-                    value = 2.5
+                    Observed = now,
+                    ParameterId = "precip_past1h",
+                    Value = 2.5
                 }
             }
         };
         var data = new DmiMetObsData
         {
-            features = features
+            Features = features
         };
 
         // Act
@@ -110,21 +110,20 @@ public class DmiMetObsDataTests
     public void RainToday_TodayFeatureWithNaN_ReturnsNaN()
     {
         // Arrange
-        var features = new List<Feature>
+        var features = new Collection<Feature>
         {
-            new Feature
-            {
-                properties = new Properties
+            new() {
+                Properties = new Properties
                 {
-                    observed = DateTime.Now,
-                    parameterId = "precip_past1h",
-                    value = double.NaN
+                    Observed = DateTime.Now,
+                    ParameterId = "precip_past1h",
+                    Value = double.NaN
                 }
             }
         };
         var data = new DmiMetObsData
         {
-            features = features
+            Features = features
         };
 
         // Act
@@ -143,30 +142,28 @@ public class DmiMetObsDataTests
     public void RainToday_WithPositiveInfinity_ReturnsPositiveInfinity()
     {
         // Arrange
-        var features = new List<Feature>
+        var features = new Collection<Feature>
         {
-            new Feature
-            {
-                properties = new Properties
+            new() {
+                Properties = new Properties
                 {
-                    observed = DateTime.Now,
-                    parameterId = "precip_past1h",
-                    value = double.PositiveInfinity
+                    Observed = DateTime.Now,
+                    ParameterId = "precip_past1h",
+                    Value = double.PositiveInfinity
                 }
             },
-            new Feature
-            {
-                properties = new Properties
+            new() {
+                Properties = new Properties
                 {
-                    observed = DateTime.Now,
-                    parameterId = "precip_past1h",
-                    value = 1.0
+                    Observed = DateTime.Now,
+                    ParameterId = "precip_past1h",
+                    Value = 1.0
                 }
             }
         };
         var data = new DmiMetObsData
         {
-            features = features
+            Features = features
         };
 
         // Act
@@ -187,7 +184,7 @@ public class DmiMetObsDataTests
         // Arrange
         var sut = new DmiMetObsData
         {
-            features = new List<Feature>()
+            Features = []
         };
 
         // Act
@@ -210,17 +207,17 @@ public class DmiMetObsDataTests
         double expected = 12.34;
         var feature = new Feature
         {
-            properties = new Properties
+            Properties = new Properties
             {
-                observed = DateTime.UtcNow,
-                parameterId = "precip_past1h",
-                value = expected
+                Observed = DateTime.UtcNow,
+                ParameterId = "precip_past1h",
+                Value = expected
             }
         };
 
         var sut = new DmiMetObsData
         {
-            features = new List<Feature> { feature }
+            Features = [feature]
         };
 
         // Act
@@ -241,17 +238,17 @@ public class DmiMetObsDataTests
         // Arrange
         var feature = new Feature
         {
-            properties = new Properties
+            Properties = new Properties
             {
-                observed = DateTime.UtcNow,
-                parameterId = "precip_past1h",
-                value = double.NaN
+                Observed = DateTime.UtcNow,
+                ParameterId = "precip_past1h",
+                Value = double.NaN
             }
         };
 
         var sut = new DmiMetObsData
         {
-            features = new List<Feature> { feature }
+            Features = [feature]
         };
 
         // Act
@@ -273,30 +270,30 @@ public class DmiMetObsDataTests
         var oldObserved = DateTime.Today.AddMonths(-1).AddDays(-1);
         var props = new Properties
         {
-            created = DateTime.UtcNow,
-            observed = oldObserved,
-            parameterId = "precip_past1h",
-            stationId = string.Empty,
-            value = 5.5,
-            noValuesInCalculation = 0,
-            timeResolution = string.Empty,
-            qcStatus = string.Empty,
-            from = oldObserved,
-            to = oldObserved,
-            calculatedAt = DateTime.UtcNow,
-            validity = true
+            Created = DateTime.UtcNow,
+            Observed = oldObserved,
+            ParameterId = "precip_past1h",
+            StationId = string.Empty,
+            Value = 5.5,
+            NoValuesInCalculation = 0,
+            TimeResolution = string.Empty,
+            QcStatus = string.Empty,
+            From = oldObserved,
+            To = oldObserved,
+            CalculatedAt = DateTime.UtcNow,
+            Validity = true
         };
-        var features = new List<Feature>
+        var features = new Collection<Feature>
         {
-            new Feature { id = Guid.NewGuid(), type = "Feature", properties = props }
+            new() { Id = Guid.NewGuid(), Type = "Feature", Properties = props }
         };
         var sut = new DmiMetObsData
         {
-            features = features,
-            numberReturned = features.Count,
-            links = new List<Link>(),
-            timeStamp = DateTime.UtcNow,
-            type = "FeatureCollection"
+            Features = features,
+            NumberReturned = features.Count,
+            Links = [],
+            TimeStamp = DateTime.UtcNow,
+            Type = "FeatureCollection"
         };
 
         // Act
@@ -318,69 +315,68 @@ public class DmiMetObsDataTests
         var observed = DateTime.Today; // within current month
         var p1 = new Properties
         {
-            created = DateTime.UtcNow,
-            observed = observed,
-            parameterId = "precip_past1h",
-            stationId = string.Empty,
-            value = 1.235, // will contribute to rounding behavior
-            noValuesInCalculation = 0,
-            timeResolution = string.Empty,
-            qcStatus = string.Empty,
-            from = observed,
-            to = observed,
-            calculatedAt = DateTime.UtcNow,
-            validity = true
+            Created = DateTime.UtcNow,
+            Observed = observed,
+            ParameterId = "precip_past1h",
+            StationId = string.Empty,
+            Value = 1.235, // will contribute to rounding behavior
+            NoValuesInCalculation = 0,
+            TimeResolution = string.Empty,
+            QcStatus = string.Empty,
+            From = observed,
+            To = observed,
+            CalculatedAt = DateTime.UtcNow,
+            Validity = true
         };
         var p2 = new Properties
         {
-            created = DateTime.UtcNow,
-            observed = observed,
-            parameterId = "precip_past1h",
-            stationId = string.Empty,
-            value = 2.001,
-            noValuesInCalculation = 0,
-            timeResolution = string.Empty,
-            qcStatus = string.Empty,
-            from = observed,
-            to = observed,
-            calculatedAt = DateTime.UtcNow,
-            validity = true
+            Created = DateTime.UtcNow,
+            Observed = observed,
+            ParameterId = "precip_past1h",
+            StationId = string.Empty,
+            Value = 2.001,
+            NoValuesInCalculation = 0,
+            TimeResolution = string.Empty,
+            QcStatus = string.Empty,
+            From = observed,
+            To = observed,
+            CalculatedAt = DateTime.UtcNow,
+            Validity = true
         };
 
-        var features = new List<Feature>
+        var features = new Collection<Feature>
         {
-            new Feature { id = Guid.NewGuid(), type = "Feature", properties = p1 },
-            new Feature { id = Guid.NewGuid(), type = "Feature", properties = p2 },
+            new() { Id = Guid.NewGuid(), Type = "Feature", Properties = p1 },
+            new() { Id = Guid.NewGuid(), Type = "Feature", Properties = p2 },
             // Add a non-this-month feature with a non-precip parameter to ensure filtering works and no invocation occurs
-            new Feature
-            {
-                id = Guid.NewGuid(),
-                type = "Feature",
-                properties = new Properties
+            new() {
+                Id = Guid.NewGuid(),
+                Type = "Feature",
+                Properties = new Properties
                 {
-                    created = DateTime.UtcNow,
-                    observed = DateTime.Today.AddMonths(-1),
-                    parameterId = "temperature",
-                    stationId = string.Empty,
-                    value = 999.9,
-                    noValuesInCalculation = 0,
-                    timeResolution = string.Empty,
-                    qcStatus = string.Empty,
-                    from = DateTime.Today.AddMonths(-1),
-                    to = DateTime.Today.AddMonths(-1),
-                    calculatedAt = DateTime.UtcNow,
-                    validity = true
+                    Created = DateTime.UtcNow,
+                    Observed = DateTime.Today.AddMonths(-1),
+                    ParameterId = "temperature",
+                    StationId = string.Empty,
+                    Value = 999.9,
+                    NoValuesInCalculation = 0,
+                    TimeResolution = string.Empty,
+                    QcStatus = string.Empty,
+                    From = DateTime.Today.AddMonths(-1),
+                    To = DateTime.Today.AddMonths(-1),
+                    CalculatedAt = DateTime.UtcNow,
+                    Validity = true
                 }
             }
         };
 
         var sut = new DmiMetObsData
         {
-            features = features,
-            numberReturned = features.Count,
-            links = new List<Link>(),
-            timeStamp = DateTime.UtcNow,
-            type = "FeatureCollection"
+            Features = features,
+            NumberReturned = features.Count,
+            Links = [],
+            TimeStamp = DateTime.UtcNow,
+            Type = "FeatureCollection"
         };
 
         // Act
@@ -404,26 +400,26 @@ public class DmiMetObsDataTests
             var observed = DateTime.Today;
             var propsNaN = new Properties
             {
-                created = DateTime.UtcNow,
-                observed = observed,
-                parameterId = "precip_past1h",
-                stationId = string.Empty,
-                value = double.NaN,
-                noValuesInCalculation = 0,
-                timeResolution = string.Empty,
-                qcStatus = string.Empty,
-                from = observed,
-                to = observed,
-                calculatedAt = DateTime.UtcNow,
-                validity = true
+                Created = DateTime.UtcNow,
+                Observed = observed,
+                ParameterId = "precip_past1h",
+                StationId = string.Empty,
+                Value = double.NaN,
+                NoValuesInCalculation = 0,
+                TimeResolution = string.Empty,
+                QcStatus = string.Empty,
+                From = observed,
+                To = observed,
+                CalculatedAt = DateTime.UtcNow,
+                Validity = true
             };
             var sutNaN = new DmiMetObsData
             {
-                features = new List<Feature> { new Feature { id = Guid.NewGuid(), type = "Feature", properties = propsNaN } },
-                numberReturned = 1,
-                links = new List<Link>(),
-                timeStamp = DateTime.UtcNow,
-                type = "FeatureCollection"
+                Features = [new Feature { Id = Guid.NewGuid(), Type = "Feature", Properties = propsNaN }],
+                NumberReturned = 1,
+                Links = [],
+                TimeStamp = DateTime.UtcNow,
+                Type = "FeatureCollection"
             };
 
             var resultNaN = sutNaN.RainThisMonth();
@@ -435,26 +431,26 @@ public class DmiMetObsDataTests
             var observed = DateTime.Today;
             var propsPosInf = new Properties
             {
-                created = DateTime.UtcNow,
-                observed = observed,
-                parameterId = "precip_past1h",
-                stationId = string.Empty,
-                value = double.PositiveInfinity,
-                noValuesInCalculation = 0,
-                timeResolution = string.Empty,
-                qcStatus = string.Empty,
-                from = observed,
-                to = observed,
-                calculatedAt = DateTime.UtcNow,
-                validity = true
+                Created = DateTime.UtcNow,
+                Observed = observed,
+                ParameterId = "precip_past1h",
+                StationId = string.Empty,
+                Value = double.PositiveInfinity,
+                NoValuesInCalculation = 0,
+                TimeResolution = string.Empty,
+                QcStatus = string.Empty,
+                From = observed,
+                To = observed,
+                CalculatedAt = DateTime.UtcNow,
+                Validity = true
             };
             var sutPosInf = new DmiMetObsData
             {
-                features = new List<Feature> { new Feature { id = Guid.NewGuid(), type = "Feature", properties = propsPosInf } },
-                numberReturned = 1,
-                links = new List<Link>(),
-                timeStamp = DateTime.UtcNow,
-                type = "FeatureCollection"
+                Features = [new Feature { Id = Guid.NewGuid(), Type = "Feature", Properties = propsPosInf }],
+                NumberReturned = 1,
+                Links = [],
+                TimeStamp = DateTime.UtcNow,
+                Type = "FeatureCollection"
             };
 
             var resultPosInf = sutPosInf.RainThisMonth();
@@ -466,26 +462,26 @@ public class DmiMetObsDataTests
             var observed = DateTime.Today;
             var propsNegInf = new Properties
             {
-                created = DateTime.UtcNow,
-                observed = observed,
-                parameterId = "precip_past1h",
-                stationId = string.Empty,
-                value = double.NegativeInfinity,
-                noValuesInCalculation = 0,
-                timeResolution = string.Empty,
-                qcStatus = string.Empty,
-                from = observed,
-                to = observed,
-                calculatedAt = DateTime.UtcNow,
-                validity = true
+                Created = DateTime.UtcNow,
+                Observed = observed,
+                ParameterId = "precip_past1h",
+                StationId = string.Empty,
+                Value = double.NegativeInfinity,
+                NoValuesInCalculation = 0,
+                TimeResolution = string.Empty,
+                QcStatus = string.Empty,
+                From = observed,
+                To = observed,
+                CalculatedAt = DateTime.UtcNow,
+                Validity = true
             };
             var sutNegInf = new DmiMetObsData
             {
-                features = new List<Feature> { new Feature { id = Guid.NewGuid(), type = "Feature", properties = propsNegInf } },
-                numberReturned = 1,
-                links = new List<Link>(),
-                timeStamp = DateTime.UtcNow,
-                type = "FeatureCollection"
+                Features = [new() { Id = Guid.NewGuid(), Type = "Feature", Properties = propsNegInf }],
+                NumberReturned = 1,
+                Links = [],
+                TimeStamp = DateTime.UtcNow,
+                Type = "FeatureCollection"
             };
 
             var resultNegInf = sutNegInf.RainThisMonth();
@@ -505,7 +501,7 @@ public class DmiMetObsDataTests
     public void AllRecived_FeaturesCountEqualsNumberReturned_ReturnsTrue()
     {
         // Arrange
-        var testCases = new List<(int featuresCount, int numberReturned)>
+        var testCases = new Collection<(int featuresCount, int numberReturned)>
         {
             (0, 0),   // boundary: empty collection equals zero
             (3, 3)    // typical non-empty equality case
@@ -513,10 +509,28 @@ public class DmiMetObsDataTests
 
         foreach (var (featuresCount, numberReturned) in testCases)
         {
+            var features = new Collection<Feature>();
+            for (int i = 0; i < featuresCount; i++)
+            {
+                // Create a feature with a unique ID for each iteration
+                var feature = new Feature
+                {
+                    Id = Guid.NewGuid(),
+                    Type = "Feature",
+                    Properties = new Properties
+                    {
+                        Observed = DateTime.UtcNow,
+                        ParameterId = "precip_past1h",
+                        Value = 1.0
+                    }
+                };
+                features.Add(feature);
+            }
+
             var data = new DmiMetObsData
             {
-                features = Enumerable.Range(0, featuresCount).Select(_ => new Feature()).ToList(),
-                numberReturned = numberReturned
+                Features = features,
+                NumberReturned = numberReturned
             };
 
             // Act
@@ -541,7 +555,7 @@ public class DmiMetObsDataTests
     public void AllRecived_FeaturesCountNotEqualNumberReturned_ReturnsFalse()
     {
         // Arrange
-        var testCases = new List<(int featuresCount, int numberReturned)>
+        var testCases = new Collection<(int featuresCount, int numberReturned)>
         {
             (0, 1),                    // empty vs positive
             (2, -1),                   // small positive count vs negative numberReturned
@@ -551,10 +565,27 @@ public class DmiMetObsDataTests
 
         foreach (var (featuresCount, numberReturned) in testCases)
         {
+            var features = new Collection<Feature>();
+            for (int i = 0; i < featuresCount; i++)
+            {
+                // Create a feature with a unique ID for each iteration
+                var feature = new Feature
+                {
+                    Id = Guid.NewGuid(),
+                    Type = "Feature",
+                    Properties = new Properties
+                    {
+                        Observed = DateTime.UtcNow,
+                        ParameterId = "precip_past1h",
+                        Value = 1.0
+                    }
+                };
+                features.Add(feature);
+            }
             var data = new DmiMetObsData
             {
-                features = Enumerable.Range(0, featuresCount).Select(_ => new Feature()).ToList(),
-                numberReturned = numberReturned
+                Features = features,
+                NumberReturned = numberReturned
             };
 
             // Act

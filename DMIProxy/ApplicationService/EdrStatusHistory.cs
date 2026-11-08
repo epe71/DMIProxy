@@ -18,7 +18,7 @@ public sealed class EdrStatusHistory(IFusionCache cache) : IDisposable
         await _writeLock.WaitAsync(cancellationToken);
         try
         {
-            var cachedHistory = cache.TryGet<List<int>>(CacheKey, token: cancellationToken);
+            var cachedHistory = await cache.TryGetAsync<List<int>>(CacheKey, token: cancellationToken);
             var history = cachedHistory.HasValue && cachedHistory.Value is not null
                 ? cachedHistory.Value.ToList()
                 : [];

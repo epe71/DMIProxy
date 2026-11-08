@@ -1,6 +1,7 @@
 ﻿using DMIProxy.BusinessEntity;
 using DMIProxy.Contract;
 using DMIProxy.DomainService;
+using System.Collections.ObjectModel;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace DMIProxy.ApplicationService;
@@ -12,7 +13,7 @@ public class WeatherForecastService(
 {
     public async Task<ForecastMessageDTO> GetWeatherForecast(string stationId)
     {
-        var updateTime = new List<TimeOnly> { new(6, 0), new(10, 0), new(18, 0) };
+        var updateTime = new Collection<TimeOnly> { new(6, 0), new(10, 0), new(18, 0) };
         var expirationTime = timeSpanCalculator.FixTime(updateTime);
 
         var forecast = await cache.GetOrSetAsync<TextForecast>(

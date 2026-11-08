@@ -18,14 +18,14 @@ public class EdrStatusHistoryTests
             await history.AddAsync(status, TestContext.CancellationToken);
 
         await history.AddAsync(200, TestContext.CancellationToken);
-        var afterFourGoodStatuses = cache.TryGet<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
-        CollectionAssert.AreEqual(new[] { 200, 200, 200, 429, 200 }, afterFourGoodStatuses.Value);
+        var afterFourGoodStatuses = await cache.TryGetAsync<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
+        Assert.AreSequenceEqual([200, 200, 200, 429, 200], afterFourGoodStatuses.Value);
 
         for (var i = 0; i < 4; i++)
             await history.AddAsync(200, TestContext.CancellationToken);
 
-        var afterFiveGoodStatuses = cache.TryGet<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
-        CollectionAssert.AreEqual(new[] { 200, 200, 200, 200, 200 }, afterFiveGoodStatuses.Value);
+        var afterFiveGoodStatuses = await cache.TryGetAsync<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
+        Assert.AreSequenceEqual([200, 200, 200, 200, 200], afterFiveGoodStatuses.Value);
         cache.Dispose();
     }
 
@@ -37,7 +37,7 @@ public class EdrStatusHistoryTests
 
         await Task.WhenAll(Enumerable.Range(200, 20).Select(status => history.AddAsync(status, TestContext.CancellationToken)));
 
-        var cached = cache.TryGet<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
+        var cached = await cache.TryGetAsync<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
         Assert.IsTrue(cached.HasValue);
         Assert.HasCount(EdrStatusHistory.Capacity, cached.Value!);
         Assert.HasCount(EdrStatusHistory.Capacity, cached.Value!.Distinct());

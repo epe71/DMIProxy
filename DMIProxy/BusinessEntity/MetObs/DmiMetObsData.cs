@@ -1,42 +1,53 @@
-﻿namespace DMIProxy.BusinessEntity.MetObs
+﻿using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
+
+namespace DMIProxy.BusinessEntity.MetObs;
+
+public class DmiMetObsData
 {
-    public class DmiMetObsData
+    [JsonPropertyName("type")]
+    public string Type { get; init; }
+
+    [JsonPropertyName("features")]
+    public Collection<Feature> Features { get; init; }
+
+    [JsonPropertyName("timeStamp")]
+    public DateTime TimeStamp { get; init; }
+
+    [JsonPropertyName("numberReturned")]
+    public int NumberReturned { get; init; }
+
+    [JsonPropertyName("links")]
+    public Collection<Link> Links { get; init; }
+
+    public double Rain1h()
     {
-        public string type { get; init; }
-        public List<Feature> features { get; init; }
-        public DateTime timeStamp { get; init; }
-        public int numberReturned { get; init; }
-        public List<Link> links { get; init; }
-
-        public double Rain1h()
+        var thisHour = Features.FirstOrDefault(f => f.ThisHour());
+        if (thisHour == null)
         {
-            var thisHour = features.FirstOrDefault(f => f.ThisHour());
-            if (thisHour == null)
-            {
-                return 0.0;
-            }
-            return thisHour.Rain1h();
+            return 0.0;
         }
+        return thisHour.Rain1h();
+    }
 
-        public double RainToday()
-        {
-            var rainToday = features.Where(f => f.ThisDay()).Select(f => f.Rain1h()).Sum();
-            return rainToday;
-        }
+    public double RainToday()
+    {
+        var rainToday = Features.Where(f => f.ThisDay()).Select(f => f.Rain1h()).Sum();
+        return rainToday;
+    }
 
-        public double RainThisMonth()
-        {
-            var rainThisMonth = features.Where(f => f.ThisMonth()).Select(f => f.Rain1h()).Sum();
-            return Math.Round(rainThisMonth, 2);
-        }
+    public double RainThisMonth()
+    {
+        var rainThisMonth = Features.Where(f => f.ThisMonth()).Select(f => f.Rain1h()).Sum();
+        return Math.Round(rainThisMonth, 2);
+    }
 
-        public bool AllRecived()
+    public bool AllRecived()
+    {
+        if (Features.Count == NumberReturned)
         {
-            if (features.Count() == numberReturned)
-            {
-                return true;
-            }
-            return false;
+            return true;
         }
+        return false;
     }
 }

@@ -80,7 +80,7 @@ builder.Services.AddFusionCache()
     });
 
 // Share the DMI rate limiter and circuit breaker across all DMI requests in this process.
-builder.Services.AddSingleton<IAsyncPolicy<HttpResponseMessage>>(sp =>
+builder.Services.AddSingleton(sp =>
 {
     var logger = sp.GetRequiredService<ILogger<PollyConfiguration>>();
     return PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(logger: logger);

@@ -5,7 +5,9 @@ using System.Net;
 
 namespace DMIProxy;
 
+#pragma warning disable CA1052 // Static holder types should be Static or NotInheritable
 public class PollyConfiguration
+#pragma warning restore CA1052 // Static holder types should be Static or NotInheritable
 {
     public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(int retries = 1, int BackoffTimeInSeconds = 180)
     {

@@ -27,14 +27,12 @@ public class WebScrapeService : IWebScrapeService
     {
         try
         {
-            var response = await _httpClient.GetAsync(baseUrl + stationId);
+            var response = await _httpClient.GetAsync(new Uri(baseUrl + stationId));
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            using (JsonDocument doc = JsonDocument.Parse(jsonResponse))
-            {
-                var regionalForecast = doc.RootElement.GetProperty("regionalForecast");
-                return ParseJson(regionalForecast);
-            }
+            using JsonDocument doc = JsonDocument.Parse(jsonResponse);
+            var regionalForecast = doc.RootElement.GetProperty("regionalForecast");
+            return ParseJson(regionalForecast);
         }
         catch (Exception ex) when (ex is HttpRequestException
             or TaskCanceledException

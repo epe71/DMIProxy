@@ -2,6 +2,7 @@
 using DMIProxy.BusinessEntity;
 using DMIProxy.DomainService;
 using Moq;
+using System.Collections.ObjectModel;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.NullObjects;
 
@@ -25,7 +26,7 @@ public class WeatherForecastServiceTests
         webScrapeServiceMock.Setup(s => s.GetWeatherForecast(stationId)).ReturnsAsync(forecast);
 
         var timeSpanCalculatorMock = new Mock<ITimeSpanCalculator>();
-        timeSpanCalculatorMock.Setup(t => t.FixTime(It.IsAny<List<TimeOnly>>())).Returns(TimeSpan.FromHours(1));
+        timeSpanCalculatorMock.Setup(t => t.FixTime(It.IsAny<Collection<TimeOnly>>())).Returns(TimeSpan.FromHours(1));
 
         var nullCache = new NullFusionCache(new FusionCacheOptions());
 

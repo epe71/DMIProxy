@@ -40,7 +40,7 @@ public class PropertiesTests
             // Act
             var sut = new Properties
             {
-                observed = observedValue
+                Observed = observedValue
             };
 
             bool actual = sut.ThisHour();
@@ -75,8 +75,8 @@ public class PropertiesTests
         {
             var sut = new Properties
             {
-                parameterId = "precip_past1h",
-                value = expected
+                ParameterId = "precip_past1h",
+                Value = expected
             };
 
             // Act

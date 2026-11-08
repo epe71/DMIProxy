@@ -4,8 +4,9 @@ using DMIProxy.DomainService;
 using Moq;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.NullObjects;
+using DMIProxy.ApplicationService;
 
-namespace DMIProxy.ApplicationService.UnitTests;
+namespace DMIProxyTests.ApplicationService;
 
 [TestClass]
 public class MetObsApplicationServiceTests
@@ -17,20 +18,20 @@ public class MetObsApplicationServiceTests
         var stationId = "12345";
         var metObsData = new DmiMetObsData
         {
-            timeStamp = DateTime.Now,
-            features = new List<Feature>
-            {
-                new Feature()
+            TimeStamp = DateTime.Now,
+            Features =
+            [
+                new()
                 {
-                    properties = new Properties
+                    Properties = new Properties
                     {
-                        parameterId = "precip_past1h",
-                        observed = DateTime.Now,
-                        value = 2
+                        ParameterId = "precip_past1h",
+                        Observed = DateTime.Now,
+                        Value = 2
                     }
                 }
-            },
-            numberReturned = 1
+            ],
+            NumberReturned = 1
         };
 
         var expectedRainDto = new RainDTO()
@@ -38,8 +39,8 @@ public class MetObsApplicationServiceTests
             Rain1h = metObsData.Rain1h(),
             RainToday = metObsData.RainToday(),
             RainThisMonth = metObsData.RainThisMonth(),
-            TimeStamp = metObsData.timeStamp,
-            NumberReturned = metObsData.numberReturned
+            TimeStamp = metObsData.TimeStamp,
+            NumberReturned = metObsData.NumberReturned
         };
 
         var metObsServiceMock = new Mock<IMetObsService>();

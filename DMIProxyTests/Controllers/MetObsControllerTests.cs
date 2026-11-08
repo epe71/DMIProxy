@@ -61,11 +61,11 @@ public class MetObsControllerTests
         // Arrange
         var expectedForecastDTO = new HomeAssistantDTO
         {
-            data =
+            Data =
             [
-                new() { date = "2025-05-24 17:17:45", value = 20.5 },
+                new() { Date = "2025-05-24 17:17:45", Value = 20.5 },
             ],
-            description = "Test forecast description"
+            Description = "Test forecast description"
         };
 
         var edrServiceMock = new Mock<IEdrApplicationService>();
@@ -92,8 +92,8 @@ public class MetObsControllerTests
         Assert.IsNotNull(jsonResult);
         var actualForecastDTO = jsonResult.Value as HomeAssistantDTO;
         Assert.IsNotNull(actualForecastDTO);
-        Assert.AreEqual(expectedForecastDTO.description, actualForecastDTO.description);
-        Assert.HasCount(expectedForecastDTO.data.Count, actualForecastDTO.data);
+        Assert.AreEqual(expectedForecastDTO.Description, actualForecastDTO.Description);
+        Assert.HasCount(expectedForecastDTO.Data.Count, actualForecastDTO.Data);
     }
 
 

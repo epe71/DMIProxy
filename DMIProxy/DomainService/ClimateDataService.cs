@@ -37,7 +37,7 @@ public class ClimateDataService : IClimateDataService
     public async Task<DmiMetObsData> GetParameterId(ParameterId parameterId, int limit)
     {
         var query = BuildQuery(parameterId, limit);
-        var requestUri = $"{baseUrl}?{query}";
+        var requestUri = new Uri($"{baseUrl}?{query}");
 
         using var response = await _httpClient.GetAsync(requestUri);
         response.EnsureDmiSuccessStatusCode();

@@ -30,7 +30,7 @@ public class MetObsService : IMetObsService
     public async Task<DmiMetObsData> GetRain(string stationId)
     {
         var query = BuildQuery(stationId);
-        var requestUri = $"{baseUrl}?{query}";
+        var requestUri = new Uri($"{baseUrl}?{query}");
 
         using var response = await _httpClient.GetAsync(requestUri);
         response.EnsureDmiSuccessStatusCode();

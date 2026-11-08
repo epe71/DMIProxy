@@ -1,9 +1,16 @@
-﻿namespace DMIProxy.Contract
+﻿using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
+
+namespace DMIProxy.Contract;
+
+public class HomeAssistantDTO
 {
-    public class HomeAssistantDTO
-    {
-        public string name { get; init; }
-        public List<PointDTO> data { get; init; }
-        public string description { get; init; }
-    }
+    [JsonPropertyName("name")]
+    public string Name { get; init; }
+
+    [JsonPropertyName("data")]
+    public Collection<PointDTO> Data { get; init; }
+
+    [JsonPropertyName("description")]
+    public string Description { get; init; }
 }

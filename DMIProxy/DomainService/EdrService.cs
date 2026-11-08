@@ -1,4 +1,5 @@
 ﻿using DMIProxy.Contract;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.Json;
 
@@ -32,12 +33,12 @@ public class EdrService : IEdrService
         };
     }
 
-    public async Task<EdrForecastResult> GetEdrForecast(List<string> forecastParameters)
+    public async Task<EdrForecastResult> GetEdrForecast(Collection<string> forecastParameters)
     {
         ArgumentNullException.ThrowIfNull(forecastParameters);
 
         var query = BuildQuery(forecastParameters);
-        var requestUri = $"{baseUrl}?{query}";
+        var requestUri = new Uri($"{baseUrl}?{query}");
 
         using var response = await _httpClient.GetAsync(requestUri);
         var statusCode = response.StatusCode;
@@ -46,7 +47,7 @@ public class EdrService : IEdrService
         await using var stream = await response.Content.ReadAsStreamAsync();
         var dmiResult = await JsonSerializer.DeserializeAsync<JsonElement>(stream, _serializerOptions);
 
-        var allForcasts = new List<HomeAssistantDTO>();
+        var allForcasts = new Collection<HomeAssistantDTO>();
         foreach (var parameter in forecastParameters)
         {
             var forcast = ExtractForecastData(parameter, dmiResult);
@@ -55,7 +56,7 @@ public class EdrService : IEdrService
         return new EdrForecastResult(statusCode, allForcasts);
     }
 
-    private static string BuildQuery(List<string> forecastParameters)
+    private static string BuildQuery(Collection<string> forecastParameters)
     {
         var weatherParameters = string.Join(",", forecastParameters);
         var parameters = new Dictionary<string, string> {
@@ -72,22 +73,22 @@ public class EdrService : IEdrService
     {
         var time = jsonElement.GetProperty("domain").GetProperty("axes").GetProperty("t").GetProperty("values").EnumerateArray().Select(x => x.GetDateTime()).ToArray();
         var description = jsonElement.GetProperty("parameters").GetProperty(forecastParameter).GetProperty("description").GetProperty("en").GetString();
-        var values = jsonElement.GetProperty("ranges").GetProperty(forecastParameter).GetProperty("values").EnumerateArray().Select(x => x.GetDouble()).ToList();
+        var values = (Collection<double>)jsonElement.GetProperty("ranges").GetProperty(forecastParameter).GetProperty("values").EnumerateArray().Select(x => x.GetDouble());
 
         var adjustedValues = AdjustData(forecastParameter, values);
         var transmittance = DataToPointDTOList(time, adjustedValues);
 
         var forecastDto = new HomeAssistantDTO()
         {
-            name = forecastParameter,
-            data = transmittance,
-            description = description ?? forecastParameter
+            Name = forecastParameter,
+            Data = transmittance,
+            Description = description ?? forecastParameter
         };
 
         return forecastDto;
     }
 
-    private static List<double> AdjustData(string forecastParameter, List<double> values)
+    private static Collection<double> AdjustData(string forecastParameter, Collection<double> values)
     {
         return forecastParameter switch
         {
@@ -104,15 +105,15 @@ public class EdrService : IEdrService
         };
     }
 
-    private static List<PointDTO> DataToPointDTOList(DateTime[] time, List<double> cloudTransmit)
+    private static Collection<PointDTO> DataToPointDTOList(DateTime[] time, Collection<double> cloudTransmit)
     {
-        var transmittance = new List<PointDTO>();
+        var transmittance = new Collection<PointDTO>();
         for (int i = 0; i < time.Length; i++)
         {
             var point = new PointDTO()
             {
-                date = time[i].ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
-                value = cloudTransmit[i]
+                Date = time[i].ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
+                Value = cloudTransmit[i]
             };
             transmittance.Add(point);
         }

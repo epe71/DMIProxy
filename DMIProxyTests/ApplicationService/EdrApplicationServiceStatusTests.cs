@@ -4,6 +4,7 @@ using DMIProxy.DomainService;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using System.Net;
+using System.Collections.ObjectModel;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace DMIProxyTests.ApplicationService;
@@ -17,15 +18,15 @@ public class EdrApplicationServiceStatusTests
         var cache = new FusionCache(new FusionCacheOptions());
         using var history = new EdrStatusHistory(cache);
         var edrService = new Mock<IEdrService>();
-        edrService.Setup(service => service.GetEdrForecast(It.IsAny<List<string>>()))
+        edrService.Setup(service => service.GetEdrForecast(It.IsAny<Collection<string>>()))
             .ReturnsAsync(new EdrForecastResult(HttpStatusCode.OK,
-                [new HomeAssistantDTO { name = "wind-speed", description = "Wind", data = [] }]));
+                [new HomeAssistantDTO { Name = "wind-speed", Description = "Wind", Data = [] }]));
         var applicationService = new EdrApplicationService(edrService.Object, cache, history, NullLogger<EdrApplicationService>.Instance);
 
         await applicationService.GetEdrForecast("wind-speed");
 
-        var result = cache.TryGet<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
-        CollectionAssert.AreEqual(new[] { (int)HttpStatusCode.OK }, result.Value);
+        var result = await cache.TryGetAsync<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
+        Assert.AreSequenceEqual([(int)HttpStatusCode.OK], result.Value);
         cache.Dispose();
     }
 
@@ -35,15 +36,15 @@ public class EdrApplicationServiceStatusTests
         var cache = new FusionCache(new FusionCacheOptions());
         using var history = new EdrStatusHistory(cache);
         var edrService = new Mock<IEdrService>();
-        edrService.Setup(service => service.GetEdrForecast(It.IsAny<List<string>>()))
+        edrService.Setup(service => service.GetEdrForecast(It.IsAny<Collection<string>>()))
             .ReturnsAsync(new EdrForecastResult(HttpStatusCode.Created,
-                [new HomeAssistantDTO { name = "temperature-2m", description = "Temperature", data = [] }]));
+                [new HomeAssistantDTO { Name = "temperature-2m", Description = "Temperature", Data = [] }]));
         var applicationService = new EdrApplicationService(edrService.Object, cache, history, NullLogger<EdrApplicationService>.Instance);
 
         await applicationService.GetEdrForecast("temperature-2m");
 
-        var result = cache.TryGet<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
-        CollectionAssert.AreEqual(new[] { (int)HttpStatusCode.Created }, result.Value);
+        var result = await cache.TryGetAsync<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
+        Assert.AreSequenceEqual([(int)HttpStatusCode.Created], result.Value);
         cache.Dispose();
     }
 
@@ -53,7 +54,7 @@ public class EdrApplicationServiceStatusTests
         var cache = new FusionCache(new FusionCacheOptions());
         using var history = new EdrStatusHistory(cache);
         var edrService = new Mock<IEdrService>();
-        edrService.SetupSequence(service => service.GetEdrForecast(It.IsAny<List<string>>()))
+        edrService.SetupSequence(service => service.GetEdrForecast(It.IsAny<Collection<string>>()))
             .ThrowsAsync(new DmiUpstreamRateLimitException(null))
             .ThrowsAsync(new HttpRequestException("Upstream error", null, HttpStatusCode.InternalServerError))
             .ThrowsAsync(new HttpRequestException("No response"));
@@ -63,8 +64,8 @@ public class EdrApplicationServiceStatusTests
         await InvokeAndIgnoreUpstreamError(() => applicationService.GetEdrForecast("server-error"));
         await InvokeAndIgnoreUpstreamError(() => applicationService.GetEdrForecast("transport-error"));
 
-        var result = cache.TryGet<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
-        CollectionAssert.AreEqual(new[] { 429, 500, 0 }, result.Value);
+        var result = await cache.TryGetAsync<List<int>>(EdrStatusHistory.CacheKey, token: TestContext.CancellationToken);
+        Assert.AreSequenceEqual([429, 500, 0], result.Value);
         cache.Dispose();
     }
 

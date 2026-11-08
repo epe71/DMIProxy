@@ -7,14 +7,14 @@ namespace DMIProxy.HealthCheck;
 
 public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimeProvider) : IHealthCheck
 {
-    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var stationId = cache.TryGet<string>("RainCache:StationId", token: cancellationToken);
+        var stationId = await cache.TryGetAsync<string>("RainCache:StationId", token: cancellationToken);
         if (!stationId.HasValue)
         {
-            return Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, null));
+            return await Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, null));
         }
 
         var data = new Dictionary<string, object>()
@@ -22,10 +22,10 @@ public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimePro
                 { "Station id", stationId }
             };
 
-        RainDTO cachedValue = cache.TryGet<RainDTO>($"Rain-{stationId}", token: cancellationToken);
+        RainDTO cachedValue = await cache.TryGetAsync<RainDTO>($"Rain-{stationId}", token: cancellationToken);
         if (cachedValue == null)
         {
-            return Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, data));
+            return await Task.FromResult(HealthCheckResult.Degraded("No MetObs data", null, data));
         }
 
         data = new Dictionary<string, object>()
@@ -37,19 +37,19 @@ public class MetObsHealthCheck(IFusionCache cache, IDateTimeProvider dateTimePro
 
         if (cachedValue.TimeStamp < dateTimeProvider.UtcNow.AddDays(-1))
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("MetObs data is to old", null, data));
+            return await Task.FromResult(HealthCheckResult.Unhealthy("MetObs data is to old", null, data));
         }
 
         if (cachedValue.TimeStamp < dateTimeProvider.UtcNow.AddHours(-3))
         {
-            return Task.FromResult(HealthCheckResult.Degraded("MetObs data delayed", null, data));
+            return await Task.FromResult(HealthCheckResult.Degraded("MetObs data delayed", null, data));
         }
 
         if (cachedValue.NumberReturned < 27 * 24)
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("To few MetObs data points", null, data));
+            return await Task.FromResult(HealthCheckResult.Unhealthy("To few MetObs data points", null, data));
         }
 
-        return Task.FromResult(HealthCheckResult.Healthy("All good", data));
+        return await Task.FromResult(HealthCheckResult.Healthy("All good", data));
     }
 }

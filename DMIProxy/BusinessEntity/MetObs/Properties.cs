@@ -1,24 +1,38 @@
-﻿namespace DMIProxy.BusinessEntity.MetObs
+﻿using System.Text.Json.Serialization;
+
+namespace DMIProxy.BusinessEntity.MetObs
 {
     public class Properties
     {
-        public DateTime created { get; set; }
-        public DateTime observed { get; set; }
-        public string parameterId { get; set; }
-        public string stationId { get; set; }
-        public double value { get; set; }
-        public int noValuesInCalculation { get; set; }
-        public string timeResolution { get; set; }
-        public string qcStatus { get; set; }
-        public DateTime from { get; set; }
-        public DateTime to { get; set; }
-        public DateTime calculatedAt { get; set; }
-        public bool validity { get; set; }
+        [JsonPropertyName("created")]
+        public DateTime Created { get; set; }
+        [JsonPropertyName("observed")]
+        public DateTime Observed { get; set; }
+        [JsonPropertyName("parameterId")]
+        public string ParameterId { get; set; }
+        [JsonPropertyName("stationId")]
+        public string StationId { get; set; }
+        [JsonPropertyName("value")]
+        public double Value { get; set; }
+        [JsonPropertyName("noValuesInCalculation")]
+        public int NoValuesInCalculation { get; set; }
+        [JsonPropertyName("timeResolution")]
+        public string TimeResolution { get; set; }
+        [JsonPropertyName("qcStatus")]
+        public string QcStatus { get; set; }
+        [JsonPropertyName("from")]
+        public DateTime From { get; set; }
+        [JsonPropertyName("to")]
+        public DateTime To { get; set; }
+        [JsonPropertyName("calculatedAt")]
+        public DateTime CalculatedAt { get; set; }
+        [JsonPropertyName("validity")]
+        public bool Validity { get; set; }
 
 
         public bool ThisHour()
         {
-            var span = DateTime.UtcNow - observed;
+            var span = DateTime.UtcNow - Observed;
             if (span.TotalMinutes < 60)
             {
                 return true;
@@ -28,7 +42,7 @@
 
         public bool ThisDay()
         {
-            if (DateTime.Today <= observed)
+            if (DateTime.Today <= Observed)
             {
                 return true;
             }
@@ -38,7 +52,7 @@
         public bool ThisMonth()
         {
             var monthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1, 0, 0, 0);
-            if (monthStart <= observed)
+            if (monthStart <= Observed)
             {
                 return true;
             }
@@ -47,11 +61,11 @@
 
         public double Rain1h()
         {
-            if (parameterId != "precip_past1h")
+            if (ParameterId != "precip_past1h")
             {
                 throw new InvalidOperationException("Not a rain measurement");
             }
-            return value;
+            return Value;
         }
     }
 }

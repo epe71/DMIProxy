@@ -1,52 +1,48 @@
-﻿namespace DMIProxy.DomainService
+﻿using System.Collections.ObjectModel;
+
+namespace DMIProxy.DomainService;
+
+public class AdjustList(Collection<double> values)
 {
-    public class AdjustList
+    private Collection<double> _numbers = [.. values];
+
+    public AdjustList Divide(double fraction)
     {
-        private List<double> _numbers;
+        _numbers = [.. _numbers.Select(n => n / fraction)];
+        return this;
+    }
 
-        public AdjustList(List<double> values)
-        {
-            _numbers = values;
-        }
+    public AdjustList Multiply(double times)
+    {
+        _numbers = [.. _numbers.Select(n => n * times)];
+        return this;
+    }
 
-        public AdjustList Divide(double fraction)
-        {
-            _numbers = _numbers.Select(n => n / fraction).ToList();
-            return this;
-        }
+    public AdjustList Subtract(double subtract)
+    {
+        _numbers = [.. _numbers.Select(n => n - subtract)];
+        return this;
+    }
 
-        public AdjustList Multiply(double times)
-        {
-            _numbers = _numbers.Select(n => n * times).ToList();
-            return this;
-        }
+    public AdjustList Round(int digits)
+    {
+        _numbers = [.. _numbers.Select(n => Math.Round(n, digits))];
+        return this;
+    }
 
-        public AdjustList Subtract(double subtract)
+    public AdjustList Difference()
+    {
+        var differences = new Collection<double> { 0.0 };
+        for (int i = 0; i < _numbers.Count - 1; i++)
         {
-            _numbers = _numbers.Select(n => n - subtract).ToList();
-            return this;
+            differences.Add(_numbers[i + 1] - _numbers[i]);
         }
+        _numbers = differences;
+        return this;
+    }
 
-        public AdjustList Round(int digits)
-        {
-            _numbers = _numbers.Select(n => Math.Round(n, digits)).ToList();
-            return this;
-        }
-
-        public AdjustList Difference()
-        {
-            var differences = new List<double> { 0.0 };
-            for (int i = 0; i < _numbers.Count - 1; i++)
-            {
-                differences.Add(_numbers[i + 1] - _numbers[i]);
-            }
-            _numbers = differences;
-            return this;
-        }
-
-        public List<double> Run()
-        {
-            return _numbers;
-        }
+    public Collection<double> Run()
+    {
+        return _numbers;
     }
 }

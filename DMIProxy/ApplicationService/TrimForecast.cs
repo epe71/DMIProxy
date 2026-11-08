@@ -1,6 +1,6 @@
 ﻿namespace DMIProxy.ApplicationService;
 
-public class TrimForecast
+public static class TrimForecast
 {
     public static string TrimText(string text)
     {

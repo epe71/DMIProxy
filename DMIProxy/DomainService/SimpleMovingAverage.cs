@@ -5,8 +5,8 @@ public class SimpleMovingAverage
     private readonly int _k;
     private readonly double[] _values;
 
-    private int _index = 0;
-    private double _sum = 0;
+    private int _index;
+    private double _sum;
 
     public SimpleMovingAverage(int k)
     {

@@ -1,4 +1,5 @@
 ﻿using DMIProxy.BusinessEntity;
+using System.Collections.ObjectModel;
 
 namespace DMIProxy.DomainService;
 
@@ -22,7 +23,7 @@ public class TimeSpanCalculator(IDateTimeProvider dateTimeProvider) : ITimeSpanC
     /// </summary>
     /// <param name="updateTime">A list of hour and minutes when it is time to update</param>
     /// <returns></returns>
-    public TimeSpan FixTime(List<TimeOnly> updateTime)
+    public TimeSpan FixTime(Collection<TimeOnly> updateTime)
     {
         ArgumentNullException.ThrowIfNull(updateTime);
 
@@ -32,7 +33,7 @@ public class TimeSpanCalculator(IDateTimeProvider dateTimeProvider) : ITimeSpanC
         return expirationTime - now;
     }
 
-    private static DateTime NextExpirationTime(DateTime now, List<TimeOnly> updateTime)
+    private static DateTime NextExpirationTime(DateTime now, Collection<TimeOnly> updateTime)
     {
         var today = DateOnly.FromDateTime(now);
         foreach (var t in updateTime)

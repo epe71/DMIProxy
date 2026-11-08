@@ -1,10 +1,16 @@
-﻿namespace DMIProxy.BusinessEntity.MetObs
+﻿using System.Text.Json.Serialization;
+
+namespace DMIProxy.BusinessEntity.MetObs
 {
     public class Link
     {
-        public string href { get; set; }
-        public string rel { get; set; }
-        public string type { get; set; }
-        public string title { get; set; }
+        [JsonPropertyName("href")]
+        public string Href { get; set; }
+        [JsonPropertyName("rel")]
+        public string Rel { get; set; }
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
     }
 }

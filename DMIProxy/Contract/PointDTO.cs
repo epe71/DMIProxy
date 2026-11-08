@@ -1,8 +1,12 @@
-﻿namespace DMIProxy.Contract
+﻿using System.Text.Json.Serialization;
+
+namespace DMIProxy.Contract
 {
     public class PointDTO
     {
-        public string date { get; init; }
-        public double value { get; init; }
+        [JsonPropertyName("date")]
+        public string Date { get; init; }
+        [JsonPropertyName("value")]
+        public double Value { get; init; }
     }
 }

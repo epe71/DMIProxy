@@ -372,6 +372,9 @@ dotnet_diagnostic.CA1000.severity = warning
 # CA1001 - Types that own disposable fields should be disposable
 dotnet_diagnostic.CA1001.severity = error
 
+# CA1014 - Mark assemblies with CLSCompliantAttribute
+dotnet_diagnostic.CA1014.severity = none
+
 # CA1018 - Mark attributes with AttributeUsageAttribute
 dotnet_diagnostic.CA1018.severity = warning
 
@@ -426,6 +429,9 @@ dotnet_diagnostic.CA1816.severity = error
 # CA1820 - Test for empty strings using string length
 dotnet_diagnostic.CA1820.severity = warning
 
+# CA1848 - Use the LoggerMessage delegates
+dotnet_diagnostic.CA1848.severity = none
+
 # CA1851 - Possible multiple enumerations of IEnumerable
 dotnet_diagnostic.CA1851.severity = warning
 
@@ -434,6 +440,9 @@ dotnet_diagnostic.CA2000.severity = error
 
 # CA2002 - Do not lock on objects with weak identity
 dotnet_diagnostic.CA2002.severity = error
+
+# CA2007 - Do not directly await a Task without calling ConfigureAwait
+dotnet_diagnostic.CA2007.severity = none
 
 # CA2100 - Review SQL queries for security vulnerabilities
 dotnet_diagnostic.CA2100.severity = error
@@ -737,3 +746,6 @@ dotnet_diagnostic.MSTEST0037.severity = warning
 
 # Flow TestContext cancellation token
 dotnet_diagnostic.MSTEST0049.severity = warning
+
+# CS1591 - Missing XML comment for publicly visible type or member
+dotnet_diagnostic.CS1591.severity = none

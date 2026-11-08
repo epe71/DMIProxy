@@ -6,16 +6,16 @@ namespace DMIProxy.HealthCheck;
 
 public class ClimateDataHealthCheck(IFusionCache cache) : IHealthCheck
 {
-    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        HomeAssistantDTO cachedValue = cache.TryGet<HomeAssistantDTO>("HeatingDegreeDays", token: cancellationToken);
+        HomeAssistantDTO cachedValue = await cache.TryGetAsync<HomeAssistantDTO>("HeatingDegreeDays", token: cancellationToken);
         if (cachedValue == null)
         {
-            return Task.FromResult(HealthCheckResult.Degraded("No Climate Data: HeatingDegreeDays", null, null));
+            return await Task.FromResult(HealthCheckResult.Degraded("No Climate Data: HeatingDegreeDays", null, null));
         }
 
-        return Task.FromResult(HealthCheckResult.Healthy("All good", null));
+        return await Task.FromResult(HealthCheckResult.Healthy("All good", null));
     }
 }

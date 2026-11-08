@@ -5,7 +5,9 @@ namespace DMIProxy.DomainService;
 /// <summary>
 /// Represents an HTTP 429 response received from DMI and preserves its Retry-After value.
 /// </summary>
+#pragma warning disable CA1032 // Implement standard exception constructors
 public sealed class DmiUpstreamRateLimitException(TimeSpan? retryAfter)
+#pragma warning restore CA1032 // Implement standard exception constructors
     : HttpRequestException("DMI returned HTTP 429 Too Many Requests.", null, HttpStatusCode.TooManyRequests)
 {
     public TimeSpan? RetryAfter { get; } = retryAfter;

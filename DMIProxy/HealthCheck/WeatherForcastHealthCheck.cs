@@ -8,16 +8,16 @@ public class WeatherForcastHealthCheck(IFusionCache cache) : IHealthCheck
 {
     private const string DefaultStationId = "2624652";
 
-    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        TextForecast cachedValue = cache.TryGet<TextForecast>($"TextForecast-{DefaultStationId}", token: cancellationToken);
+        TextForecast cachedValue = await cache.TryGetAsync<TextForecast>($"TextForecast-{DefaultStationId}", token: cancellationToken);
         if (cachedValue == null)
         {
-            return Task.FromResult(HealthCheckResult.Degraded($"No Weather Forcast for station: {DefaultStationId}", null, null));
+            return await Task.FromResult(HealthCheckResult.Degraded($"No Weather Forcast for station: {DefaultStationId}", null, null));
         }
 
-        return Task.FromResult(HealthCheckResult.Healthy("All good", null));
+        return await Task.FromResult(HealthCheckResult.Healthy("All good", null));
     }
 }
