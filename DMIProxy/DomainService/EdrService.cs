@@ -25,7 +25,7 @@ public class EdrService : IEdrService
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
 
-        _httpClient = httpClientFactory.CreateClient("DmiClient");
+        _httpClient = httpClientFactory.CreateClient("EdrClient");
         _serializerOptions = new()
         {
             PropertyNameCaseInsensitive = true,

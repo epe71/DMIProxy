@@ -3,6 +3,7 @@ using Moq;
 using Moq.Protected;
 using Polly;
 using Polly.CircuitBreaker;
+using Polly.RateLimit;
 using System.Net;
 
 namespace DMIProxyTests;
@@ -122,6 +123,27 @@ public class PollyPolicyTests
         });
         httpResponse.Dispose();
         httpClient.Dispose();
+    }
+
+    [TestMethod]
+    public async Task RateLimitPolicies_AreIndependent()
+    {
+        IAsyncPolicy<HttpResponseMessage> edrPolicy = PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(maxCallPerMinute: 1);
+        IAsyncPolicy<HttpResponseMessage> otherDmiPolicy = PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(maxCallPerMinute: 1);
+
+        using var edrResponse = await edrPolicy.ExecuteAsync(() => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
+        edrResponse.EnsureSuccessStatusCode();
+        await Assert.ThrowsExactlyAsync<RateLimitRejectedException>(async () =>
+        {
+            using var rejectedResponse = await edrPolicy.ExecuteAsync(() => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
+        });
+
+        using var otherDmiResponse = await otherDmiPolicy.ExecuteAsync(() => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
+        otherDmiResponse.EnsureSuccessStatusCode();
+        await Assert.ThrowsExactlyAsync<RateLimitRejectedException>(async () =>
+        {
+            using var rejectedResponse = await otherDmiPolicy.ExecuteAsync(() => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
+        });
     }
 
     public TestContext TestContext { get; set; }

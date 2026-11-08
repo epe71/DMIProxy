@@ -79,21 +79,36 @@ builder.Services.AddFusionCache()
         JitterMaxDuration = TimeSpan.FromSeconds(2)
     });
 
-// Share the DMI rate limiter and circuit breaker across all DMI requests in this process.
-builder.Services.AddSingleton(sp =>
+// Keep separate process-wide rate limiters and circuit breakers for EDR and other DMI requests.
+builder.Services.AddKeyedSingleton("Edr", (sp, _) =>
 {
     var logger = sp.GetRequiredService<ILogger<PollyConfiguration>>();
-    return PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(logger: logger);
+    return PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(maxCallPerMinute: 1, logger: logger);
+});
+builder.Services.AddKeyedSingleton("Dmi", (sp, _) =>
+{
+    var logger = sp.GetRequiredService<ILogger<PollyConfiguration>>();
+    return PollyConfiguration.GetRateLimitAndCircuitBreakerPolicy(maxCallPerMinute: 5, logger: logger);
 });
 
-// DMI clients share one process-wide rate limiter and circuit breaker.
+// Policy-specific DMI clients - EDR client
+builder.Services.AddHttpClient("EdrClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(120);
+})
+.AddHttpMessageHandler<DmiLocalRateLimitLoggingHandler>()
+.AddPolicyHandler(PollyConfiguration.GetRetryPolicy())
+.AddPolicyHandler((sp, request) => sp.GetRequiredKeyedService<IAsyncPolicy<HttpResponseMessage>>("Edr"))
+.AddHttpMessageHandler<DmiHttpLoggingHandler>();
+
+// Policy-specific DMI clients (for non-EDR requests)
 builder.Services.AddHttpClient("DmiClient", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(120);
 })
 .AddHttpMessageHandler<DmiLocalRateLimitLoggingHandler>()
 .AddPolicyHandler(PollyConfiguration.GetRetryPolicy())
-.AddPolicyHandler((sp, request) => sp.GetRequiredService<IAsyncPolicy<HttpResponseMessage>>())
+.AddPolicyHandler((sp, request) => sp.GetRequiredKeyedService<IAsyncPolicy<HttpResponseMessage>>("Dmi"))
 .AddHttpMessageHandler<DmiHttpLoggingHandler>();
 
 // Non-DMI requests (currently weather text scraping) keep their timeout and retry behavior,

@@ -18,7 +18,7 @@ public class EdrApplicationService(
     EdrStatusHistory statusHistory,
     ILogger<EdrApplicationService> logger) : IEdrApplicationService
 {
-    private int cacheDurationHours = 8;
+    private const int CacheDurationHours = 8;
 
     public async Task<HomeAssistantDTO> GetEdrForecast(string forecastParameter)
     {
@@ -26,8 +26,8 @@ public class EdrApplicationService(
             $"EDR-{forecastParameter}",
             async (_, _) => await GetEdrForecast_NoCache(forecastParameter),
             new HomeAssistantDTO() { Name = forecastParameter, Description = "No data ready right now" },
-            options => options.SetDuration(TimeSpan.FromHours(cacheDurationHours))
-            .SetFailSafe(true, TimeSpan.FromHours(cacheDurationHours + 4), TimeSpan.FromMinutes(2))
+            options => options.SetDuration(TimeSpan.FromHours(CacheDurationHours))
+            .SetFailSafe(true, TimeSpan.FromHours(CacheDurationHours + 4), TimeSpan.FromMinutes(2))
             .SetFactoryTimeouts(TimeSpan.FromSeconds(1))
         );
 
@@ -64,7 +64,7 @@ public class EdrApplicationService(
         HomeAssistantDTO? returnDto = null;
         foreach (var dto in forecastDtos)
         {
-            await cache.SetAsync($"EDR-{dto.Name}", dto, options => options.SetDuration(TimeSpan.FromHours(cacheDurationHours)));
+            await cache.SetAsync($"EDR-{dto.Name}", dto, options => options.SetDuration(TimeSpan.FromHours(CacheDurationHours)));
 
             if (dto.Name == forecastParameter)
             {
