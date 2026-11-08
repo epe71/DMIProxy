@@ -23,15 +23,11 @@ public class EDRHealthCheck(IFusionCache cache) : IHealthCheck
             return await Task.FromResult(HealthCheckResult.Unhealthy("EDR returned a failing status", null, data));
         }
 
-        if (history is null || history.Count < EdrStatusHistory.Capacity)
-        {
-            return await Task.FromResult(HealthCheckResult.Degraded("EDR status history is missing or incomplete", null, data));
-        }
-
-        if (history.Contains(429))
+        if (history is not null && history.Contains(429))
         {
             return await Task.FromResult(HealthCheckResult.Degraded("EDR returned HTTP 429", null, data));
         }
+
 
         return await Task.FromResult(HealthCheckResult.Healthy("All good", data));
     }

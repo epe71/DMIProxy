@@ -18,14 +18,16 @@ public class EdrApplicationService(
     EdrStatusHistory statusHistory,
     ILogger<EdrApplicationService> logger) : IEdrApplicationService
 {
+    private int cacheDurationHours = 8;
+
     public async Task<HomeAssistantDTO> GetEdrForecast(string forecastParameter)
     {
         var rainDto = await cache.GetOrSetAsync<HomeAssistantDTO>(
             $"EDR-{forecastParameter}",
             async (_, _) => await GetEdrForecast_NoCache(forecastParameter),
             new HomeAssistantDTO() { Name = forecastParameter, Description = "No data ready right now" },
-            options => options.SetDuration(TimeSpan.FromHours(8))
-            .SetFailSafe(true, TimeSpan.FromHours(12), TimeSpan.FromMinutes(2))
+            options => options.SetDuration(TimeSpan.FromHours(cacheDurationHours))
+            .SetFailSafe(true, TimeSpan.FromHours(cacheDurationHours + 4), TimeSpan.FromMinutes(2))
             .SetFactoryTimeouts(TimeSpan.FromSeconds(1))
         );
 
@@ -37,7 +39,8 @@ public class EdrApplicationService(
         Collection<HomeAssistantDTO>? forecastDtos;
         try
         {
-            var result = await edrService.GetEdrForecast([forecastParameter]);
+            var forecastParameters = BatchForecastParameters(forecastParameter);
+            var result = await edrService.GetEdrForecast(forecastParameters);
             await statusHistory.AddAsync((int)result.StatusCode);
             forecastDtos = result.Forecasts;
         }
@@ -58,16 +61,35 @@ public class EdrApplicationService(
             throw new InvalidOperationException(errorMsg);
         }
 
-        HomeAssistantDTO? forcastDto = null;
+        HomeAssistantDTO? returnDto = null;
         foreach (var dto in forecastDtos)
         {
+            await cache.SetAsync($"EDR-{dto.Name}", dto, options => options.SetDuration(TimeSpan.FromHours(cacheDurationHours)));
+
             if (dto.Name == forecastParameter)
             {
-                forcastDto = dto;
+                returnDto = dto;
             }
             logger.LogInformation("Forecast data for {Parameter}: {Description}", forecastParameter, dto.Description);
         }
 
-        return forcastDto ?? throw new InvalidOperationException("Forcast data not saved in cache after update");
+        return returnDto ?? throw new InvalidOperationException("Forcast data not saved in cache after update");
+    }
+
+    private static Collection<string> BatchForecastParameters(string forecastParameter)
+    {
+        return forecastParameter switch
+        {
+            "temperature-2m" => ["temperature-2m", "relative-humidity-2m"],
+            "relative-humidity-2m" => ["relative-humidity-2m", "temperature-2m"],
+            "wind-speed" => ["wind-speed", "wind-dir"],
+            "wind-dir" => ["wind-dir", "wind-speed"],
+            "fraction-of-cloud-cover" => ["fraction-of-cloud-cover", "cloud-transmittance", "global-radiation-flux"],
+            "cloud-transmittance" => ["cloud-transmittance", "fraction-of-cloud-cover", "global-radiation-flux"],
+            "global-radiation-flux" => ["global-radiation-flux", "fraction-of-cloud-cover", "cloud-transmittance"],
+            "pressure-sealevel" => ["pressure-sealevel", "total-precipitation"],
+            "total-precipitation" => ["total-precipitation", "pressure-sealevel"],
+            _ => [forecastParameter],
+        };
     }
 }

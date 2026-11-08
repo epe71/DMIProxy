@@ -21,8 +21,7 @@ public class EdrService : IEdrService
     private readonly JsonSerializerOptions _serializerOptions;
     private readonly HttpClient _httpClient;
 
-    public EdrService(
-        IHttpClientFactory httpClientFactory)
+    public EdrService(IHttpClientFactory httpClientFactory)
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
 
@@ -65,8 +64,7 @@ public class EdrService : IEdrService
             { "parameter-name", weatherParameters }
         };
 
-        return string.Join("&", parameters.Select(p =>
-            $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
+        return string.Join("&", parameters.Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
     }
 
     private static HomeAssistantDTO ExtractForecastData(string forecastParameter, JsonElement jsonElement)

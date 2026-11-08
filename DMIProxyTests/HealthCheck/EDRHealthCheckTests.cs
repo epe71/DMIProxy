@@ -12,7 +12,7 @@ public class EDRHealthCheckTests
 
     [TestMethod]
     [DataRow("200,200,200,200,200", HealthStatus.Healthy)]
-    [DataRow("200,200,200,200", HealthStatus.Degraded)]
+    [DataRow("200,200,200,200", HealthStatus.Healthy)]
     [DataRow("200,200,429,200,200", HealthStatus.Degraded)]
     [DataRow("429,200,500,200,200", HealthStatus.Unhealthy)]
     [DataRow("401,200,200,200,200", HealthStatus.Unhealthy)]
@@ -40,7 +40,7 @@ public class EDRHealthCheckTests
 
         var result = await healthCheck.CheckHealthAsync(new HealthCheckContext(), TestContext.CancellationToken);
 
-        Assert.AreEqual(HealthStatus.Degraded, result.Status);
+        Assert.AreEqual(HealthStatus.Healthy, result.Status);
         cache.Dispose();
     }
 }
