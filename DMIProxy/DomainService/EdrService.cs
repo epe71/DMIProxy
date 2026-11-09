@@ -64,14 +64,22 @@ public class EdrService : IEdrService
             { "parameter-name", weatherParameters }
         };
 
-        return string.Join("&", parameters.Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
+        return string.Join("&", parameters.Select(p =>
+            $"{p.Key}={(p.Key == "coords" ? Uri.EscapeDataString(p.Value) : p.Value)}"));
     }
 
     private static HomeAssistantDTO ExtractForecastData(string forecastParameter, JsonElement jsonElement)
     {
         var time = jsonElement.GetProperty("domain").GetProperty("axes").GetProperty("t").GetProperty("values").EnumerateArray().Select(x => x.GetDateTime()).ToArray();
         var description = jsonElement.GetProperty("parameters").GetProperty(forecastParameter).GetProperty("description").GetProperty("en").GetString();
-        var values = (Collection<double>)jsonElement.GetProperty("ranges").GetProperty(forecastParameter).GetProperty("values").EnumerateArray().Select(x => x.GetDouble());
+        var values = new Collection<double>(
+            jsonElement.GetProperty("ranges")
+                .GetProperty(forecastParameter)
+                .GetProperty("values")
+                .EnumerateArray()
+                .Select(x => x.GetDouble())
+                .ToArray()
+        );
 
         var adjustedValues = AdjustData(forecastParameter, values);
         var transmittance = DataToPointDTOList(time, adjustedValues);

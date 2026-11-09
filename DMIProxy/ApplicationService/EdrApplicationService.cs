@@ -49,8 +49,9 @@ public class EdrApplicationService(
             await statusHistory.AddAsync(exception.StatusCode is { } statusCode ? (int)statusCode : 0);
             throw;
         }
-        catch
+        catch (Exception exception)
         {
+            logger.LogError(exception, "An error occurred while retrieving EDR forecast data for parameter: {Parameter}", forecastParameter);
             await statusHistory.AddAsync(0);
             throw;
         }
@@ -80,15 +81,15 @@ public class EdrApplicationService(
     {
         return forecastParameter switch
         {
-            "temperature-2m" => ["temperature-2m", "relative-humidity-2m"],
-            "relative-humidity-2m" => ["relative-humidity-2m", "temperature-2m"],
-            "wind-speed" => ["wind-speed", "wind-dir"],
-            "wind-dir" => ["wind-dir", "wind-speed"],
-            "fraction-of-cloud-cover" => ["fraction-of-cloud-cover", "cloud-transmittance", "global-radiation-flux"],
-            "cloud-transmittance" => ["cloud-transmittance", "fraction-of-cloud-cover", "global-radiation-flux"],
-            "global-radiation-flux" => ["global-radiation-flux", "fraction-of-cloud-cover", "cloud-transmittance"],
-            "pressure-sealevel" => ["pressure-sealevel", "total-precipitation"],
-            "total-precipitation" => ["total-precipitation", "pressure-sealevel"],
+            "temperature-2m" => ["temperature-2m", "relative-humidity-2m", "wind-speed", "wind-dir", "pressure-sealevel"],
+            "relative-humidity-2m" => ["temperature-2m", "relative-humidity-2m", "wind-speed", "wind-dir", "pressure-sealevel"],
+            "wind-speed" => ["temperature-2m", "relative-humidity-2m", "wind-speed", "wind-dir", "pressure-sealevel"],
+            "wind-dir" => ["temperature-2m", "relative-humidity-2m", "wind-speed", "wind-dir", "pressure-sealevel"],
+            "pressure-sealevel" => ["temperature-2m", "relative-humidity-2m", "wind-speed", "wind-dir", "pressure-sealevel"],
+            "fraction-of-cloud-cover" => ["fraction-of-cloud-cover", "cloud-transmittance", "global-radiation-flux", "total-precipitation"],
+            "cloud-transmittance" => ["fraction-of-cloud-cover", "cloud-transmittance", "global-radiation-flux", "total-precipitation"],
+            "global-radiation-flux" => ["fraction-of-cloud-cover", "cloud-transmittance", "global-radiation-flux", "total-precipitation"],
+            "total-precipitation" => ["fraction-of-cloud-cover", "cloud-transmittance", "global-radiation-flux", "total-precipitation"],
             _ => [forecastParameter],
         };
     }
